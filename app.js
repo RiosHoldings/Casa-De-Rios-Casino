@@ -24,6 +24,49 @@ function renderPlayerId() {
   if (box) box.textContent = getPlayerId();
 }
 
+function setWalletText(text) {
+  const box = document.getElementById("walletBalance");
+  if (box) box.textContent = text;
+}
+
+function setStatusText(text) {
+  const box = document.getElementById("playerStatus");
+  if (box) box.textContent = text;
+}
+
+async function loadWallet() {
+  const playerId = getPlayerId();
+
+  setWalletText("Balance: Loading...");
+  setStatusText("Status: Loading...");
+
+  try {
+    const response = await fetch("/api/wallet?playerId=" + encodeURIComponent(playerId));
+    const data = await response.json();
+
+    if (!data.ok) {
+      setWalletText("Balance: Create / Update Player first");
+      setStatusText("Status: Not registered");
+      return;
+    }
+
+    const chips = Number(data.player.chips || 0);
+    const locked = Number(data.player.locked || 0);
+    const status = data.player.status || "unknown";
+    const vip = data.player.vip_tier || "none";
+
+    setWalletText("Balance: " + chips.toLocaleString() + " chips");
+    setStatusText(
+      "Status: " + status +
+      " | VIP: " + vip +
+      " | Locked: " + locked.toLocaleString()
+    );
+  } catch (error) {
+    setWalletText("Balance: Wallet API failed");
+    setStatusText("Status: Check deployment");
+  }
+}
+
 async function registerPlayer() {
   const playerId = getPlayerId();
 
@@ -51,12 +94,13 @@ async function registerPlayer() {
     }
 
     alert(
-      "Player created in Cloudflare.\n" +
+      "Player saved in Cloudflare.\n" +
       "Status: " + data.player.status + "\n" +
       "Chips: " + data.player.chips
     );
 
     renderPlayerId();
+    loadWallet();
   } catch (error) {
     alert("Player API failed. Check D1 binding and schema.");
   }
@@ -84,10 +128,16 @@ async function testBackend() {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderPlayerId();
+  loadWallet();
 
   const createBtn = document.getElementById("createPlayerBtn");
   if (createBtn) {
     createBtn.addEventListener("click", registerPlayer);
+  }
+
+  const refreshBtn = document.getElementById("refreshWalletBtn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", loadWallet);
   }
 
   const apiBtn = document.getElementById("apiTestBtn");

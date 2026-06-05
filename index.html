@@ -16,13 +16,23 @@
       <p class="subtext">RP currency only. No real money. Payouts are manually approved by the house.</p>
     </section>
 
-    <section class="wallet-card">
-      <div>
-        <span class="label">Player ID</span>
-        <strong id="playerId">Not created yet</strong>
-      </div>
-      <button id="createPlayerBtn">Create Player ID</button>
-    </section>
+<section class="wallet-card">
+  <div>
+    <span class="label">Player ID</span>
+    <strong id="playerId">Not created yet</strong>
+
+    <span class="label" style="margin-top:12px;">Wallet</span>
+    <strong id="walletBalance">Balance: Not loaded</strong>
+
+    <span class="label" style="margin-top:12px;">Status</span>
+    <strong id="playerStatus">Status: Not loaded</strong>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:10px;">
+    <button id="createPlayerBtn">Create / Update Player</button>
+    <button id="refreshWalletBtn">Refresh Wallet</button>
+  </div>
+</section>
 
     <section class="grid">
       <a class="card active" href="roulette.html">
