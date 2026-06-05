@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casino Casa de Ríos</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="casino-shell">
+    <section class="hero">
+      <div class="crest">R</div>
+      <div class="eyebrow">CASA DE RÍOS</div>
+      <h1>Casino Casa de Ríos</h1>
+      <p class="motto">Suerte. Honor. Lealtad.</p>
+      <p class="subtext">RP currency only. No real money. Payouts are manually approved by the house.</p>
+    </section>
+
+    <section class="wallet-card">
+      <div>
+        <span class="label">Player ID</span>
+        <strong id="playerId">Not created yet</strong>
+      </div>
+      <button id="createPlayerBtn">Create Player ID</button>
+    </section>
+
+    <section class="grid">
+      <a class="card active" href="roulette.html">
+        <span>Roulette</span>
+        <small>Recommended first secure game</small>
+      </a>
+
+      <a class="card disabled" href="#">
+        <span>Slots</span>
+        <small>Coming soon</small>
+      </a>
+
+      <a class="card disabled" href="#">
+        <span>Blackjack</span>
+        <small>Coming after roulette</small>
+      </a>
+
+      <a class="card disabled" href="#">
+        <span>Texas Hold’em</span>
+        <small>Future poker room</small>
+      </a>
+
+      <a class="card disabled" href="#">
+        <span>Cash Out</span>
+        <small>Payout ticket system</small>
+      </a>
+
+      <a class="card disabled" href="#">
+        <span>Lealtad VIP</span>
+        <small>Loyalty tiers</small>
+      </a>
+    </section>
+
+    <section class="rules">
+      <h2>House Rules</h2>
+      <p>All balances and payout tickets are subject to house review.</p>
+      <p>Suspicious activity, duplicated accounts, tampering, or abnormal betting may void payout.</p>
+      <p>Casa de Ríos — Suerte. Honor. Lealtad.</p>
+    </section>
+
+    <footer>
+      <button id="apiTestBtn">Test Backend</button>
+      <span id="apiStatus">Backend not tested</span>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

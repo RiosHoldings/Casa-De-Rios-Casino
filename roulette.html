@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos Roulette</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="casino-shell">
+    <section class="hero compact">
+      <div class="crest">R</div>
+      <div class="eyebrow">CASA DE RÍOS</div>
+      <h1>Roulette</h1>
+      <p class="motto">Suerte. Honor. Lealtad.</p>
+    </section>
+
+    <section class="wallet-card">
+      <div>
+        <span class="label">Player ID</span>
+        <strong id="playerId">Not created yet</strong>
+      </div>
+      <button id="createPlayerBtn">Create Player ID</button>
+    </section>
+
+    <section class="game-panel">
+      <h2>Roulette Table</h2>
+      <p class="subtext">This page is a placeholder. The secure spin backend comes next.</p>
+
+      <label>
+        Bet Amount
+        <input id="betAmount" type="number" min="1" value="100" />
+      </label>
+
+      <label>
+        Bet Type
+        <select id="betType">
+          <option value="red">Red</option>
+          <option value="black">Black</option>
+          <option value="odd">Odd</option>
+          <option value="even">Even</option>
+          <option value="number">Single Number</option>
+        </select>
+      </label>
+
+      <label>
+        Number Bet
+        <input id="betValue" type="number" min="0" max="36" value="7" />
+      </label>
+
+      <button class="primary" disabled>Spin Coming Next</button>
+
+      <div class="result-box">
+        Roulette will be the first game connected to the Cloudflare backend.
+      </div>
+    </section>
+
+    <a class="back-link" href="index.html">← Back to Lobby</a>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
