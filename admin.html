@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="casino-shell">
+    <section class="hero compact">
+      <div class="crest">R</div>
+      <div class="eyebrow">CASA DE RÍOS</div>
+      <h1>Admin Panel</h1>
+      <p class="motto">House Buy-In System</p>
+    </section>
+
+    <section class="game-panel">
+      <h2>Add Chips</h2>
+      <p class="subtext">
+        Use this after a player buys in through Discord or in-game RP.
+      </p>
+
+      <label>
+        Admin Key
+        <input id="adminKey" type="password" placeholder="Enter your admin key" />
+      </label>
+
+      <label>
+        Player ID
+        <input id="targetPlayerId" type="text" placeholder="CDR-..." />
+      </label>
+
+      <label>
+        Chip Amount
+        <input id="chipAmount" type="number" min="1" value="10000" />
+      </label>
+
+      <label>
+        Note
+        <input id="chipNote" type="text" value="Discord buy-in confirmed" />
+      </label>
+
+      <button id="addChipsBtn" class="primary">Add Chips</button>
+
+      <div id="adminResult" class="result-box">
+        Waiting for admin action.
+      </div>
+    </section>
+
+    <a class="back-link" href="index.html">← Back to Lobby</a>
+  </main>
+
+  <script>
+    async function addChips() {
+      const adminKey = document.getElementById("adminKey").value.trim();
+      const playerId = document.getElementById("targetPlayerId").value.trim();
+      const amount = Number(document.getElementById("chipAmount").value);
+      const note = document.getElementById("chipNote").value.trim();
+      const resultBox = document.getElementById("adminResult");
+
+      if (!adminKey) {
+        resultBox.textContent = "Enter your admin key.";
+        return;
+      }
+
+      if (!playerId) {
+        resultBox.textContent = "Enter a Player ID.";
+        return;
+      }
+
+      if (!amount || amount <= 0) {
+        resultBox.textContent = "Enter a valid chip amount.";
+        return;
+      }
+
+      resultBox.textContent = "Adding chips...";
+
+      try {
+        const response = await fetch("/api/admin-add-chips", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({
+            playerId,
+            amount,
+            note
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          resultBox.textContent = "Failed: " + data.error;
+          return;
+        }
+
+        resultBox.innerHTML =
+          "<strong>Chips added.</strong><br>" +
+          "Player ID: " + data.playerId + "<br>" +
+          "Amount Added: " + data.amountAdded.toLocaleString() + "<br>" +
+          "New Balance: " + data.balanceAfter.toLocaleString();
+      } catch (error) {
+        resultBox.textContent = "Request failed. Check Cloudflare deployment.";
+      }
+    }
+
+    document.getElementById("addChipsBtn").addEventListener("click", addChips);
+  </script>
+</body>
+</html>
