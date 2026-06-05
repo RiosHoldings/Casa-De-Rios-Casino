@@ -24,6 +24,44 @@ function renderPlayerId() {
   if (box) box.textContent = getPlayerId();
 }
 
+async function registerPlayer() {
+  const playerId = getPlayerId();
+
+  const characterName = prompt("Character name:", "Survivor") || "Survivor";
+  const discordName = prompt("Discord name:", "") || "";
+
+  try {
+    const response = await fetch("/api/player", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerId,
+        characterName,
+        discordName
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      alert("Player registration failed: " + data.error);
+      return;
+    }
+
+    alert(
+      "Player created in Cloudflare.\n" +
+      "Status: " + data.player.status + "\n" +
+      "Chips: " + data.player.chips
+    );
+
+    renderPlayerId();
+  } catch (error) {
+    alert("Player API failed. Check D1 binding and schema.");
+  }
+}
+
 async function testBackend() {
   const status = document.getElementById("apiStatus");
   if (!status) return;
@@ -49,12 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const createBtn = document.getElementById("createPlayerBtn");
   if (createBtn) {
-    createBtn.addEventListener("click", () => {
-      const id = getPlayerId();
-      navigator.clipboard?.writeText(id);
-      alert("Player ID ready. It was copied if your browser allowed it.");
-      renderPlayerId();
-    });
+    createBtn.addEventListener("click", registerPlayer);
   }
 
   const apiBtn = document.getElementById("apiTestBtn");
