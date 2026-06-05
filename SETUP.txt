@@ -1,0 +1,43 @@
+CASA DE RÍOS CASINO — STARTER SETUP
+
+GOAL:
+Build a future secure casino on Cloudflare without touching the working Firebase blackjack app.
+
+BEST STACK:
+GitHub = file storage/editor
+Cloudflare Pages = website host
+Cloudflare Pages Functions = backend/API
+Cloudflare D1 = database
+
+FILES TO CREATE:
+index.html
+roulette.html
+styles.css
+app.js
+functions/api/health.js
+schema.sql
+README.md
+
+CLOUDFLARE SETTINGS:
+Framework preset: None
+Build command: leave blank
+Build output directory: /
+Root directory: /
+
+TEST:
+Open:
+https://YOUR-PROJECT.pages.dev/api/health
+
+Expected result:
+{
+  "ok": true,
+  "service": "Casa de Ríos Casino API",
+  "status": "online"
+}
+
+NEXT AFTER THIS WORKS:
+Create D1 database named:
+casa_rios_casino
+
+Bind it to the Pages project as:
+DB
