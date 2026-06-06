@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Casa de Ríos Roulette</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=7" />
 </head>
 <body>
   <main class="casino-shell">
@@ -13,19 +13,29 @@
       <div class="eyebrow">CASA DE RÍOS</div>
       <h1>Roulette</h1>
       <p class="motto">Suerte. Honor. Lealtad.</p>
+      <p class="subtext">Server-side roulette. The house backend spins and settles the result.</p>
     </section>
 
     <section class="wallet-card">
       <div>
         <span class="label">Player ID</span>
         <strong id="playerId">Not created yet</strong>
+
+        <span class="label" style="margin-top:12px;">Wallet</span>
+        <strong id="walletBalance">Balance: Not loaded</strong>
+
+        <span class="label" style="margin-top:12px;">Status</span>
+        <strong id="playerStatus">Status: Not loaded</strong>
       </div>
-      <button id="createPlayerBtn">Create Player ID</button>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="createPlayerBtn">Create / Update Player</button>
+        <button id="refreshWalletBtn">Refresh Wallet</button>
+      </div>
     </section>
 
     <section class="game-panel">
       <h2>Roulette Table</h2>
-      <p class="subtext">This page is a placeholder. The secure spin backend comes next.</p>
 
       <label>
         Bet Amount
@@ -35,11 +45,13 @@
       <label>
         Bet Type
         <select id="betType">
-          <option value="red">Red</option>
-          <option value="black">Black</option>
-          <option value="odd">Odd</option>
-          <option value="even">Even</option>
-          <option value="number">Single Number</option>
+          <option value="red">Red — pays 1:1</option>
+          <option value="black">Black — pays 1:1</option>
+          <option value="odd">Odd — pays 1:1</option>
+          <option value="even">Even — pays 1:1</option>
+          <option value="low">Low 1-18 — pays 1:1</option>
+          <option value="high">High 19-36 — pays 1:1</option>
+          <option value="number">Single Number — pays 35:1</option>
         </select>
       </label>
 
@@ -48,16 +60,82 @@
         <input id="betValue" type="number" min="0" max="36" value="7" />
       </label>
 
-      <button class="primary" disabled>Spin Coming Next</button>
+      <button id="spinRouletteBtn" class="primary">Spin Roulette</button>
 
-      <div class="result-box">
-        Roulette will be the first game connected to the Cloudflare backend.
+      <div id="rouletteResult" class="result-box">
+        Choose your bet and spin.
       </div>
     </section>
 
-    <a class="back-link" href="index.html">← Back to Lobby</a>
+    <a class="back-link" href="./index.html">← Back to Lobby</a>
   </main>
 
-  <script src="app.js"></script>
+  <script src="./app.js?v=7"></script>
+
+  <script>
+    async function spinRoulette() {
+      const resultBox = document.getElementById("rouletteResult");
+
+      const playerId = localStorage.getItem("casa_rios_player_id");
+      const playerSecret = localStorage.getItem("casa_rios_player_secret");
+
+      const betAmount = Number(document.getElementById("betAmount").value);
+      const betType = document.getElementById("betType").value;
+      const betValue = document.getElementById("betValue").value;
+
+      if (!playerId || !playerSecret) {
+        resultBox.textContent = "Create / Update Player first.";
+        return;
+      }
+
+      if (!betAmount || betAmount <= 0) {
+        resultBox.textContent = "Enter a valid bet amount.";
+        return;
+      }
+
+      resultBox.textContent = "Spinning...";
+
+      try {
+        const response = await fetch("/api/roulette", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            playerId,
+            playerSecret,
+            betAmount,
+            betType,
+            betValue
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          resultBox.textContent = "Failed: " + data.error;
+          return;
+        }
+
+        const outcome = data.won ? "WIN" : "LOSS";
+
+        resultBox.innerHTML =
+          "<strong>Result: " + data.resultNumber + " " + data.resultColor.toUpperCase() + "</strong><br>" +
+          "Outcome: " + outcome + "<br>" +
+          "Bet: " + data.betAmount.toLocaleString() + " chips<br>" +
+          "Payout Returned: " + data.payout.toLocaleString() + " chips<br>" +
+          "Net Change: " + data.netChange.toLocaleString() + " chips<br>" +
+          "New Balance: " + data.balanceAfter.toLocaleString() + " chips";
+
+        if (typeof loadWallet === "function") {
+          loadWallet();
+        }
+      } catch (error) {
+        resultBox.textContent = "Roulette request failed. Check deployment.";
+      }
+    }
+
+    document.getElementById("spinRouletteBtn").addEventListener("click", spinRoulette);
+  </script>
 </body>
 </html>

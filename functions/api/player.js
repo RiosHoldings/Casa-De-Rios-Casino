@@ -1,41 +1,67 @@
+function json(data, status = 200) {
+  return Response.json(data, { status });
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
 
     if (!db) {
-      return Response.json(
-        { ok: false, error: "D1 database binding DB is missing." },
-        { status: 500 }
-      );
+      return json({ ok: false, error: "D1 database binding DB is missing." }, 500);
     }
 
     const body = await context.request.json();
 
     const playerId = String(body.playerId || "").trim();
+    const playerSecret = String(body.playerSecret || "").trim();
     const characterName = String(body.characterName || "Survivor").trim();
     const discordName = String(body.discordName || "").trim();
 
     if (!playerId || !playerId.startsWith("CDR-")) {
-      return Response.json(
-        { ok: false, error: "Invalid Player ID." },
-        { status: 400 }
-      );
+      return json({ ok: false, error: "Invalid Player ID." }, 400);
     }
 
-    await db.prepare(`
-      INSERT INTO players (
-        id,
-        character_name,
-        discord_name,
-        status,
-        updated_at
-      )
-      VALUES (?, ?, ?, 'waiting_buyin', CURRENT_TIMESTAMP)
-      ON CONFLICT(id) DO UPDATE SET
-        character_name = excluded.character_name,
-        discord_name = excluded.discord_name,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(playerId, characterName, discordName).run();
+    if (!playerSecret || playerSecret.length < 20) {
+      return json({ ok: false, error: "Invalid Player Secret." }, 400);
+    }
+
+    const existing = await db.prepare(`
+      SELECT id, player_secret
+      FROM players
+      WHERE id = ?
+    `).bind(playerId).first();
+
+    if (existing && existing.player_secret && existing.player_secret !== playerSecret) {
+      return json({
+        ok: false,
+        error: "This Player ID belongs to another saved device/session."
+      }, 401);
+    }
+
+    if (!existing) {
+      await db.prepare(`
+        INSERT INTO players (
+          id,
+          player_secret,
+          character_name,
+          discord_name,
+          status,
+          vip_tier,
+          created_at,
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, 'waiting_buyin', 'none', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(playerId, playerSecret, characterName, discordName).run();
+    } else {
+      await db.prepare(`
+        UPDATE players
+        SET player_secret = COALESCE(player_secret, ?),
+            character_name = ?,
+            discord_name = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).bind(playerSecret, characterName, discordName, playerId).run();
+    }
 
     await db.prepare(`
       INSERT INTO wallets (
@@ -62,17 +88,14 @@ export async function onRequestPost(context) {
       WHERE players.id = ?
     `).bind(playerId).first();
 
-    return Response.json({
+    return json({
       ok: true,
       player
     });
   } catch (error) {
-    return Response.json(
-      {
-        ok: false,
-        error: error.message || "Player API failed."
-      },
-      { status: 500 }
-    );
+    return json({
+      ok: false,
+      error: error.message || "Player API failed."
+    }, 500);
   }
 }

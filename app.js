@@ -1,4 +1,5 @@
 const PLAYER_KEY = "casa_rios_player_id";
+const PLAYER_SECRET_KEY = "casa_rios_player_secret";
 
 function makePlayerId() {
   if (crypto && crypto.randomUUID) {
@@ -6,6 +7,14 @@ function makePlayerId() {
   }
 
   return "CDR-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+}
+
+function makePlayerSecret() {
+  if (crypto && crypto.randomUUID) {
+    return "SECRET-" + crypto.randomUUID() + "-" + crypto.randomUUID();
+  }
+
+  return "SECRET-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
 }
 
 function getPlayerId() {
@@ -17,6 +26,17 @@ function getPlayerId() {
   }
 
   return id;
+}
+
+function getPlayerSecret() {
+  let secret = localStorage.getItem(PLAYER_SECRET_KEY);
+
+  if (!secret) {
+    secret = makePlayerSecret();
+    localStorage.setItem(PLAYER_SECRET_KEY, secret);
+  }
+
+  return secret;
 }
 
 function renderPlayerId() {
@@ -36,17 +56,24 @@ function setStatusText(text) {
 
 async function loadWallet() {
   const playerId = getPlayerId();
+  const playerSecret = getPlayerSecret();
 
   setWalletText("Balance: Loading...");
   setStatusText("Status: Loading...");
 
   try {
-    const response = await fetch("/api/wallet?playerId=" + encodeURIComponent(playerId));
+    const response = await fetch(
+      "/api/wallet?playerId=" +
+      encodeURIComponent(playerId) +
+      "&playerSecret=" +
+      encodeURIComponent(playerSecret)
+    );
+
     const data = await response.json();
 
     if (!data.ok) {
       setWalletText("Balance: Create / Update Player first");
-      setStatusText("Status: Not registered");
+      setStatusText("Status: " + data.error);
       return;
     }
 
@@ -69,6 +96,7 @@ async function loadWallet() {
 
 async function registerPlayer() {
   const playerId = getPlayerId();
+  const playerSecret = getPlayerSecret();
 
   const characterName = prompt("Character name:", "Survivor") || "Survivor";
   const discordName = prompt("Discord name:", "") || "";
@@ -81,6 +109,7 @@ async function registerPlayer() {
       },
       body: JSON.stringify({
         playerId,
+        playerSecret,
         characterName,
         discordName
       })
@@ -128,6 +157,7 @@ async function testBackend() {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderPlayerId();
+  getPlayerSecret();
   loadWallet();
 
   const createBtn = document.getElementById("createPlayerBtn");
