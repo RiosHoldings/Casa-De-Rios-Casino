@@ -45,6 +45,56 @@
   </div>
 </section>
 
+<section class="game-panel">
+  <h2>Player Controls</h2>
+
+  <label>
+    Player ID
+    <input id="controlPlayerId" type="text" placeholder="CDR-..." />
+  </label>
+
+  <label>
+    Set Balance
+    <input id="setBalanceAmount" type="number" min="0" value="0" />
+  </label>
+
+  <button id="setBalanceBtn">Set Balance</button>
+  <button id="lockWalletBtn">Lock Wallet</button>
+  <button id="unlockWalletBtn">Unlock Wallet</button>
+
+  <label>
+    Player Status
+    <select id="setStatusValue">
+      <option value="waiting_buyin">waiting_buyin</option>
+      <option value="active">active</option>
+      <option value="cashout_pending">cashout_pending</option>
+      <option value="paid_out">paid_out</option>
+      <option value="locked">locked</option>
+      <option value="banned">banned</option>
+    </select>
+  </label>
+
+  <button id="setStatusBtn">Set Status</button>
+
+  <label>
+    VIP / Lealtad Tier
+    <select id="setVipValue">
+      <option value="none">none</option>
+      <option value="bronze">bronze</option>
+      <option value="silver">silver</option>
+      <option value="gold">gold</option>
+      <option value="platinum">platinum</option>
+      <option value="lealtad">lealtad</option>
+    </select>
+  </label>
+
+  <button id="setVipBtn">Set VIP Tier</button>
+
+  <div id="controlResult" class="result-box">
+    No control action yet.
+  </div>
+</section>
+
     <section class="game-panel">
       <h2>Add Chips / Buy-In</h2>
 
@@ -389,11 +439,87 @@ async function searchPlayer() {
       } catch (error) {
         resultBox.textContent = "Deny payout request failed.";
       }
+      async function adminUpdatePlayer(action, extra = {}) {
+  const resultBox = document.getElementById("controlResult");
+
+  const adminKey = getAdminKey();
+  const adminName = getAdminName();
+  const playerId = document.getElementById("controlPlayerId").value.trim();
+
+  if (!adminKey) {
+    resultBox.textContent = "Enter admin key first.";
+    return;
+  }
+
+  if (!playerId) {
+    resultBox.textContent = "Enter a Player ID.";
+    return;
+  }
+
+  resultBox.textContent = "Updating player...";
+
+  try {
+    const response = await fetch("/api/admin-update-player", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        playerId,
+        action,
+        adminName,
+        ...extra
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      resultBox.textContent = "Failed: " + data.error;
+      return;
     }
+
+    const p = data.player;
+
+    resultBox.innerHTML =
+      "<strong>Player updated.</strong><br>" +
+      "Player ID: " + p.id + "<br>" +
+      "Status: " + p.status + "<br>" +
+      "VIP: " + p.vip_tier + "<br>" +
+      "Balance: " + Number(p.chips || 0).toLocaleString() + " chips<br>" +
+      "Locked: " + (Number(p.locked || 0) === 1 ? "Yes" : "No");
+  } catch (error) {
+    resultBox.textContent = "Admin update request failed.";
+  }
+}
 
     document.getElementById("searchPlayerBtn").addEventListener("click", searchPlayer);
     document.getElementById("addChipsBtn").addEventListener("click", addChips);
     document.getElementById("loadPayoutsBtn").addEventListener("click", loadPayouts);
+
+    document.getElementById("setBalanceBtn").addEventListener("click", () => {
+  const newBalance = Number(document.getElementById("setBalanceAmount").value);
+  adminUpdatePlayer("set_balance", { newBalance });
+});
+
+document.getElementById("lockWalletBtn").addEventListener("click", () => {
+  adminUpdatePlayer("lock_wallet");
+});
+
+document.getElementById("unlockWalletBtn").addEventListener("click", () => {
+  adminUpdatePlayer("unlock_wallet");
+});
+
+document.getElementById("setStatusBtn").addEventListener("click", () => {
+  const status = document.getElementById("setStatusValue").value;
+  adminUpdatePlayer("set_status", { status });
+});
+
+document.getElementById("setVipBtn").addEventListener("click", () => {
+  const vipTier = document.getElementById("setVipValue").value;
+  adminUpdatePlayer("set_vip", { vipTier });
+});
   </script>
 </body>
 </html>
