@@ -326,13 +326,13 @@
     
 .game-table {
   position: relative;
-  min-height: 720px;
-  padding: 16px 14px 22px;
+  min-height: 900px;
+  padding: 12px 14px 22px;
   overflow: hidden;
   background-image:
     linear-gradient(rgba(22, 8, 34, .32), rgba(8, 3, 12, .18)),
     url("./images/casa-rios-bj.webp");
-  background-size: contain;
+  background-size: 135% auto;
   background-position: center top;
   background-repeat: no-repeat;
   background-color: #110718;
@@ -361,7 +361,7 @@
       display: flex;
       justify-content: space-between;
       gap: 10px;
-      margin-bottom: 34px;
+      margin-bottom: 18px;
     }
 
     .mini-card {
@@ -387,18 +387,20 @@
 
     .dealer-area,
     .player-area {
-      max-width: 760px;
+      max-width: 260px;
       margin-left: auto;
       margin-right: auto;
       border: 1px solid rgba(255, 255, 255, .08);
       background: rgba(0, 0, 0, .20);
       border-radius: 18px;
-      padding: 14px;
+      padding: 10px;
       box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
     }
 
     .dealer-area {
-      margin-top: 25px;
+      margin-top: 260px;
+      padding: 10px;
+      background: rgba(0, 0, 0, .18);
     }
 
     .player-area {
@@ -496,7 +498,7 @@
     .message {
       max-width: 720px;
       min-height: 62px;
-      margin: 22px auto;
+      margin: 28px auto;
       border: 1px solid rgba(212, 166, 74, .35);
       border-radius: 16px;
       padding: 14px;
@@ -528,7 +530,7 @@
     .controls {
       position: relative;
       z-index: 3;
-      margin: 26px auto 0;
+      margin: 28px auto 0;
       max-width: 820px;
       border: 1px solid rgba(212, 166, 74, .24);
       border-radius: 18px;
@@ -707,9 +709,9 @@
       }
 
       .game-table {
-        min-height: 620px;
-        padding: 10px 8px 16px;
-        background-size: contain;
+        min-height: 860px;
+        padding: 10px 10px 18px;
+        background-size: 138% auto;
         background-position: center top;
       }
 
@@ -725,11 +727,11 @@
       }
 
       .dealer-area {
-        margin-top: 20px;
+        margin-top: 88px;
       }
 
       .player-area {
-        margin-top: 65px;
+        margin-top: 235px;
       }
 
       .area-label {
@@ -758,6 +760,9 @@
 
       .message {
         font-size: 22px;
+
+      .controls {
+        margin-top: 22px;
       }
     }
   </style>
