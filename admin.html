@@ -30,6 +30,21 @@
       </label>
     </section>
 
+<section class="game-panel">
+  <h2>Player Search</h2>
+
+  <label>
+    Player ID
+    <input id="searchPlayerId" type="text" placeholder="CDR-..." />
+  </label>
+
+  <button id="searchPlayerBtn" class="primary">Search Player</button>
+
+  <div id="searchResult" class="result-box">
+    No player loaded.
+  </div>
+</section>
+
     <section class="game-panel">
       <h2>Add Chips / Buy-In</h2>
 
@@ -76,6 +91,118 @@
     function getAdminName() {
       return document.getElementById("adminName").value.trim() || "Casa de Ríos Admin";
     }
+
+function transactionLabel(type) {
+  if (type === "admin_add_chips") return "Buy-In / Chips Added";
+  if (type === "roulette_spin") return "Roulette Spin";
+  if (type === "cashout_request") return "Cash-Out Requested";
+  if (type === "cashout_paid") return "Cash-Out Paid";
+  if (type === "cashout_denied") return "Cash-Out Denied";
+  return type || "Unknown Transaction";
+}
+
+async function searchPlayer() {
+  const resultBox = document.getElementById("searchResult");
+
+  const adminKey = getAdminKey();
+  const playerId = document.getElementById("searchPlayerId").value.trim();
+
+  if (!adminKey) {
+    resultBox.textContent = "Enter admin key first.";
+    return;
+  }
+
+  if (!playerId) {
+    resultBox.textContent = "Enter a Player ID.";
+    return;
+  }
+
+  resultBox.textContent = "Searching player...";
+
+  try {
+    const response = await fetch(
+      "/api/admin-player?playerId=" + encodeURIComponent(playerId),
+      {
+        method: "GET",
+        headers: {
+          "x-admin-key": adminKey
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      resultBox.textContent = "Failed: " + data.error;
+      return;
+    }
+
+    const p = data.player;
+    const chips = Number(p.chips || 0).toLocaleString();
+    const locked = Number(p.locked || 0) === 1 ? "Yes" : "No";
+
+    const transactionsHtml = data.transactions.length
+      ? data.transactions.map(tx => {
+          const amount = Number(tx.amount || 0);
+          const amountText = amount > 0
+            ? "+" + amount.toLocaleString()
+            : amount.toLocaleString();
+
+          return `
+            <div class="ticket-card">
+              <strong>${transactionLabel(tx.type)}</strong><br>
+              Game: ${tx.game || "N/A"}<br>
+              Amount: ${amountText} chips<br>
+              Balance After: ${Number(tx.balance_after || 0).toLocaleString()} chips<br>
+              Note: ${tx.note || ""}<br>
+              Date: ${tx.created_at}
+            </div>
+          `;
+        }).join("<hr>")
+      : "No transactions found.";
+
+    const ticketsHtml = data.tickets.length
+      ? data.tickets.map(ticket => {
+          return `
+            <div class="ticket-card">
+              <strong>${ticket.status.toUpperCase()} — ${Number(ticket.amount || 0).toLocaleString()} chips</strong><br>
+              Ticket ID: ${ticket.id}<br>
+              Note: ${ticket.note || ""}<br>
+              Created: ${ticket.created_at}<br>
+              Fulfilled: ${ticket.fulfilled_at || "Not fulfilled"}<br>
+              Fulfilled By: ${ticket.fulfilled_by || "None"}
+            </div>
+          `;
+        }).join("<hr>")
+      : "No payout tickets found.";
+
+    resultBox.innerHTML = `
+      <div class="ticket-card">
+        <strong>${p.character_name || "Unknown Character"}</strong><br>
+        Player ID: ${p.id}<br>
+        Discord: ${p.discord_name || "Unknown"}<br>
+        Status: ${p.status}<br>
+        VIP: ${p.vip_tier}<br>
+        Balance: ${chips} chips<br>
+        Locked: ${locked}<br>
+        Created: ${p.created_at}<br>
+        Updated: ${p.updated_at}
+      </div>
+
+      <hr>
+
+      <strong>Recent Transactions</strong><br><br>
+      ${transactionsHtml}
+
+      <hr>
+
+      <strong>Payout Tickets</strong><br><br>
+      ${ticketsHtml}
+    `;
+  } catch (error) {
+    resultBox.textContent = "Player search request failed.";
+  }
+}
 
     async function addChips() {
       const resultBox = document.getElementById("addResult");
@@ -264,6 +391,7 @@
       }
     }
 
+    document.getElementById("searchPlayerBtn").addEventListener("click", searchPlayer);
     document.getElementById("addChipsBtn").addEventListener("click", addChips);
     document.getElementById("loadPayoutsBtn").addEventListener("click", loadPayouts);
   </script>
