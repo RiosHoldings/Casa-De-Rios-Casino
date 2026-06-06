@@ -4,73 +4,94 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Casa de Ríos Admin</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=9" />
 </head>
 <body>
   <main class="casino-shell">
     <section class="hero compact">
       <div class="crest">R</div>
       <div class="eyebrow">CASA DE RÍOS</div>
-      <h1>Admin Panel</h1>
-      <p class="motto">House Buy-In System</p>
+      <h1>House Admin</h1>
+      <p class="motto">Suerte. Honor. Lealtad.</p>
+      <p class="subtext">Buy-ins, wallet controls, and payout tickets.</p>
     </section>
 
     <section class="game-panel">
-      <h2>Add Chips</h2>
-      <p class="subtext">
-        Use this after a player buys in through Discord or in-game RP.
-      </p>
+      <h2>Admin Access</h2>
 
       <label>
         Admin Key
-        <input id="adminKey" type="password" placeholder="Enter your admin key" />
+        <input id="adminKey" type="password" placeholder="Enter admin key" />
       </label>
+
+      <label>
+        Admin Name
+        <input id="adminName" type="text" value="Casa de Ríos Admin" />
+      </label>
+    </section>
+
+    <section class="game-panel">
+      <h2>Add Chips / Buy-In</h2>
 
       <label>
         Player ID
-        <input id="targetPlayerId" type="text" placeholder="CDR-..." />
+        <input id="addPlayerId" type="text" placeholder="CDR-..." />
       </label>
 
       <label>
-        Chip Amount
-        <input id="chipAmount" type="number" min="1" value="10000" />
+        Chips to Add
+        <input id="addAmount" type="number" min="1" value="10000" />
       </label>
 
       <label>
         Note
-        <input id="chipNote" type="text" value="Discord buy-in confirmed" />
+        <input id="addNote" type="text" value="Buy-in approved by house" />
       </label>
 
       <button id="addChipsBtn" class="primary">Add Chips</button>
 
-      <div id="adminResult" class="result-box">
+      <div id="addResult" class="result-box">
         Waiting for admin action.
       </div>
     </section>
 
-    <a class="back-link" href="index.html">← Back to Lobby</a>
+    <section class="game-panel">
+      <h2>Payout Tickets</h2>
+
+      <button id="loadPayoutsBtn" class="primary">Load Payout Tickets</button>
+
+      <div id="payoutResult" class="result-box">
+        No payout tickets loaded.
+      </div>
+    </section>
+
+    <a class="back-link" href="./index.html">← Back to Lobby</a>
   </main>
 
   <script>
+    function getAdminKey() {
+      return document.getElementById("adminKey").value.trim();
+    }
+
+    function getAdminName() {
+      return document.getElementById("adminName").value.trim() || "Casa de Ríos Admin";
+    }
+
     async function addChips() {
-      const adminKey = document.getElementById("adminKey").value.trim();
-      const playerId = document.getElementById("targetPlayerId").value.trim();
-      const amount = Number(document.getElementById("chipAmount").value);
-      const note = document.getElementById("chipNote").value.trim();
-      const resultBox = document.getElementById("adminResult");
+      const resultBox = document.getElementById("addResult");
+
+      const adminKey = getAdminKey();
+      const playerId = document.getElementById("addPlayerId").value.trim();
+      const amount = Number(document.getElementById("addAmount").value);
+      const note = document.getElementById("addNote").value.trim();
 
       if (!adminKey) {
-        resultBox.textContent = "Enter your admin key.";
+        resultBox.textContent = "Enter admin key first.";
         return;
       }
 
-      if (!playerId) {
-        resultBox.textContent = "Enter a Player ID.";
-        return;
-      }
-
-      if (!amount || amount <= 0) {
-        resultBox.textContent = "Enter a valid chip amount.";
+      if (!playerId || !amount || amount <= 0) {
+        resultBox.textContent = "Enter valid Player ID and chip amount.";
         return;
       }
 
@@ -100,14 +121,151 @@
         resultBox.innerHTML =
           "<strong>Chips added.</strong><br>" +
           "Player ID: " + data.playerId + "<br>" +
-          "Amount Added: " + data.amountAdded.toLocaleString() + "<br>" +
-          "New Balance: " + data.balanceAfter.toLocaleString();
+          "Added: " + data.amountAdded.toLocaleString() + " chips<br>" +
+          "Balance After: " + data.balanceAfter.toLocaleString() + " chips";
       } catch (error) {
-        resultBox.textContent = "Request failed. Check Cloudflare deployment.";
+        resultBox.textContent = "Add chips request failed.";
+      }
+    }
+
+    async function loadPayouts() {
+      const resultBox = document.getElementById("payoutResult");
+      const adminKey = getAdminKey();
+
+      if (!adminKey) {
+        resultBox.textContent = "Enter admin key first.";
+        return;
+      }
+
+      resultBox.textContent = "Loading payout tickets...";
+
+      try {
+        const response = await fetch("/api/admin-payouts", {
+          method: "GET",
+          headers: {
+            "x-admin-key": adminKey
+          }
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          resultBox.textContent = "Failed: " + data.error;
+          return;
+        }
+
+        if (!data.tickets.length) {
+          resultBox.textContent = "No payout tickets found.";
+          return;
+        }
+
+        resultBox.innerHTML = data.tickets.map(ticket => {
+          const amount = Number(ticket.amount || 0).toLocaleString();
+          const chips = Number(ticket.chips || 0).toLocaleString();
+          const locked = Number(ticket.locked || 0) === 1 ? "Yes" : "No";
+
+          return `
+            <div class="ticket-card">
+              <strong>${ticket.status.toUpperCase()} — ${amount} chips</strong><br>
+              Ticket ID: ${ticket.id}<br>
+              Player ID: ${ticket.player_id}<br>
+              Character: ${ticket.character_name || "Unknown"}<br>
+              Discord: ${ticket.discord_name || "Unknown"}<br>
+              Wallet Balance: ${chips}<br>
+              Wallet Locked: ${locked}<br>
+              Note: ${ticket.note || ""}<br>
+              Created: ${ticket.created_at}<br>
+              Fulfilled: ${ticket.fulfilled_at || "Not fulfilled"}<br>
+              Fulfilled By: ${ticket.fulfilled_by || "None"}<br><br>
+
+              ${
+                ticket.status === "pending"
+                  ? `<button onclick="completePayout('${ticket.id}')">Mark Paid</button>
+                     <button onclick="denyPayout('${ticket.id}')">Deny / Unlock</button>`
+                  : ""
+              }
+            </div>
+          `;
+        }).join("<hr>");
+      } catch (error) {
+        resultBox.textContent = "Payout list request failed.";
+      }
+    }
+
+    async function completePayout(ticketId) {
+      const resultBox = document.getElementById("payoutResult");
+      const adminKey = getAdminKey();
+      const fulfilledBy = getAdminName();
+
+      if (!confirm("Mark this payout as PAID? This will set wallet chips to 0 and unlock the wallet.")) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/admin-complete-payout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({
+            ticketId,
+            fulfilledBy
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          alert("Failed: " + data.error);
+          return;
+        }
+
+        alert("Payout marked paid.");
+        loadPayouts();
+      } catch (error) {
+        resultBox.textContent = "Complete payout request failed.";
+      }
+    }
+
+    async function denyPayout(ticketId) {
+      const resultBox = document.getElementById("payoutResult");
+      const adminKey = getAdminKey();
+      const deniedBy = getAdminName();
+
+      if (!confirm("Deny this payout and unlock the wallet? Chips will remain in wallet.")) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/admin-deny-payout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({
+            ticketId,
+            deniedBy
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          alert("Failed: " + data.error);
+          return;
+        }
+
+        alert("Payout denied and wallet unlocked.");
+        loadPayouts();
+      } catch (error) {
+        resultBox.textContent = "Deny payout request failed.";
       }
     }
 
     document.getElementById("addChipsBtn").addEventListener("click", addChips);
+    document.getElementById("loadPayoutsBtn").addEventListener("click", loadPayouts);
   </script>
 </body>
 </html>

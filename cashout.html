@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos Cash Out</title>
+  <link rel="stylesheet" href="./styles.css?v=8" />
+</head>
+<body>
+  <main class="casino-shell">
+    <section class="hero compact">
+      <div class="crest">R</div>
+      <div class="eyebrow">CASA DE RÍOS</div>
+      <h1>Cash Out</h1>
+      <p class="motto">Payout Ticket Request</p>
+      <p class="subtext">
+        Cash-out tickets are reviewed manually by the house. Your wallet will lock while payout is pending.
+      </p>
+    </section>
+
+    <section class="wallet-card">
+      <div>
+        <span class="label">Player ID</span>
+        <strong id="playerId">Not created yet</strong>
+
+        <span class="label" style="margin-top:12px;">Wallet</span>
+        <strong id="walletBalance">Balance: Not loaded</strong>
+
+        <span class="label" style="margin-top:12px;">Status</span>
+        <strong id="playerStatus">Status: Not loaded</strong>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="createPlayerBtn">Create / Update Player</button>
+        <button id="refreshWalletBtn">Refresh Wallet</button>
+      </div>
+    </section>
+
+    <section class="game-panel">
+      <h2>Request Payout</h2>
+
+      <p class="subtext">
+        Pressing Cash Out creates a pending payout ticket for Casa de Ríos staff.
+        Do not continue gambling after requesting payout.
+      </p>
+
+      <label>
+        Note
+        <input id="cashoutNote" type="text" value="Cash-out requested by player" />
+      </label>
+
+      <button id="cashoutBtn" class="primary">Create Cash-Out Ticket</button>
+
+      <div id="cashoutResult" class="result-box">
+        Waiting for cash-out request.
+      </div>
+    </section>
+
+    <a class="back-link" href="./index.html">← Back to Lobby</a>
+  </main>
+
+  <script src="./app.js?v=8"></script>
+
+  <script>
+    async function requestCashout() {
+      const resultBox = document.getElementById("cashoutResult");
+
+      const playerId = localStorage.getItem("casa_rios_player_id");
+      const playerSecret = localStorage.getItem("casa_rios_player_secret");
+      const note = document.getElementById("cashoutNote").value.trim();
+
+      if (!playerId || !playerSecret) {
+        resultBox.textContent = "Create / Update Player first.";
+        return;
+      }
+
+      resultBox.textContent = "Creating payout ticket...";
+
+      try {
+        const response = await fetch("/api/cashout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            playerId,
+            playerSecret,
+            note
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          resultBox.textContent = "Failed: " + data.error;
+          return;
+        }
+
+        resultBox.innerHTML =
+          "<strong>Payout ticket created.</strong><br>" +
+          "Ticket ID: " + data.ticketId + "<br>" +
+          "Amount: " + data.amount.toLocaleString() + " chips<br>" +
+          "Status: " + data.status + "<br>" +
+          "Wallet locked: Yes<br><br>" +
+          "Wait for Casa de Ríos staff to approve and pay this in-game.";
+
+        if (typeof loadWallet === "function") {
+          loadWallet();
+        }
+      } catch (error) {
+        resultBox.textContent = "Cash-out request failed. Check deployment.";
+      }
+    }
+
+    document.getElementById("cashoutBtn").addEventListener("click", requestCashout);
+  </script>
+</body>
+</html>
