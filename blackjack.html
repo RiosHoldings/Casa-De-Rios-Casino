@@ -200,6 +200,13 @@
       text-shadow: 0 0 12px rgba(212, 166, 74, .7);
     }
 
+    .brand-logo-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(212, 166, 74, .45));
+}
+
     .brand-title {
       font-family: "Saira Condensed", sans-serif;
       font-weight: 900;
@@ -316,39 +323,38 @@
         linear-gradient(180deg, #2d123d, #110718);
     }
 
-    .game-table::before {
-      content: "CASA DE RÍOS";
-      position: absolute;
-      top: 245px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: "Saira Condensed", sans-serif;
-      font-weight: 900;
-      letter-spacing: .18em;
-      font-size: clamp(32px, 7vw, 82px);
-      color: rgba(241, 208, 106, .18);
-      white-space: nowrap;
-      pointer-events: none;
-      text-shadow: 0 0 20px rgba(0, 0, 0, .25);
-    }
+    
+.game-table {
+  position: relative;
+  min-height: 920px;
+  padding: 22px 18px 30px;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(22, 8, 34, .32), rgba(8, 3, 12, .18)),
+    url("./images/casa-rios-bj.webp");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
 
-    .game-table::after {
-      content: "♛ R";
-      position: absolute;
-      top: 330px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: "Saira Condensed", sans-serif;
-      font-weight: 900;
-      font-size: clamp(42px, 10vw, 110px);
-      color: rgba(241, 208, 106, .15);
-      pointer-events: none;
-    }
+.game-table::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 50% 45%,
+    transparent 0 42%,
+    rgba(0, 0, 0, .15) 70%,
+    rgba(0, 0, 0, .55) 100%
+  );
+  z-index: 0;
+}
 
-    .floating {
-      position: relative;
-      z-index: 2;
-    }
+.floating {
+  position: relative;
+  z-index: 2;
+}
 
     .game-status {
       display: flex;
@@ -758,7 +764,7 @@
   <div class="wrap">
     <header class="topbar">
       <div class="brand">
-        <div class="logo">R</div>
+        <img class="brand-logo-img" src="./images/casa-rios-logo.webp" alt="Casa de Ríos Logo" />
         <div>
           <div class="brand-title">Casa de Ríos</div>
           <div class="brand-sub">Suerte · Honor · Lealtad<br>RP currency only</div>
