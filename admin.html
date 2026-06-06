@@ -405,41 +405,43 @@ async function searchPlayer() {
       }
     }
 
-    async function denyPayout(ticketId) {
-      const resultBox = document.getElementById("payoutResult");
-      const adminKey = getAdminKey();
-      const deniedBy = getAdminName();
+async function denyPayout(ticketId) {
+  const resultBox = document.getElementById("payoutResult");
+  const adminKey = getAdminKey();
+  const deniedBy = getAdminName();
 
-      if (!confirm("Deny this payout and unlock the wallet? Chips will remain in wallet.")) {
-        return;
-      }
+  if (!confirm("Deny this payout and unlock the wallet? Chips will remain in wallet.")) {
+    return;
+  }
 
-      try {
-        const response = await fetch("/api/admin-deny-payout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-admin-key": adminKey
-          },
-          body: JSON.stringify({
-            ticketId,
-            deniedBy
-          })
-        });
+  try {
+    const response = await fetch("/api/admin-deny-payout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        ticketId,
+        deniedBy
+      })
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (!data.ok) {
-          alert("Failed: " + data.error);
-          return;
-        }
+    if (!data.ok) {
+      alert("Failed: " + data.error);
+      return;
+    }
 
-        alert("Payout denied and wallet unlocked.");
-        loadPayouts();
-      } catch (error) {
-        resultBox.textContent = "Deny payout request failed.";
-      }
-      async function adminUpdatePlayer(action, extra = {}) {
+    alert("Payout denied and wallet unlocked.");
+    loadPayouts();
+  } catch (error) {
+    resultBox.textContent = "Deny payout request failed.";
+  }
+}
+
+async function adminUpdatePlayer(action, extra = {}) {
   const resultBox = document.getElementById("controlResult");
 
   const adminKey = getAdminKey();
@@ -494,32 +496,46 @@ async function searchPlayer() {
   }
 }
 
-    document.getElementById("searchPlayerBtn").addEventListener("click", searchPlayer);
-    document.getElementById("addChipsBtn").addEventListener("click", addChips);
-    document.getElementById("loadPayoutsBtn").addEventListener("click", loadPayouts);
+function safeClick(id, handler) {
+  const el = document.getElementById(id);
 
-    document.getElementById("setBalanceBtn").addEventListener("click", () => {
-  const newBalance = Number(document.getElementById("setBalanceAmount").value);
-  adminUpdatePlayer("set_balance", { newBalance });
+  if (!el) {
+    console.log("Missing button:", id);
+    return;
+  }
+
+  el.addEventListener("click", handler);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  safeClick("searchPlayerBtn", searchPlayer);
+  safeClick("addChipsBtn", addChips);
+  safeClick("loadPayoutsBtn", loadPayouts);
+
+  safeClick("setBalanceBtn", () => {
+    const newBalance = Number(document.getElementById("setBalanceAmount").value);
+    adminUpdatePlayer("set_balance", { newBalance });
+  });
+
+  safeClick("lockWalletBtn", () => {
+    adminUpdatePlayer("lock_wallet");
+  });
+
+  safeClick("unlockWalletBtn", () => {
+    adminUpdatePlayer("unlock_wallet");
+  });
+
+  safeClick("setStatusBtn", () => {
+    const status = document.getElementById("setStatusValue").value;
+    adminUpdatePlayer("set_status", { status });
+  });
+
+  safeClick("setVipBtn", () => {
+    const vipTier = document.getElementById("setVipValue").value;
+    adminUpdatePlayer("set_vip", { vipTier });
+  });
 });
 
-document.getElementById("lockWalletBtn").addEventListener("click", () => {
-  adminUpdatePlayer("lock_wallet");
-});
-
-document.getElementById("unlockWalletBtn").addEventListener("click", () => {
-  adminUpdatePlayer("unlock_wallet");
-});
-
-document.getElementById("setStatusBtn").addEventListener("click", () => {
-  const status = document.getElementById("setStatusValue").value;
-  adminUpdatePlayer("set_status", { status });
-});
-
-document.getElementById("setVipBtn").addEventListener("click", () => {
-  const vipTier = document.getElementById("setVipValue").value;
-  adminUpdatePlayer("set_vip", { vipTier });
-});
   </script>
 </body>
 </html>
