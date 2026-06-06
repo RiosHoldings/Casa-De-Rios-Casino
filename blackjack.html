@@ -242,16 +242,19 @@
       font-size: 13px;
     }
 
+    /* The table is now a fixed game board like the old GitHub version */
     .game-table {
       position: relative;
-      min-height: 860px;
-      padding: 18px;
+      width: 100%;
+      aspect-ratio: 9 / 13;
+      max-height: 860px;
+      min-height: 760px;
       overflow: hidden;
       background-image:
-        linear-gradient(rgba(22, 8, 34, .12), rgba(8, 3, 12, .10)),
+        linear-gradient(rgba(22, 8, 34, .08), rgba(8, 3, 12, .18)),
         url("./images/casa-rios-bj.webp");
-      background-size: 142% auto;
-      background-position: center 42px;
+      background-size: cover;
+      background-position: center top;
       background-repeat: no-repeat;
       background-color: #07050b;
     }
@@ -262,28 +265,33 @@
       inset: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 50% 45%, transparent 0 45%, rgba(0, 0, 0, .18) 78%, rgba(0, 0, 0, .55) 100%);
+        linear-gradient(
+          180deg,
+          rgba(0,0,0,.04) 0%,
+          rgba(0,0,0,.02) 42%,
+          rgba(0,0,0,.30) 75%,
+          rgba(0,0,0,.70) 100%
+        );
       z-index: 0;
     }
 
-    .floating {
-      position: relative;
+    .table-info-left,
+    .table-info-right,
+    .dealer-area,
+    .player-area,
+    .message {
+      position: absolute;
       z-index: 2;
     }
 
-    .game-status {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 22px;
-    }
-
-    .mini-card {
+    .table-info-left,
+    .table-info-right {
+      top: 5.5%;
+      width: 42%;
       border: 1px solid rgba(212, 166, 74, .25);
       background: rgba(0, 0, 0, .34);
       border-radius: 12px;
       padding: 10px;
-      min-width: 170px;
       color: var(--bone);
       line-height: 1.6;
       font-size: 13px;
@@ -291,32 +299,30 @@
       letter-spacing: .08em;
     }
 
-    .mini-card b {
+    .table-info-left b,
+    .table-info-right b {
       color: var(--gold2);
     }
 
-    .mini-card.right {
+    .table-info-left {
+      left: 4%;
+    }
+
+    .table-info-right {
+      right: 4%;
       text-align: right;
     }
 
-    .dealer-area,
-    .player-area {
-      max-width: 760px;
-      margin-left: auto;
-      margin-right: auto;
-      border: 0;
-      background: transparent;
-      border-radius: 18px;
-      padding: 8px;
-      box-shadow: none;
-    }
-
     .dealer-area {
-      margin-top: 72px;
+      top: 31%;
+      left: 5%;
+      right: 5%;
     }
 
     .player-area {
-      margin-top: 76px;
+      top: 68%;
+      left: 5%;
+      right: 5%;
     }
 
     .area-label {
@@ -326,11 +332,13 @@
       letter-spacing: .14em;
       color: var(--gold2);
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       gap: 10px;
-      text-shadow: 0 0 12px rgba(0, 0, 0, .9);
+      text-shadow:
+        0 0 10px rgba(0,0,0,.95),
+        0 0 18px rgba(212,166,74,.20);
     }
 
     .cards {
@@ -411,21 +419,23 @@
     }
 
     .message {
-      max-width: 720px;
-      min-height: 62px;
-      margin: 24px auto;
+      top: 55%;
+      left: 4%;
+      right: 4%;
+      min-height: 58px;
       border: 1px solid rgba(212, 166, 74, .35);
       border-radius: 16px;
-      padding: 14px;
-      background: rgba(0, 0, 0, .62);
+      padding: 13px;
+      background: rgba(0, 0, 0, .68);
       color: var(--bone);
       font-size: 22px;
-      line-height: 1.35;
+      line-height: 1.25;
       text-align: center;
       font-family: "Saira Condensed", sans-serif;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .08em;
+      box-shadow: 0 14px 40px rgba(0,0,0,.45);
     }
 
     .message.win {
@@ -442,16 +452,17 @@
       color: var(--gold2);
     }
 
+    /* Controls are outside the board, like the old game layout */
     .controls {
-      position: relative;
-      z-index: 3;
-      margin: 18px auto 0;
       max-width: 820px;
-      border: 1px solid rgba(212, 166, 74, .24);
+      margin: 12px auto 0;
+      border: 1px solid rgba(212, 166, 74, .28);
       border-radius: 18px;
-      background: rgba(0, 0, 0, .62);
+      background: rgba(0, 0, 0, .72);
       padding: 14px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, .42);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.55),
+        inset 0 0 20px rgba(212,166,74,.04);
     }
 
     .wager-dock {
@@ -612,42 +623,46 @@
       }
 
       .game-table {
-        min-height: 810px;
-        padding: 10px 10px 18px;
-        background-size: 145% auto;
-        background-position: center 48px;
+        min-height: 720px;
+        aspect-ratio: 9 / 13;
+        background-size: cover;
+        background-position: center top;
       }
 
-      .game-status {
-        margin-bottom: 10px;
-      }
-
-      .mini-card {
-        font-size: 11px;
-        min-width: auto;
-        flex: 1;
-        padding: 8px;
+      .table-info-left,
+      .table-info-right {
+        top: 4.5%;
+        font-size: 10px;
+        padding: 7px;
       }
 
       .dealer-area {
-        margin-top: 66px;
+        top: 30%;
+      }
+
+      .message {
+        top: 53.5%;
+        font-size: 20px;
+        min-height: 54px;
+        padding: 11px;
       }
 
       .player-area {
-        margin-top: 44px;
+        top: 67%;
       }
 
       .area-label {
-        font-size: 21px;
+        font-size: 20px;
+        margin-bottom: 6px;
       }
 
       .cards {
-        min-height: 96px;
+        min-height: 92px;
       }
 
       .card {
-        width: 64px;
-        height: 90px;
+        width: 62px;
+        height: 88px;
       }
 
       .tl,
@@ -659,13 +674,9 @@
         font-size: 31px;
       }
 
-      .message {
-        font-size: 21px;
-        margin: 18px auto;
-      }
-
       .controls {
-        margin: 12px auto 0;
+        margin: 10px 10px 0;
+        padding: 12px;
       }
 
       .wager-dock {
@@ -674,9 +685,9 @@
       }
 
       .chip {
-        width: 54px;
-        height: 54px;
-        font-size: 15px;
+        width: 52px;
+        height: 52px;
+        font-size: 14px;
       }
 
       .action-grid {
@@ -713,20 +724,18 @@
       </div>
 
       <div class="game-table">
-        <div class="floating game-status">
-          <div class="mini-card" id="leftGameInfo">
-            Blackjack pays <b>3:2</b><br>
-            Min Bet: <b>1</b><br>
-            Max Bet: <b>50,000</b>
-          </div>
-
-          <div class="mini-card right" id="rightGameInfo">
-            Seat: <b>---</b><br>
-            Shoe: <b>House</b>
-          </div>
+        <div class="table-info-left">
+          Blackjack pays <b>3:2</b><br>
+          Min Bet: <b>1</b><br>
+          Max Bet: <b>50,000</b>
         </div>
 
-        <section class="floating dealer-area">
+        <div class="table-info-right" id="rightGameInfo">
+          Seat: <b>---</b><br>
+          Shoe: <b>House</b>
+        </div>
+
+        <section class="dealer-area">
           <div class="area-label">
             <span>Dealer</span>
             <span id="dealerTotal">Total: ?</span>
@@ -734,20 +743,20 @@
           <div id="dealerCards" class="cards"></div>
         </section>
 
-        <div id="gameMessage" class="floating message">
+        <div id="gameMessage" class="message">
           Place your bet and press Deal.
         </div>
 
-        <section class="floating player-area">
+        <section class="player-area">
           <div class="area-label">
             <span>You</span>
             <span id="playerTotal">Total: 0</span>
           </div>
           <div id="playerCards" class="cards"></div>
         </section>
-
-        <section class="controls" id="controls"></section>
       </div>
+
+      <section class="controls" id="controls"></section>
     </main>
 
     <div class="footer-note">
@@ -795,7 +804,7 @@
       const el = document.getElementById("gameMessage");
       if (!el) return;
 
-      el.className = "floating message" + (type ? " " + type : "");
+      el.className = "message" + (type ? " " + type : "");
       el.textContent = text;
     }
 
