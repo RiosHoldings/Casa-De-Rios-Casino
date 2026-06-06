@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos — My Ledger</title>
+  <link rel="stylesheet" href="./styles.css?v=10" />
+</head>
+<body>
+  <main class="casino-shell">
+    <section class="hero compact">
+      <div class="crest">R</div>
+      <div class="eyebrow">CASA DE RÍOS</div>
+      <h1>My Ledger</h1>
+      <p class="motto">Suerte. Honor. Lealtad.</p>
+      <p class="subtext">
+        View your personal casino history, wins, losses, buy-ins, and cash-out records.
+        Only records tied to this device's Player ID can be loaded.
+      </p>
+    </section>
+
+    <section class="wallet-card">
+      <div>
+        <span class="label">Player ID</span>
+        <strong id="playerId">Not created yet</strong>
+
+        <span class="label" style="margin-top:12px;">Wallet</span>
+        <strong id="walletBalance">Balance: Not loaded</strong>
+
+        <span class="label" style="margin-top:12px;">Status</span>
+        <strong id="playerStatus">Status: Not loaded</strong>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button id="createPlayerBtn">Create / Update Player</button>
+        <button id="refreshWalletBtn">Refresh Wallet</button>
+      </div>
+    </section>
+
+    <section class="game-panel">
+      <h2>My Casino History</h2>
+
+      <button id="loadHistoryBtn" class="primary">Load My Ledger</button>
+
+      <div id="historyResult" class="result-box">
+        No history loaded yet.
+      </div>
+    </section>
+
+    <a class="back-link" href="./index.html">← Back to Lobby</a>
+  </main>
+
+  <script src="./app.js?v=10"></script>
+
+  <script>
+    function transactionLabel(type) {
+      if (type === "admin_add_chips") return "Buy-In / Chips Added";
+      if (type === "roulette_spin") return "Roulette Spin";
+      if (type === "cashout_request") return "Cash-Out Requested";
+      if (type === "cashout_paid") return "Cash-Out Paid";
+      if (type === "cashout_denied") return "Cash-Out Denied";
+      return type || "Unknown Transaction";
+    }
+
+    function formatAmount(amount) {
+      const number = Number(amount || 0);
+
+      if (number > 0) {
+        return "+" + number.toLocaleString();
+      }
+
+      return number.toLocaleString();
+    }
+
+    async function loadHistory() {
+      const resultBox = document.getElementById("historyResult");
+
+      const playerId = localStorage.getItem("casa_rios_player_id");
+      const playerSecret = localStorage.getItem("casa_rios_player_secret");
+
+      if (!playerId || !playerSecret) {
+        resultBox.textContent = "Create / Update Player first.";
+        return;
+      }
+
+      resultBox.textContent = "Loading your ledger...";
+
+      try {
+        const response = await fetch(
+          "/api/history?playerId=" +
+          encodeURIComponent(playerId) +
+          "&playerSecret=" +
+          encodeURIComponent(playerSecret)
+        );
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          resultBox.textContent = "Failed: " + data.error;
+          return;
+        }
+
+        if (!data.transactions.length) {
+          resultBox.textContent = "No transactions found yet.";
+          return;
+        }
+
+        resultBox.innerHTML = data.transactions.map(tx => {
+          const balance = Number(tx.balance_after || 0);
+
+          return `
+            <div class="ticket-card">
+              <strong>${transactionLabel(tx.type)}</strong><br>
+              Game: ${tx.game || "N/A"}<br>
+              Amount: ${formatAmount(tx.amount)} chips<br>
+              Balance After: ${balance.toLocaleString()} chips<br>
+              Note: ${tx.note || ""}<br>
+              Date: ${tx.created_at}
+            </div>
+          `;
+        }).join("<hr>");
+      } catch (error) {
+        resultBox.textContent = "History request failed. Check deployment.";
+      }
+    }
+
+    document.getElementById("loadHistoryBtn").addEventListener("click", loadHistory);
+  </script>
+</body>
+</html>
