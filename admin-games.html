@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos — Game Audit</title>
+
+  <style>
+    :root {
+      --bg: #07050b;
+      --panel: #140d1d;
+      --gold: #d4a64a;
+      --gold2: #f1d06a;
+      --bone: #efe5d0;
+      --muted: #a89584;
+      --line: rgba(212, 166, 74, .28);
+      --bad: #ff8d7a;
+      --good: #91ff91;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 600px at 50% -10%, rgba(126, 51, 168, .25), transparent 60%),
+        #07050b;
+      color: var(--bone);
+      font-family: Arial, sans-serif;
+    }
+
+    .wrap {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      padding: 18px 12px 40px;
+    }
+
+    h1, h2 {
+      color: var(--gold2);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin: 0 0 12px;
+    }
+
+    h1 {
+      font-size: 28px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 22px;
+    }
+
+    .top {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    a, button {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.45);
+      color: var(--gold2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.3);
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.55);
+      color: var(--bone);
+      border-radius: 10px;
+      padding: 11px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 130px 130px;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .msg {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .cards {
+      display: grid;
+      gap: 10px;
+    }
+
+    .audit-card {
+      border: 1px solid rgba(212,166,74,.18);
+      background: rgba(255,255,255,.035);
+      border-radius: 14px;
+      padding: 12px;
+      line-height: 1.55;
+    }
+
+    .audit-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--gold2);
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .win {
+      color: var(--good);
+    }
+
+    .loss {
+      color: var(--bad);
+    }
+
+    .push {
+      color: var(--gold2);
+    }
+
+    .hands {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,.35);
+      border-radius: 10px;
+      font-family: monospace;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 700px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Casa de Ríos Game Audit</h1>
+      <div>
+        <a href="./admin.html">Admin Panel</a>
+        <a href="./index.html">Lobby</a>
+      </div>
+    </div>
+
+    <section class="panel">
+      <div class="row">
+        <div>
+          <label for="adminKey">Admin Key</label>
+          <input id="adminKey" type="password" placeholder="Enter admin key" />
+        </div>
+
+        <div>
+          <label for="limit">Limit</label>
+          <select id="limit">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+
+        <button id="loadBtn">Load Audit</button>
+      </div>
+
+      <div class="msg" id="msg">Load recent blackjack and roulette rounds.</div>
+    </section>
+
+    <section class="panel">
+      <h2>Blackjack Rounds</h2>
+      <div class="cards" id="blackjackList"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Roulette Rounds</h2>
+      <div class="cards" id="rouletteList"></div>
+    </section>
+  </div>
+
+  <script>
+    const ADMIN_KEY_STORAGE = "casa_rios_admin_key";
+
+    function money(n) {
+      return Number(n || 0).toLocaleString();
+    }
+
+    function safe(v) {
+      return String(v ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function resultClass(result) {
+      if (result === "win" || result === "blackjack") return "win";
+      if (result === "push") return "push";
+      if (result === "loss" || result === "dealer_blackjack" || result === "bust") return "loss";
+      return "";
+    }
+
+    function playerName(row) {
+      const character = row.character_name || "Unknown Character";
+      const discord = row.discord_name || "No Discord";
+      return `${character} / ${discord}`;
+    }
+
+    function renderBlackjack(rows) {
+      const box = document.getElementById("blackjackList");
+
+      if (!rows.length) {
+        box.innerHTML = `<div class="muted">No blackjack rounds found.</div>`;
+        return;
+      }
+
+      box.innerHTML = rows.map(row => {
+        const cls = resultClass(row.result);
+
+        return `
+          <div class="audit-card">
+            <div class="audit-head">
+              <span>${safe(playerName(row))}</span>
+              <span class="${cls}">${safe(row.result || row.status)}</span>
+            </div>
+
+            <div class="muted">
+              Player ID: ${safe(row.player_id)}<br>
+              Bet: ${money(row.bet_amount)} · Payout: ${money(row.payout)} · Status: ${safe(row.status)}<br>
+              Created: ${safe(row.created_at)}<br>
+              Updated: ${safe(row.updated_at)}
+            </div>
+
+            <div class="hands">
+              Player Hand: ${safe(row.player_hand)}<br>
+              Dealer Hand: ${safe(row.dealer_hand)}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderRoulette(rows) {
+      const box = document.getElementById("rouletteList");
+
+      if (!rows.length) {
+        box.innerHTML = `<div class="muted">No roulette rounds found.</div>`;
+        return;
+      }
+
+      box.innerHTML = rows.map(row => {
+        const won = Number(row.payout || 0) > 0;
+        const cls = won ? "win" : "loss";
+
+        return `
+          <div class="audit-card">
+            <div class="audit-head">
+              <span>${safe(playerName(row))}</span>
+              <span class="${cls}">${won ? "WIN" : "LOSS"}</span>
+            </div>
+
+            <div class="muted">
+              Player ID: ${safe(row.player_id)}<br>
+              Bet: ${safe(row.bet_type)} ${safe(row.bet_value || "")} · Amount: ${money(row.bet_amount)} · Payout: ${money(row.payout)}<br>
+              Result: ${safe(row.result_number)} ${safe(row.result_color)}<br>
+              Status: ${safe(row.status)}<br>
+              Created: ${safe(row.created_at)}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function loadAudit() {
+      const adminKey = document.getElementById("adminKey").value.trim();
+      const limit = document.getElementById("limit").value;
+
+      if (!adminKey) {
+        document.getElementById("msg").textContent = "Enter admin key first.";
+        return;
+      }
+
+      localStorage.setItem(ADMIN_KEY_STORAGE, adminKey);
+
+      document.getElementById("msg").textContent = "Loading game audit...";
+
+      try {
+        const response = await fetch(
+          "/api/admin-game-audit?adminKey=" +
+          encodeURIComponent(adminKey) +
+          "&limit=" +
+          encodeURIComponent(limit)
+        );
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          document.getElementById("msg").textContent = "Failed: " + data.error;
+          return;
+        }
+
+        renderBlackjack(data.blackjack || []);
+        renderRoulette(data.roulette || []);
+
+        document.getElementById("msg").textContent = "Audit loaded.";
+      } catch (error) {
+        document.getElementById("msg").textContent = "Request failed. Check deployment.";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedKey = localStorage.getItem(ADMIN_KEY_STORAGE);
+      if (savedKey) document.getElementById("adminKey").value = savedKey;
+
+      document.getElementById("loadBtn").addEventListener("click", loadAudit);
+    });
+  </script>
+</body>
+</html>
