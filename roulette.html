@@ -309,6 +309,18 @@
       box-shadow: inset 3px 0 0 rgba(212,166,74,.82);
     }
 
+    .bet-choice.green-bet {
+      border-color: rgba(135, 230, 111, .38);
+    }
+
+    .bet-choice.green-bet.active {
+      border-color: rgba(135, 230, 111, .85);
+      background:
+        linear-gradient(90deg, rgba(20, 96, 45, .88), rgba(0,0,0,.48));
+      color: var(--casa-good);
+      box-shadow: inset 3px 0 0 rgba(135, 230, 111, .82);
+    }
+
     .split-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -491,21 +503,23 @@
 
         <div class="bet-grid">
           <div class="split-buttons">
-            <button class="bet-choice active" data-type="color" data-value="red">Red</button>
-            <button class="bet-choice" data-type="color" data-value="black">Black</button>
+            <button class="bet-choice active" data-api-type="red" data-api-value="">Red</button>
+            <button class="bet-choice" data-api-type="black" data-api-value="">Black</button>
+          </div>
+
+          <button class="bet-choice green-bet" data-api-type="number" data-api-value="0">Green 0</button>
+
+          <div class="split-buttons">
+            <button class="bet-choice" data-api-type="even" data-api-value="">Even</button>
+            <button class="bet-choice" data-api-type="odd" data-api-value="">Odd</button>
           </div>
 
           <div class="split-buttons">
-            <button class="bet-choice" data-type="parity" data-value="even">Even</button>
-            <button class="bet-choice" data-type="parity" data-value="odd">Odd</button>
+            <button class="bet-choice" data-api-type="low" data-api-value="">1-18</button>
+            <button class="bet-choice" data-api-type="high" data-api-value="">19-36</button>
           </div>
 
-          <div class="split-buttons">
-            <button class="bet-choice" data-type="range" data-value="low">1-18</button>
-            <button class="bet-choice" data-type="range" data-value="high">19-36</button>
-          </div>
-
-          <button class="bet-choice" data-type="number" data-value="number">Exact Number</button>
+          <button class="bet-choice" data-api-type="number" data-api-value="custom">Exact Number</button>
 
           <div class="number-box" id="numberBox">
             <label for="numberBet">Number 0-36</label>
@@ -599,8 +613,8 @@
     const RECENT_KEY = "casa_rios_roulette_recent";
 
     let selectedBet = {
-      type: "color",
-      value: "red",
+      apiType: "red",
+      apiValue: "",
       label: "Red"
     };
 
@@ -708,16 +722,22 @@
       const spinBtn = document.getElementById("spinBtn");
       const betAmount = Math.floor(Number(document.getElementById("betAmount").value || 0));
 
-      let betType = selectedBet.type;
-      let betValue = selectedBet.value;
+      let betType = selectedBet.apiType;
+      let betValue = selectedBet.apiValue;
 
       if (betType === "number") {
-        betValue = String(Math.floor(Number(document.getElementById("numberBet").value || 0)));
+        if (betValue === "custom") {
+          betValue = String(Math.floor(Number(document.getElementById("numberBet").value || 0)));
+        } else {
+          betValue = "0";
+        }
 
         if (Number(betValue) < 0 || Number(betValue) > 36) {
           setResult("Invalid Number", "Exact number must be between 0 and 36.", false);
           return;
         }
+      } else {
+        betValue = "";
       }
 
       if (!Number.isFinite(betAmount) || betAmount < 100) {
@@ -749,12 +769,14 @@
           body: JSON.stringify({
             playerId: getPlayerId(),
             playerSecret: getPlayerSecret(),
+
             betAmount,
             betType,
             betValue,
+
+            amount: betAmount,
             type: betType,
-            value: betValue,
-            amount: betAmount
+            value: betValue
           })
         });
 
@@ -817,6 +839,7 @@
           color,
           betType,
           betValue,
+          betLabel: selectedBet.label,
           betAmount,
           payout,
           netChange
@@ -860,7 +883,7 @@
         <div class="recent-row">
           <div class="recent-title">${spin.number} ${String(spin.color || "").toUpperCase()}</div>
           <div class="recent-meta">
-            Bet: ${spin.betType} ${spin.betValue}<br>
+            Bet: ${spin.betLabel || spin.betType} ${spin.betType === "number" ? spin.betValue : ""}<br>
             Amount: ${money(spin.betAmount)} | Payout: ${money(spin.payout)} | Net: ${(spin.netChange >= 0 ? "+" : "") + money(spin.netChange)}
           </div>
         </div>
@@ -883,12 +906,15 @@
           btn.classList.add("active");
 
           selectedBet = {
-            type: btn.dataset.type,
-            value: btn.dataset.value,
+            apiType: btn.dataset.apiType,
+            apiValue: btn.dataset.apiValue,
             label: btn.textContent.trim()
           };
 
-          document.getElementById("numberBox").classList.toggle("show", selectedBet.type === "number");
+          document.getElementById("numberBox").classList.toggle(
+            "show",
+            selectedBet.apiType === "number" && selectedBet.apiValue === "custom"
+          );
         });
       });
     });
