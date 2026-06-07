@@ -162,7 +162,30 @@
       padding: 14px 0 18px;
     }
 
+    .wheel-shell {
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .wheel-pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--casa-gold-2);
+      font-size: 28px;
+      text-shadow:
+        0 0 12px rgba(241,208,106,.55),
+        0 4px 10px rgba(0,0,0,.85);
+      z-index: 6;
+      pointer-events: none;
+    }
+
     .wheel {
+      --ball-angle: 0deg;
+      --ball-track: min(185px, 35vw);
+
       width: min(430px, 82vw);
       aspect-ratio: 1;
       border-radius: 50%;
@@ -170,41 +193,43 @@
       background:
         radial-gradient(circle at 50% 50%, #08050d 0 18%, transparent 19%),
         conic-gradient(
-          #7c101d 0deg 10deg,
-          #050505 10deg 20deg,
-          #7c101d 20deg 30deg,
-          #050505 30deg 40deg,
-          #7c101d 40deg 50deg,
-          #050505 50deg 60deg,
-          #7c101d 60deg 70deg,
-          #050505 70deg 80deg,
-          #7c101d 80deg 90deg,
-          #050505 90deg 100deg,
-          #7c101d 100deg 110deg,
-          #050505 110deg 120deg,
-          #7c101d 120deg 130deg,
-          #050505 130deg 140deg,
-          #7c101d 140deg 150deg,
-          #050505 150deg 160deg,
-          #7c101d 160deg 170deg,
-          #050505 170deg 180deg,
-          #7c101d 180deg 190deg,
-          #050505 190deg 200deg,
-          #7c101d 200deg 210deg,
-          #050505 210deg 220deg,
-          #7c101d 220deg 230deg,
-          #050505 230deg 240deg,
-          #7c101d 240deg 250deg,
-          #050505 250deg 260deg,
-          #7c101d 260deg 270deg,
-          #050505 270deg 280deg,
-          #7c101d 280deg 290deg,
-          #050505 290deg 300deg,
-          #7c101d 300deg 310deg,
-          #050505 310deg 320deg,
-          #7c101d 320deg 330deg,
-          #050505 330deg 340deg,
-          #0b6b34 340deg 360deg
+          #0b6b34 0deg 9.73deg,
+          #7c101d 9.73deg 19.46deg,
+          #050505 19.46deg 29.19deg,
+          #7c101d 29.19deg 38.92deg,
+          #050505 38.92deg 48.65deg,
+          #7c101d 48.65deg 58.38deg,
+          #050505 58.38deg 68.11deg,
+          #7c101d 68.11deg 77.84deg,
+          #050505 77.84deg 87.57deg,
+          #7c101d 87.57deg 97.30deg,
+          #050505 97.30deg 107.03deg,
+          #7c101d 107.03deg 116.76deg,
+          #050505 116.76deg 126.49deg,
+          #7c101d 126.49deg 136.22deg,
+          #050505 136.22deg 145.95deg,
+          #7c101d 145.95deg 155.68deg,
+          #050505 155.68deg 165.41deg,
+          #7c101d 165.41deg 175.14deg,
+          #050505 175.14deg 184.87deg,
+          #7c101d 184.87deg 194.60deg,
+          #050505 194.60deg 204.33deg,
+          #7c101d 204.33deg 214.06deg,
+          #050505 214.06deg 223.79deg,
+          #7c101d 223.79deg 233.52deg,
+          #050505 233.52deg 243.25deg,
+          #7c101d 243.25deg 252.98deg,
+          #050505 252.98deg 262.71deg,
+          #7c101d 262.71deg 272.44deg,
+          #050505 272.44deg 282.17deg,
+          #7c101d 282.17deg 291.90deg,
+          #050505 291.90deg 301.63deg,
+          #7c101d 301.63deg 311.36deg,
+          #050505 311.36deg 321.09deg,
+          #7c101d 321.09deg 330.82deg,
+          #050505 330.82deg 340.55deg,
+          #7c101d 340.55deg 350.28deg,
+          #050505 350.28deg 360deg
         );
       box-shadow:
         inset 0 0 34px rgba(0,0,0,.9),
@@ -214,6 +239,7 @@
       place-items: center;
       transition: transform 1.1s cubic-bezier(.16,.9,.26,1.02);
       position: relative;
+      overflow: visible;
     }
 
     .wheel::before {
@@ -227,9 +253,56 @@
       pointer-events: none;
     }
 
+    .wheel::after {
+      content: "";
+      position: absolute;
+      width: 88%;
+      height: 88%;
+      border-radius: 50%;
+      border: 1px dashed rgba(241,208,106,.20);
+      pointer-events: none;
+    }
+
+    .wheel-ball {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      margin-left: -9px;
+      margin-top: -9px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, #ffffff, #f1d06a 42%, #8b641d 78%);
+      box-shadow:
+        0 0 12px rgba(241,208,106,.75),
+        0 0 24px rgba(255,255,255,.22),
+        0 5px 12px rgba(0,0,0,.9);
+      transform:
+        rotate(var(--ball-angle))
+        translateY(calc(-1 * var(--ball-track)));
+      transition: transform 1.15s cubic-bezier(.16,.9,.26,1.02);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .wheel-ball.spinning {
+      animation: ballOrbit .32s linear infinite;
+    }
+
+    @keyframes ballOrbit {
+      from {
+        transform: rotate(0deg) translateY(calc(-1 * var(--ball-track)));
+      }
+
+      to {
+        transform: rotate(360deg) translateY(calc(-1 * var(--ball-track)));
+      }
+    }
+
     .wheel-center {
       position: relative;
-      z-index: 2;
+      z-index: 4;
       width: 38%;
       height: 38%;
       border-radius: 50%;
@@ -476,6 +549,22 @@
       .split-buttons {
         grid-template-columns: 1fr;
       }
+
+      .wheel {
+        --ball-track: min(138px, 35vw);
+      }
+
+      .wheel-pointer {
+        top: -15px;
+        font-size: 23px;
+      }
+
+      .wheel-ball {
+        width: 15px;
+        height: 15px;
+        margin-left: -7.5px;
+        margin-top: -7.5px;
+      }
     }
   </style>
 </head>
@@ -545,11 +634,17 @@
           </div>
 
           <div class="wheel-area">
-            <div class="wheel" id="wheel">
-              <div class="wheel-center">
-                <div>
-                  <div class="wheel-number" id="resultNumber">--</div>
-                  <div class="wheel-color" id="resultColor">Ready</div>
+            <div class="wheel-shell">
+              <div class="wheel-pointer">◆</div>
+
+              <div class="wheel" id="wheel">
+                <div class="wheel-ball" id="wheelBall"></div>
+
+                <div class="wheel-center">
+                  <div>
+                    <div class="wheel-number" id="resultNumber">--</div>
+                    <div class="wheel-color" id="resultColor">Ready</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -611,6 +706,11 @@
     const PLAYER_KEY = "casa_rios_player_id";
     const PLAYER_SECRET_KEY = "casa_rios_player_secret";
     const RECENT_KEY = "casa_rios_roulette_recent";
+
+    const EUROPEAN_WHEEL_ORDER = [
+      0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23,
+      10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+    ];
 
     let selectedBet = {
       apiType: "red",
@@ -682,6 +782,51 @@
 
       titleEl.classList.remove("good", "bad");
       titleEl.classList.add(good ? "good" : "bad");
+    }
+
+    function angleForNumber(number) {
+      const n = Number(number);
+      const index = EUROPEAN_WHEEL_ORDER.indexOf(n);
+
+      if (index === -1) {
+        return 0;
+      }
+
+      const slice = 360 / EUROPEAN_WHEEL_ORDER.length;
+      return index * slice;
+    }
+
+    function startBallSpin() {
+      const ball = document.getElementById("wheelBall");
+
+      if (ball) {
+        ball.classList.add("spinning");
+      }
+    }
+
+    function stopBallSpin() {
+      const ball = document.getElementById("wheelBall");
+
+      if (ball) {
+        ball.classList.remove("spinning");
+      }
+    }
+
+    function landBallOnNumber(number) {
+      const ball = document.getElementById("wheelBall");
+      const wheel = document.getElementById("wheel");
+
+      if (!ball || !wheel) {
+        return;
+      }
+
+      stopBallSpin();
+
+      const targetAngle = angleForNumber(number);
+      const wheelAngle = ((wheelRotation % 360) + 360) % 360;
+      const correctedAngle = targetAngle - wheelAngle + 720;
+
+      wheel.style.setProperty("--ball-angle", `${correctedAngle}deg`);
     }
 
     async function loadWallet() {
@@ -758,6 +903,8 @@
       wheelRotation += 1080 + Math.floor(Math.random() * 720);
       wheel.style.transform = `rotate(${wheelRotation}deg)`;
 
+      startBallSpin();
+
       const startedAt = Date.now();
 
       try {
@@ -783,10 +930,11 @@
         const data = await response.json();
 
         const elapsed = Date.now() - startedAt;
-        const waitMore = Math.max(0, 1000 - elapsed);
+        const waitMore = Math.max(0, 1100 - elapsed);
         await new Promise(resolve => setTimeout(resolve, waitMore));
 
         if (!data.ok) {
+          stopBallSpin();
           setResult("Spin Denied", data.error || "The house denied this spin.", false);
           return;
         }
@@ -806,6 +954,7 @@
           "";
 
         const payout = Number(data.payout || 0);
+
         const balanceAfter =
           data.balanceAfter ??
           data.balance_after ??
@@ -819,6 +968,9 @@
 
         setText("resultNumber", number);
         setText("resultColor", String(color || "").toUpperCase());
+
+        landBallOnNumber(number);
+
         setText("lastPayout", money(payout));
         setText("netChange", (netChange >= 0 ? "+" : "") + money(netChange));
 
@@ -847,6 +999,7 @@
 
         renderRecentSpins();
       } catch (error) {
+        stopBallSpin();
         setResult("Spin Failed", "Roulette request failed. Check the API deployment.", false);
       } finally {
         spinBtn.disabled = false;
