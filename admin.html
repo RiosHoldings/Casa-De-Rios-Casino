@@ -2,158 +2,703 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Casa de Ríos Admin</title>
-  <link rel="stylesheet" href="./styles.css?v=9" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>House Admin | Casino Casa de Ríos</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Saira+Condensed:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./styles-casa.css">
+
+  <style>
+    .admin-wrap {
+      position: relative;
+      z-index: 1;
+      width: min(1380px, 100%);
+      margin: 0 auto;
+      padding: 12px 10px 36px;
+    }
+
+    .admin-header {
+      border: 1px solid var(--casa-line);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.76), rgba(12,7,17,.90)),
+        radial-gradient(circle at 50% 0%, rgba(122,35,174,.34), transparent 62%);
+      box-shadow: var(--casa-shadow);
+      padding: 12px 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .admin-brand img {
+      width: 62px;
+      height: 62px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 16px rgba(212,166,74,.48));
+    }
+
+    .admin-brand h1 {
+      margin: 0;
+      font-family: var(--font-title);
+      color: var(--casa-gold-2);
+      text-transform: uppercase;
+      letter-spacing: .11em;
+      font-size: clamp(25px, 4vw, 46px);
+      line-height: .95;
+    }
+
+    .admin-brand span {
+      display: block;
+      margin-top: 5px;
+      color: var(--casa-muted);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 11px;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .admin-grid {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .admin-panel {
+      border: 1px solid var(--casa-line);
+      background:
+        linear-gradient(180deg, rgba(12,7,17,.92), rgba(5,3,8,.97)),
+        radial-gradient(circle at 50% 0%, rgba(122,35,174,.12), transparent 60%);
+      box-shadow: var(--casa-shadow);
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .admin-title {
+      font-family: var(--font-title);
+      color: var(--casa-gold-2);
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      font-size: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .admin-section {
+      border: 1px solid var(--casa-line);
+      background:
+        linear-gradient(180deg, rgba(12,7,17,.90), rgba(5,3,8,.96));
+      box-shadow: var(--casa-shadow);
+      overflow: hidden;
+    }
+
+    .admin-section-head {
+      border-bottom: 1px solid rgba(212,166,74,.18);
+      padding: 13px 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      background:
+        linear-gradient(90deg, rgba(72,25,101,.42), rgba(0,0,0,.20));
+    }
+
+    .admin-section-head h2 {
+      margin: 0;
+      color: var(--casa-gold-2);
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      font-size: 19px;
+    }
+
+    .admin-section-head span {
+      color: var(--casa-muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .admin-section-body {
+      padding: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 11px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .three-col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .mini-btn {
+      border: 1px solid rgba(212,166,74,.22);
+      background: rgba(0,0,0,.38);
+      color: var(--casa-bone);
+      border-radius: 10px;
+      min-height: 42px;
+      padding: 8px 10px;
+      text-decoration: none;
+      text-align: center;
+      display: grid;
+      place-items: center;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-btn:hover {
+      border-color: rgba(241,208,106,.70);
+      color: var(--casa-gold-2);
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat-card {
+      border: 1px solid rgba(212,166,74,.16);
+      background: rgba(0,0,0,.34);
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .stat-card small {
+      display: block;
+      color: var(--casa-muted);
+      text-transform: uppercase;
+      letter-spacing: .11em;
+      font-size: 10px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card b {
+      color: var(--casa-gold-2);
+      font-family: var(--font-title);
+      font-size: 20px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(212,166,74,.24);
+      border-radius: 999px;
+      padding: 5px 10px;
+      background: rgba(0,0,0,.36);
+      color: var(--casa-gold-2);
+      text-transform: uppercase;
+      letter-spacing: .10em;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .status-pill.good {
+      color: var(--casa-good);
+      border-color: rgba(116,255,154,.34);
+    }
+
+    .status-pill.bad {
+      color: var(--casa-bad);
+      border-color: rgba(255,99,99,.34);
+    }
+
+    .status-pill.warn {
+      color: var(--casa-gold-2);
+      border-color: rgba(241,208,106,.34);
+    }
+
+    .admin-msg {
+      border: 1px solid rgba(212,166,74,.18);
+      background: rgba(0,0,0,.35);
+      padding: 11px;
+      color: var(--casa-muted);
+      font-size: 13px;
+      line-height: 1.45;
+      min-height: 44px;
+    }
+
+    .admin-msg.good {
+      color: var(--casa-good);
+      border-color: rgba(116,255,154,.34);
+    }
+
+    .admin-msg.bad {
+      color: var(--casa-bad);
+      border-color: rgba(255,99,99,.34);
+    }
+
+    .record-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .record-card {
+      border: 1px solid rgba(212,166,74,.16);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.64));
+      padding: 12px;
+      line-height: 1.45;
+    }
+
+    .record-card strong {
+      color: var(--casa-gold-2);
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 15px;
+    }
+
+    .record-meta {
+      color: var(--casa-muted);
+      font-size: 12px;
+      margin-top: 5px;
+      overflow-wrap: anywhere;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .small-action {
+      border: 1px solid rgba(212,166,74,.26);
+      background: rgba(0,0,0,.42);
+      color: var(--casa-bone);
+      border-radius: 9px;
+      min-height: 38px;
+      padding: 7px 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-family: var(--font-ui);
+      font-weight: 900;
+    }
+
+    .small-action.good {
+      border-color: rgba(116,255,154,.34);
+      color: var(--casa-good);
+    }
+
+    .small-action.bad {
+      border-color: rgba(255,99,99,.34);
+      color: var(--casa-bad);
+    }
+
+    .amount-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .amount-buttons button {
+      border: 1px solid rgba(212,166,74,.20);
+      background: rgba(0,0,0,.34);
+      color: var(--casa-bone);
+      border-radius: 999px;
+      min-height: 38px;
+      font-family: var(--font-ui);
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .amount-buttons button:hover {
+      color: var(--casa-gold-2);
+      border-color: rgba(241,208,106,.56);
+    }
+
+    .empty {
+      color: var(--casa-muted);
+      padding: 14px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1050px) {
+      .admin-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .admin-wrap {
+        padding: 0 0 28px;
+      }
+
+      .admin-header {
+        border-left: 0;
+        border-right: 0;
+        grid-template-columns: 1fr;
+        margin-bottom: 10px;
+      }
+
+      .admin-brand {
+        justify-content: center;
+        text-align: center;
+      }
+
+      .admin-brand img {
+        width: 54px;
+        height: 54px;
+      }
+
+      .admin-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .admin-panel,
+      .admin-section {
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .two-col,
+      .three-col,
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-links {
+        grid-template-columns: 1fr;
+      }
+
+      .amount-buttons {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <a href="./admin-games.html" style="
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  z-index: 9999;
-  display: inline-block;
-  border: 1px solid rgba(212, 166, 74, .45);
-  background: rgba(0, 0, 0, .82);
-  color: #f1d06a;
-  border-radius: 12px;
-  padding: 10px 12px;
-  text-decoration: none;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
-">
-  Game Audit
-</a>
-  <a class="floating-admin-link" href="./admin-games.html">Game Audit</a>
-  <main class="casino-shell">
-    <section class="hero compact">
-      <div class="crest">R</div>
-      <div class="eyebrow">CASA DE RÍOS</div>
-      <h1>House Admin</h1>
-      <p class="motto">Suerte. Honor. Lealtad.</p>
-      <p class="subtext">Buy-ins, wallet controls, and payout tickets.</p>
-    </section>
-
-    <section class="game-panel">
-      <h2>Admin Access</h2>
-
-      <label>
-        Admin Key
-        <input id="adminKey" type="password" placeholder="Enter admin key" />
-      </label>
-
-      <label>
-        Admin Name
-        <input id="adminName" type="text" value="Casa de Ríos Admin" />
-      </label>
-    </section>
-
-<section class="game-panel">
-  <h2>Player Search</h2>
-
-  <label>
-    Player ID
-    <input id="searchPlayerId" type="text" placeholder="CDR-..." />
-  </label>
-
-  <button id="searchPlayerBtn" class="primary">Search Player</button>
-
-  <div id="searchResult" class="result-box">
-    No player loaded.
-  </div>
-</section>
-
-<section class="game-panel">
-  <h2>Player Controls</h2>
-
-  <label>
-    Player ID
-    <input id="controlPlayerId" type="text" placeholder="CDR-..." />
-  </label>
-
-  <label>
-    Set Balance
-    <input id="setBalanceAmount" type="number" min="0" value="0" />
-  </label>
-
-  <button id="setBalanceBtn">Set Balance</button>
-  <button id="lockWalletBtn">Lock Wallet</button>
-  <button id="unlockWalletBtn">Unlock Wallet</button>
-
-  <label>
-    Player Status
-    <select id="setStatusValue">
-      <option value="waiting_buyin">waiting_buyin</option>
-      <option value="active">active</option>
-      <option value="cashout_pending">cashout_pending</option>
-      <option value="paid_out">paid_out</option>
-      <option value="locked">locked</option>
-      <option value="banned">banned</option>
-    </select>
-  </label>
-
-  <button id="setStatusBtn">Set Status</button>
-
-  <label>
-    VIP / Lealtad Tier
-    <select id="setVipValue">
-      <option value="none">none</option>
-      <option value="bronze">bronze</option>
-      <option value="silver">silver</option>
-      <option value="gold">gold</option>
-      <option value="platinum">platinum</option>
-      <option value="lealtad">lealtad</option>
-    </select>
-  </label>
-
-  <button id="setVipBtn">Set VIP Tier</button>
-
-  <div id="controlResult" class="result-box">
-    No control action yet.
-  </div>
-</section>
-
-    <section class="game-panel">
-      <h2>Add Chips / Buy-In</h2>
-
-      <label>
-        Player ID
-        <input id="addPlayerId" type="text" placeholder="CDR-..." />
-      </label>
-
-      <label>
-        Chips to Add
-        <input id="addAmount" type="number" min="1" value="10000" />
-      </label>
-
-      <label>
-        Note
-        <input id="addNote" type="text" value="Buy-in approved by house" />
-      </label>
-
-      <button id="addChipsBtn" class="primary">Add Chips</button>
-
-      <div id="addResult" class="result-box">
-        Waiting for admin action.
+  <div class="admin-wrap">
+    <header class="admin-header">
+      <div class="admin-brand">
+        <img src="./images/casa-rios-logo.webp" alt="Casa de Ríos Logo" />
+        <div>
+          <h1>House Admin</h1>
+          <span>Control room of Casino Casa de Ríos</span>
+        </div>
       </div>
-    </section>
 
-    <section class="game-panel">
-      <h2>Payout Tickets</h2>
-
-      <button id="loadPayoutsBtn" class="primary">Load Payout Tickets</button>
-
-      <div id="payoutResult" class="result-box">
-        No payout tickets loaded.
+      <div class="admin-actions">
+        <a class="casa-btn" href="./index.html">Lobby</a>
+        <a class="casa-btn" href="./admin-games.html">Game Audit</a>
       </div>
-    </section>
+    </header>
 
-    <a class="back-link" href="./index.html">← Back to Lobby</a>
-  </main>
+    <main class="admin-grid">
+      <aside class="admin-stack">
+        <section class="admin-panel">
+          <div class="admin-title">🔐 Admin Access</div>
+
+          <div class="form-grid">
+            <div>
+              <label for="adminKey">Admin Key</label>
+              <input id="adminKey" type="password" placeholder="Enter house key" />
+            </div>
+
+            <div>
+              <label for="adminName">Admin Name</label>
+              <input id="adminName" type="text" value="Casa de Ríos Admin" />
+            </div>
+
+            <button class="casa-btn gold" id="saveAdminBtn">Save Access</button>
+
+            <div class="admin-msg" id="accessMsg">
+              Enter your admin key before using house controls.
+            </div>
+          </div>
+
+          <div class="quick-links">
+            <a class="mini-btn" href="./admin-games.html">Game Audit</a>
+            <a class="mini-btn" href="./cashout.html">Cashout</a>
+            <a class="mini-btn" href="./history.html">History</a>
+            <a class="mini-btn" href="./index.html">Lobby</a>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-title">🔎 Player Search</div>
+
+          <div class="form-grid">
+            <div>
+              <label for="searchPlayerId">Player ID</label>
+              <input id="searchPlayerId" type="text" placeholder="CDR-..." />
+            </div>
+
+            <button class="casa-btn" id="searchPlayerBtn">Search Player</button>
+
+            <div class="admin-msg" id="searchMsg">
+              No player loaded.
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-title">⚡ Quick Buy-In</div>
+
+          <div class="form-grid">
+            <div>
+              <label for="addPlayerId">Player ID</label>
+              <input id="addPlayerId" type="text" placeholder="CDR-..." />
+            </div>
+
+            <div>
+              <label for="addAmount">Chips to Add</label>
+              <input id="addAmount" type="number" min="1" value="10000" />
+            </div>
+
+            <div class="amount-buttons">
+              <button data-add="5000">5K</button>
+              <button data-add="10000">10K</button>
+              <button data-add="25000">25K</button>
+              <button data-add="50000">50K</button>
+              <button data-add="100000">100K</button>
+              <button data-add="250000">250K</button>
+            </div>
+
+            <div>
+              <label for="addNote">Note</label>
+              <input id="addNote" type="text" value="Buy-in approved by house" />
+            </div>
+
+            <button class="casa-btn gold" id="addChipsBtn">Add Chips</button>
+
+            <div class="admin-msg" id="addMsg">
+              Waiting for buy-in action.
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="admin-stack">
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <h2>Player Dossier</h2>
+            <span>Profile, wallet, and status</span>
+          </div>
+
+          <div class="admin-section-body">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <small>Character</small>
+                <b id="statCharacter">---</b>
+              </div>
+
+              <div class="stat-card">
+                <small>Discord</small>
+                <b id="statDiscord">---</b>
+              </div>
+
+              <div class="stat-card">
+                <small>Balance</small>
+                <b><span id="statBalance">0</span></b>
+              </div>
+
+              <div class="stat-card">
+                <small>Wallet</small>
+                <b id="statLocked">---</b>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <span class="status-pill" id="statStatus">No Status</span>
+              <span class="status-pill warn" id="statVip">VIP: None</span>
+              <span class="status-pill" id="statPlayerId">No Player</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <h2>Player Controls</h2>
+            <span>Balance, locks, status, Lealtad tier</span>
+          </div>
+
+          <div class="admin-section-body">
+            <div class="form-grid">
+              <div>
+                <label for="controlPlayerId">Player ID</label>
+                <input id="controlPlayerId" type="text" placeholder="CDR-..." />
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="setBalanceAmount">Set Balance</label>
+                  <input id="setBalanceAmount" type="number" min="0" value="0" />
+                </div>
+
+                <div>
+                  <label for="setStatusValue">Player Status</label>
+                  <select id="setStatusValue">
+                    <option value="waiting_buyin">waiting_buyin</option>
+                    <option value="active">active</option>
+                    <option value="cashout_pending">cashout_pending</option>
+                    <option value="paid_out">paid_out</option>
+                    <option value="locked">locked</option>
+                    <option value="banned">banned</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="setVipValue">VIP / Lealtad Tier</label>
+                  <select id="setVipValue">
+                    <option value="none">none</option>
+                    <option value="bronze">bronze</option>
+                    <option value="silver">silver</option>
+                    <option value="gold">gold</option>
+                    <option value="platinum">platinum</option>
+                    <option value="lealtad">lealtad</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label>Loaded Player</label>
+                  <input id="loadedPlayerCopy" type="text" readonly value="None" />
+                </div>
+              </div>
+
+              <div class="three-col">
+                <button class="casa-btn" id="setBalanceBtn">Set Balance</button>
+                <button class="casa-btn" id="setStatusBtn">Set Status</button>
+                <button class="casa-btn" id="setVipBtn">Set VIP</button>
+              </div>
+
+              <div class="two-col">
+                <button class="casa-btn" id="lockWalletBtn">Lock Wallet</button>
+                <button class="casa-btn gold" id="unlockWalletBtn">Unlock Wallet</button>
+              </div>
+
+              <div class="admin-msg" id="controlMsg">
+                No control action yet.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <h2>Payout Tickets</h2>
+            <span>Approve, deny, or review cashouts</span>
+          </div>
+
+          <div class="admin-section-body">
+            <button class="casa-btn gold" id="loadPayoutsBtn">Load Payout Tickets</button>
+
+            <div class="record-list" id="payoutList" style="margin-top: 12px;">
+              <div class="empty">No payout tickets loaded.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <h2>Recent Transactions</h2>
+            <span>Loaded after player search</span>
+          </div>
+
+          <div class="admin-section-body">
+            <div class="record-list" id="transactionList">
+              <div class="empty">Search a player to load transactions.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <h2>Player Payout History</h2>
+            <span>Loaded after player search</span>
+          </div>
+
+          <div class="admin-section-body">
+            <div class="record-list" id="ticketList">
+              <div class="empty">Search a player to load payout history.</div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
 
   <script>
+    const ADMIN_KEY_STORAGE = "casa_rios_admin_key";
+    const ADMIN_NAME_STORAGE = "casa_rios_admin_name";
+
+    let loadedPlayerId = "";
+
+    function money(n) {
+      return Number(n || 0).toLocaleString() + " chips";
+    }
+
+    function cleanMoney(n) {
+      return Number(n || 0).toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
     function getAdminKey() {
       return document.getElementById("adminKey").value.trim();
     }
@@ -162,137 +707,211 @@
       return document.getElementById("adminName").value.trim() || "Casa de Ríos Admin";
     }
 
-function transactionLabel(type) {
-  if (type === "admin_add_chips") return "Buy-In / Chips Added";
-  if (type === "roulette_spin") return "Roulette Spin";
-  if (type === "cashout_request") return "Cash-Out Requested";
-  if (type === "cashout_paid") return "Cash-Out Paid";
-  if (type === "cashout_denied") return "Cash-Out Denied";
-  return type || "Unknown Transaction";
-}
+    function setMsg(id, text, type = "") {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-async function searchPlayer() {
-  const resultBox = document.getElementById("searchResult");
+      el.textContent = text;
+      el.classList.remove("good", "bad");
 
-  const adminKey = getAdminKey();
-  const playerId = document.getElementById("searchPlayerId").value.trim();
-
-  if (!adminKey) {
-    resultBox.textContent = "Enter admin key first.";
-    return;
-  }
-
-  if (!playerId) {
-    resultBox.textContent = "Enter a Player ID.";
-    return;
-  }
-
-  resultBox.textContent = "Searching player...";
-
-  try {
-    const response = await fetch(
-      "/api/admin-player?playerId=" + encodeURIComponent(playerId),
-      {
-        method: "GET",
-        headers: {
-          "x-admin-key": adminKey
-        }
+      if (type) {
+        el.classList.add(type);
       }
-    );
-
-    const data = await response.json();
-
-    if (!data.ok) {
-      resultBox.textContent = "Failed: " + data.error;
-      return;
     }
 
-    const p = data.player;
-    const chips = Number(p.chips || 0).toLocaleString();
-    const locked = Number(p.locked || 0) === 1 ? "Yes" : "No";
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
 
-    const transactionsHtml = data.transactions.length
-      ? data.transactions.map(tx => {
-          const amount = Number(tx.amount || 0);
-          const amountText = amount > 0
-            ? "+" + amount.toLocaleString()
-            : amount.toLocaleString();
+    function shortId(id) {
+      if (!id) return "---";
+      return id.length > 16 ? id.slice(0, 14) + "..." : id;
+    }
 
-          return `
-            <div class="ticket-card">
-              <strong>${transactionLabel(tx.type)}</strong><br>
-              Game: ${tx.game || "N/A"}<br>
-              Amount: ${amountText} chips<br>
-              Balance After: ${Number(tx.balance_after || 0).toLocaleString()} chips<br>
-              Note: ${tx.note || ""}<br>
-              Date: ${tx.created_at}
+    function transactionLabel(type) {
+      const labels = {
+        admin_add_chips: "Buy-In / Chips Added",
+        roulette_spin: "Roulette Spin",
+        roulette_bet: "Roulette Bet",
+        roulette_payout: "Roulette Payout",
+        blackjack_bet: "Blackjack Bet",
+        blackjack_payout: "Blackjack Payout",
+        blackjack_loss: "Blackjack Loss",
+        slots_bet: "Slots Bet",
+        slots_payout: "Slots Payout",
+        slots_loss: "Slots Loss",
+        cashout_request: "Cash-Out Requested",
+        cashout_paid: "Cash-Out Paid",
+        cashout_denied: "Cash-Out Denied"
+      };
+
+      return labels[type] || type || "Unknown Transaction";
+    }
+
+    function saveAccess() {
+      const key = getAdminKey();
+      const name = getAdminName();
+
+      localStorage.setItem(ADMIN_KEY_STORAGE, key);
+      localStorage.setItem(ADMIN_NAME_STORAGE, name);
+
+      setMsg("accessMsg", "Admin access saved on this device.", "good");
+    }
+
+    function syncLoadedPlayer(playerId) {
+      loadedPlayerId = playerId || loadedPlayerId || "";
+
+      if (!loadedPlayerId) return;
+
+      document.getElementById("searchPlayerId").value = loadedPlayerId;
+      document.getElementById("addPlayerId").value = loadedPlayerId;
+      document.getElementById("controlPlayerId").value = loadedPlayerId;
+      document.getElementById("loadedPlayerCopy").value = loadedPlayerId;
+    }
+
+    function updateDossier(player) {
+      if (!player) return;
+
+      const locked = Number(player.locked || 0) === 1;
+      const status = String(player.status || "unknown");
+      const vip = String(player.vip_tier || "none");
+
+      setText("statCharacter", player.character_name || "Unknown");
+      setText("statDiscord", player.discord_name || "Unknown");
+      setText("statBalance", money(player.chips || 0));
+      setText("statLocked", locked ? "Locked" : "Unlocked");
+      setText("statStatus", status);
+      setText("statVip", "VIP: " + vip);
+      setText("statPlayerId", shortId(player.id));
+
+      const statusEl = document.getElementById("statStatus");
+      const lockedEl = document.getElementById("statLocked");
+
+      statusEl.classList.remove("good", "bad", "warn");
+      statusEl.classList.add(status === "active" ? "good" : status === "banned" || status === "locked" ? "bad" : "warn");
+
+      lockedEl.className = "";
+      lockedEl.classList.add(locked ? "bad" : "good");
+
+      document.getElementById("setBalanceAmount").value = Number(player.chips || 0);
+      document.getElementById("setStatusValue").value = status;
+      document.getElementById("setVipValue").value = vip;
+    }
+
+    function renderTransactions(transactions = []) {
+      const list = document.getElementById("transactionList");
+
+      if (!transactions.length) {
+        list.innerHTML = `<div class="empty">No transactions found.</div>`;
+        return;
+      }
+
+      list.innerHTML = transactions.map(tx => {
+        const amount = Number(tx.amount || 0);
+        const amountText = amount > 0 ? "+" + cleanMoney(amount) : cleanMoney(amount);
+
+        return `
+          <article class="record-card">
+            <strong>${escapeHtml(transactionLabel(tx.type))}</strong>
+            <div class="record-meta">
+              Game: ${escapeHtml(tx.game || "N/A")}<br>
+              Amount: ${escapeHtml(amountText)} chips<br>
+              Balance After: ${money(tx.balance_after || 0)}<br>
+              Note: ${escapeHtml(tx.note || "")}<br>
+              Date: ${escapeHtml(tx.created_at || "")}
             </div>
-          `;
-        }).join("<hr>")
-      : "No transactions found.";
+          </article>
+        `;
+      }).join("");
+    }
 
-    const ticketsHtml = data.tickets.length
-      ? data.tickets.map(ticket => {
-          return `
-            <div class="ticket-card">
-              <strong>${ticket.status.toUpperCase()} — ${Number(ticket.amount || 0).toLocaleString()} chips</strong><br>
-              Ticket ID: ${ticket.id}<br>
-              Note: ${ticket.note || ""}<br>
-              Created: ${ticket.created_at}<br>
-              Fulfilled: ${ticket.fulfilled_at || "Not fulfilled"}<br>
-              Fulfilled By: ${ticket.fulfilled_by || "None"}
-            </div>
-          `;
-        }).join("<hr>")
-      : "No payout tickets found.";
+    function renderPlayerTickets(tickets = []) {
+      const list = document.getElementById("ticketList");
 
-    resultBox.innerHTML = `
-      <div class="ticket-card">
-        <strong>${p.character_name || "Unknown Character"}</strong><br>
-        Player ID: ${p.id}<br>
-        Discord: ${p.discord_name || "Unknown"}<br>
-        Status: ${p.status}<br>
-        VIP: ${p.vip_tier}<br>
-        Balance: ${chips} chips<br>
-        Locked: ${locked}<br>
-        Created: ${p.created_at}<br>
-        Updated: ${p.updated_at}
-      </div>
+      if (!tickets.length) {
+        list.innerHTML = `<div class="empty">No payout tickets found for this player.</div>`;
+        return;
+      }
 
-      <hr>
+      list.innerHTML = tickets.map(ticket => `
+        <article class="record-card">
+          <strong>${escapeHtml(String(ticket.status || "unknown").toUpperCase())} — ${money(ticket.amount || 0)}</strong>
+          <div class="record-meta">
+            Ticket ID: ${escapeHtml(ticket.id)}<br>
+            Note: ${escapeHtml(ticket.note || "")}<br>
+            Created: ${escapeHtml(ticket.created_at || "")}<br>
+            Fulfilled: ${escapeHtml(ticket.fulfilled_at || "Not fulfilled")}<br>
+            Fulfilled By: ${escapeHtml(ticket.fulfilled_by || "None")}
+          </div>
+        </article>
+      `).join("");
+    }
 
-      <strong>Recent Transactions</strong><br><br>
-      ${transactionsHtml}
+    async function searchPlayer() {
+      const adminKey = getAdminKey();
+      const playerId = document.getElementById("searchPlayerId").value.trim();
 
-      <hr>
+      if (!adminKey) {
+        setMsg("searchMsg", "Enter admin key first.", "bad");
+        return;
+      }
 
-      <strong>Payout Tickets</strong><br><br>
-      ${ticketsHtml}
-    `;
-  } catch (error) {
-    resultBox.textContent = "Player search request failed.";
-  }
-}
+      if (!playerId) {
+        setMsg("searchMsg", "Enter a Player ID.", "bad");
+        return;
+      }
+
+      setMsg("searchMsg", "Searching player...");
+
+      try {
+        const response = await fetch(
+          "/api/admin-player?playerId=" + encodeURIComponent(playerId),
+          {
+            method: "GET",
+            headers: {
+              "x-admin-key": adminKey
+            }
+          }
+        );
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          setMsg("searchMsg", data.error || "Player search failed.", "bad");
+          return;
+        }
+
+        const player = data.player || {};
+
+        syncLoadedPlayer(player.id || playerId);
+        updateDossier(player);
+        renderTransactions(data.transactions || []);
+        renderPlayerTickets(data.tickets || []);
+
+        setMsg("searchMsg", "Player loaded: " + (player.character_name || player.id || playerId), "good");
+      } catch (error) {
+        setMsg("searchMsg", "Player search request failed.", "bad");
+      }
+    }
 
     async function addChips() {
-      const resultBox = document.getElementById("addResult");
-
       const adminKey = getAdminKey();
       const playerId = document.getElementById("addPlayerId").value.trim();
       const amount = Number(document.getElementById("addAmount").value);
       const note = document.getElementById("addNote").value.trim();
 
       if (!adminKey) {
-        resultBox.textContent = "Enter admin key first.";
+        setMsg("addMsg", "Enter admin key first.", "bad");
         return;
       }
 
       if (!playerId || !amount || amount <= 0) {
-        resultBox.textContent = "Enter valid Player ID and chip amount.";
+        setMsg("addMsg", "Enter valid Player ID and chip amount.", "bad");
         return;
       }
 
-      resultBox.textContent = "Adding chips...";
+      setMsg("addMsg", "Adding chips...");
 
       try {
         const response = await fetch("/api/admin-add-chips", {
@@ -311,30 +930,81 @@ async function searchPlayer() {
         const data = await response.json();
 
         if (!data.ok) {
-          resultBox.textContent = "Failed: " + data.error;
+          setMsg("addMsg", data.error || "Add chips failed.", "bad");
           return;
         }
 
-        resultBox.innerHTML =
-          "<strong>Chips added.</strong><br>" +
-          "Player ID: " + data.playerId + "<br>" +
-          "Added: " + data.amountAdded.toLocaleString() + " chips<br>" +
-          "Balance After: " + data.balanceAfter.toLocaleString() + " chips";
+        const added = data.amountAdded ?? amount;
+        const balanceAfter = data.balanceAfter ?? 0;
+
+        setMsg("addMsg", `Chips added. Added ${cleanMoney(added)}. Balance after ${cleanMoney(balanceAfter)}.`, "good");
+
+        syncLoadedPlayer(playerId);
+        searchPlayer();
       } catch (error) {
-        resultBox.textContent = "Add chips request failed.";
+        setMsg("addMsg", "Add chips request failed.", "bad");
+      }
+    }
+
+    async function adminUpdatePlayer(action, extra = {}) {
+      const adminKey = getAdminKey();
+      const adminName = getAdminName();
+      const playerId = document.getElementById("controlPlayerId").value.trim();
+
+      if (!adminKey) {
+        setMsg("controlMsg", "Enter admin key first.", "bad");
+        return;
+      }
+
+      if (!playerId) {
+        setMsg("controlMsg", "Enter a Player ID.", "bad");
+        return;
+      }
+
+      setMsg("controlMsg", "Updating player...");
+
+      try {
+        const response = await fetch("/api/admin-update-player", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({
+            playerId,
+            action,
+            adminName,
+            ...extra
+          })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          setMsg("controlMsg", data.error || "Admin update failed.", "bad");
+          return;
+        }
+
+        const player = data.player || {};
+
+        syncLoadedPlayer(player.id || playerId);
+        updateDossier(player);
+
+        setMsg("controlMsg", "Player updated successfully.", "good");
+      } catch (error) {
+        setMsg("controlMsg", "Admin update request failed.", "bad");
       }
     }
 
     async function loadPayouts() {
-      const resultBox = document.getElementById("payoutResult");
       const adminKey = getAdminKey();
 
       if (!adminKey) {
-        resultBox.textContent = "Enter admin key first.";
+        document.getElementById("payoutList").innerHTML = `<div class="empty">Enter admin key first.</div>`;
         return;
       }
 
-      resultBox.textContent = "Loading payout tickets...";
+      document.getElementById("payoutList").innerHTML = `<div class="empty">Loading payout tickets...</div>`;
 
       try {
         const response = await fetch("/api/admin-payouts", {
@@ -347,54 +1017,74 @@ async function searchPlayer() {
         const data = await response.json();
 
         if (!data.ok) {
-          resultBox.textContent = "Failed: " + data.error;
+          document.getElementById("payoutList").innerHTML = `<div class="empty">${escapeHtml(data.error || "Failed to load payouts.")}</div>`;
           return;
         }
 
-        if (!data.tickets.length) {
-          resultBox.textContent = "No payout tickets found.";
-          return;
-        }
-
-        resultBox.innerHTML = data.tickets.map(ticket => {
-          const amount = Number(ticket.amount || 0).toLocaleString();
-          const chips = Number(ticket.chips || 0).toLocaleString();
-          const locked = Number(ticket.locked || 0) === 1 ? "Yes" : "No";
-
-          return `
-            <div class="ticket-card">
-              <strong>${ticket.status.toUpperCase()} — ${amount} chips</strong><br>
-              Ticket ID: ${ticket.id}<br>
-              Player ID: ${ticket.player_id}<br>
-              Character: ${ticket.character_name || "Unknown"}<br>
-              Discord: ${ticket.discord_name || "Unknown"}<br>
-              Wallet Balance: ${chips}<br>
-              Wallet Locked: ${locked}<br>
-              Note: ${ticket.note || ""}<br>
-              Created: ${ticket.created_at}<br>
-              Fulfilled: ${ticket.fulfilled_at || "Not fulfilled"}<br>
-              Fulfilled By: ${ticket.fulfilled_by || "None"}<br><br>
-
-              ${
-                ticket.status === "pending"
-                  ? `<button onclick="completePayout('${ticket.id}')">Mark Paid</button>
-                     <button onclick="denyPayout('${ticket.id}')">Deny / Unlock</button>`
-                  : ""
-              }
-            </div>
-          `;
-        }).join("<hr>");
+        renderPayouts(data.tickets || []);
       } catch (error) {
-        resultBox.textContent = "Payout list request failed.";
+        document.getElementById("payoutList").innerHTML = `<div class="empty">Payout list request failed.</div>`;
       }
     }
 
+    function renderPayouts(tickets = []) {
+      const list = document.getElementById("payoutList");
+
+      if (!tickets.length) {
+        list.innerHTML = `<div class="empty">No payout tickets found.</div>`;
+        return;
+      }
+
+      list.innerHTML = tickets.map(ticket => {
+        const pending = ticket.status === "pending";
+        const locked = Number(ticket.locked || 0) === 1 ? "Yes" : "No";
+
+        return `
+          <article class="record-card">
+            <strong>${escapeHtml(String(ticket.status || "unknown").toUpperCase())} — ${money(ticket.amount || 0)}</strong>
+            <div class="record-meta">
+              Ticket ID: ${escapeHtml(ticket.id)}<br>
+              Player ID: ${escapeHtml(ticket.player_id)}<br>
+              Character: ${escapeHtml(ticket.character_name || "Unknown")}<br>
+              Discord: ${escapeHtml(ticket.discord_name || "Unknown")}<br>
+              Wallet Balance: ${money(ticket.chips || 0)}<br>
+              Wallet Locked: ${escapeHtml(locked)}<br>
+              Note: ${escapeHtml(ticket.note || "")}<br>
+              Created: ${escapeHtml(ticket.created_at || "")}<br>
+              Fulfilled: ${escapeHtml(ticket.fulfilled_at || "Not fulfilled")}<br>
+              Fulfilled By: ${escapeHtml(ticket.fulfilled_by || "None")}
+            </div>
+
+            ${
+              pending
+                ? `
+                  <div class="record-actions">
+                    <button class="small-action good" data-ticket-paid="${escapeHtml(ticket.id)}">Mark Paid</button>
+                    <button class="small-action bad" data-ticket-deny="${escapeHtml(ticket.id)}">Deny / Unlock</button>
+                    <button class="small-action" data-load-player="${escapeHtml(ticket.player_id)}">Load Player</button>
+                  </div>
+                `
+                : `
+                  <div class="record-actions">
+                    <button class="small-action" data-load-player="${escapeHtml(ticket.player_id)}">Load Player</button>
+                  </div>
+                `
+            }
+          </article>
+        `;
+      }).join("");
+    }
+
     async function completePayout(ticketId) {
-      const resultBox = document.getElementById("payoutResult");
       const adminKey = getAdminKey();
       const fulfilledBy = getAdminName();
 
-      if (!confirm("Mark this payout as PAID? This will set wallet chips to 0 and unlock the wallet.")) {
+      if (!adminKey) {
+        alert("Enter admin key first.");
+        return;
+      }
+
+      if (!confirm("Mark this payout as PAID? This sets wallet chips to 0 and unlocks the wallet.")) {
         return;
       }
 
@@ -414,148 +1104,112 @@ async function searchPlayer() {
         const data = await response.json();
 
         if (!data.ok) {
-          alert("Failed: " + data.error);
+          alert("Failed: " + (data.error || "Could not complete payout."));
           return;
         }
 
         alert("Payout marked paid.");
         loadPayouts();
       } catch (error) {
-        resultBox.textContent = "Complete payout request failed.";
+        alert("Complete payout request failed.");
       }
     }
 
-async function denyPayout(ticketId) {
-  const resultBox = document.getElementById("payoutResult");
-  const adminKey = getAdminKey();
-  const deniedBy = getAdminName();
+    async function denyPayout(ticketId) {
+      const adminKey = getAdminKey();
+      const deniedBy = getAdminName();
 
-  if (!confirm("Deny this payout and unlock the wallet? Chips will remain in wallet.")) {
-    return;
-  }
+      if (!adminKey) {
+        alert("Enter admin key first.");
+        return;
+      }
 
-  try {
-    const response = await fetch("/api/admin-deny-payout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": adminKey
-      },
-      body: JSON.stringify({
-        ticketId,
-        deniedBy
-      })
-    });
+      if (!confirm("Deny this payout and unlock the wallet? Chips will remain in wallet.")) {
+        return;
+      }
 
-    const data = await response.json();
+      try {
+        const response = await fetch("/api/admin-deny-payout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({
+            ticketId,
+            deniedBy
+          })
+        });
 
-    if (!data.ok) {
-      alert("Failed: " + data.error);
-      return;
+        const data = await response.json();
+
+        if (!data.ok) {
+          alert("Failed: " + (data.error || "Could not deny payout."));
+          return;
+        }
+
+        alert("Payout denied and wallet unlocked.");
+        loadPayouts();
+      } catch (error) {
+        alert("Deny payout request failed.");
+      }
     }
 
-    alert("Payout denied and wallet unlocked.");
-    loadPayouts();
-  } catch (error) {
-    resultBox.textContent = "Deny payout request failed.";
-  }
-}
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedKey = localStorage.getItem(ADMIN_KEY_STORAGE);
+      const savedName = localStorage.getItem(ADMIN_NAME_STORAGE);
 
-async function adminUpdatePlayer(action, extra = {}) {
-  const resultBox = document.getElementById("controlResult");
+      if (savedKey) document.getElementById("adminKey").value = savedKey;
+      if (savedName) document.getElementById("adminName").value = savedName;
 
-  const adminKey = getAdminKey();
-  const adminName = getAdminName();
-  const playerId = document.getElementById("controlPlayerId").value.trim();
+      document.getElementById("saveAdminBtn").addEventListener("click", saveAccess);
+      document.getElementById("searchPlayerBtn").addEventListener("click", searchPlayer);
+      document.getElementById("addChipsBtn").addEventListener("click", addChips);
+      document.getElementById("loadPayoutsBtn").addEventListener("click", loadPayouts);
 
-  if (!adminKey) {
-    resultBox.textContent = "Enter admin key first.";
-    return;
-  }
+      document.getElementById("setBalanceBtn").addEventListener("click", () => {
+        const newBalance = Number(document.getElementById("setBalanceAmount").value);
+        adminUpdatePlayer("set_balance", { newBalance });
+      });
 
-  if (!playerId) {
-    resultBox.textContent = "Enter a Player ID.";
-    return;
-  }
+      document.getElementById("lockWalletBtn").addEventListener("click", () => {
+        adminUpdatePlayer("lock_wallet");
+      });
 
-  resultBox.textContent = "Updating player...";
+      document.getElementById("unlockWalletBtn").addEventListener("click", () => {
+        adminUpdatePlayer("unlock_wallet");
+      });
 
-  try {
-    const response = await fetch("/api/admin-update-player", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": adminKey
-      },
-      body: JSON.stringify({
-        playerId,
-        action,
-        adminName,
-        ...extra
-      })
+      document.getElementById("setStatusBtn").addEventListener("click", () => {
+        const status = document.getElementById("setStatusValue").value;
+        adminUpdatePlayer("set_status", { status });
+      });
+
+      document.getElementById("setVipBtn").addEventListener("click", () => {
+        const vipTier = document.getElementById("setVipValue").value;
+        adminUpdatePlayer("set_vip", { vipTier });
+      });
+
+      document.querySelectorAll("[data-add]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("addAmount").value = btn.dataset.add;
+        });
+      });
+
+      document.getElementById("payoutList").addEventListener("click", event => {
+        const paidId = event.target.dataset.ticketPaid;
+        const denyId = event.target.dataset.ticketDeny;
+        const playerId = event.target.dataset.loadPlayer;
+
+        if (paidId) completePayout(paidId);
+        if (denyId) denyPayout(denyId);
+
+        if (playerId) {
+          syncLoadedPlayer(playerId);
+          searchPlayer();
+        }
+      });
     });
-
-    const data = await response.json();
-
-    if (!data.ok) {
-      resultBox.textContent = "Failed: " + data.error;
-      return;
-    }
-
-    const p = data.player;
-
-    resultBox.innerHTML =
-      "<strong>Player updated.</strong><br>" +
-      "Player ID: " + p.id + "<br>" +
-      "Status: " + p.status + "<br>" +
-      "VIP: " + p.vip_tier + "<br>" +
-      "Balance: " + Number(p.chips || 0).toLocaleString() + " chips<br>" +
-      "Locked: " + (Number(p.locked || 0) === 1 ? "Yes" : "No");
-  } catch (error) {
-    resultBox.textContent = "Admin update request failed.";
-  }
-}
-
-function safeClick(id, handler) {
-  const el = document.getElementById(id);
-
-  if (!el) {
-    console.log("Missing button:", id);
-    return;
-  }
-
-  el.addEventListener("click", handler);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  safeClick("searchPlayerBtn", searchPlayer);
-  safeClick("addChipsBtn", addChips);
-  safeClick("loadPayoutsBtn", loadPayouts);
-
-  safeClick("setBalanceBtn", () => {
-    const newBalance = Number(document.getElementById("setBalanceAmount").value);
-    adminUpdatePlayer("set_balance", { newBalance });
-  });
-
-  safeClick("lockWalletBtn", () => {
-    adminUpdatePlayer("lock_wallet");
-  });
-
-  safeClick("unlockWalletBtn", () => {
-    adminUpdatePlayer("unlock_wallet");
-  });
-
-  safeClick("setStatusBtn", () => {
-    const status = document.getElementById("setStatusValue").value;
-    adminUpdatePlayer("set_status", { status });
-  });
-
-  safeClick("setVipBtn", () => {
-    const vipTier = document.getElementById("setVipValue").value;
-    adminUpdatePlayer("set_vip", { vipTier });
-  });
-});
-
   </script>
 </body>
 </html>
