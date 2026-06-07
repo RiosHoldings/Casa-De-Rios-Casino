@@ -1,0 +1,1074 @@
+/* =========================================================
+   CASINO CASA DE RÍOS — LUXURY THEME SYSTEM
+   Desktop + Mobile Portrait
+   Black / Purple / Gold / Royal Casino Style
+========================================================= */
+
+:root {
+  --casa-bg: #050308;
+  --casa-black: #08050d;
+  --casa-black-2: #100918;
+
+  --casa-purple: #2a0f3d;
+  --casa-purple-2: #4d1870;
+  --casa-purple-3: #7b2db4;
+
+  --casa-gold: #d4a64a;
+  --casa-gold-2: #f1d06a;
+  --casa-gold-dark: #8b641d;
+
+  --casa-bone: #efe5d0;
+  --casa-muted: #a99684;
+
+  --casa-good: #87e66f;
+  --casa-bad: #ff816f;
+  --casa-warn: #f1d06a;
+
+  --casa-line: rgba(212, 166, 74, .28);
+  --casa-line-strong: rgba(241, 208, 106, .55);
+
+  --casa-panel: rgba(8, 6, 12, .84);
+  --casa-panel-2: rgba(20, 10, 30, .78);
+  --casa-glass: rgba(0, 0, 0, .46);
+
+  --casa-shadow: 0 24px 70px rgba(0, 0, 0, .56);
+  --casa-glow: 0 0 28px rgba(122, 35, 174, .35);
+  --casa-gold-glow: 0 0 22px rgba(212, 166, 74, .30);
+
+  --font-title: "Cinzel", serif;
+  --font-ui: "Saira Condensed", sans-serif;
+  --font-mono: "Share Tech Mono", monospace;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--casa-bg);
+  color: var(--casa-bone);
+  font-family: var(--font-mono);
+}
+
+body {
+  overflow-x: hidden;
+  background:
+    radial-gradient(900px 480px at 50% -12%, rgba(122, 35, 174, .34), transparent 62%),
+    radial-gradient(700px 500px at 10% 105%, rgba(212, 166, 74, .12), transparent 60%),
+    radial-gradient(700px 500px at 90% 105%, rgba(122, 35, 174, .12), transparent 60%),
+    linear-gradient(180deg, #09040e, #030205 75%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 38px 38px;
+  mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent 80%);
+  z-index: 0;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* =========================================================
+   PAGE SHELL
+========================================================= */
+
+.casa-shell,
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr) 310px;
+  gap: 16px;
+  padding: 10px;
+}
+
+.casa-main,
+.main,
+.casa-rail,
+.rail,
+.casa-rightbar,
+.rightbar {
+  min-width: 0;
+}
+
+/* =========================================================
+   LEFT RAIL / SIDEBAR
+========================================================= */
+
+.casa-rail,
+.rail {
+  border: 1px solid var(--casa-line);
+  background:
+    linear-gradient(180deg, rgba(13,8,18,.96), rgba(5,3,8,.96)),
+    radial-gradient(circle at 50% 0%, rgba(95, 29, 138, .25), transparent 55%);
+  box-shadow: var(--casa-shadow);
+  overflow: hidden;
+  position: sticky;
+  top: 10px;
+  height: calc(100vh - 20px);
+  display: flex;
+  flex-direction: column;
+}
+
+.casa-crest-block,
+.crest-block {
+  padding: 20px 14px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(212,166,74,.18);
+  background:
+    radial-gradient(circle at 50% 30%, rgba(122,35,174,.24), transparent 55%),
+    rgba(0,0,0,.25);
+}
+
+.casa-logo,
+.logo {
+  width: 116px;
+  height: 116px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(212,166,74,.45));
+  margin-bottom: 8px;
+}
+
+.casa-brand-name,
+.brand-name {
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  font-size: 25px;
+  line-height: .96;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-shadow: var(--casa-gold-glow);
+}
+
+.casa-tagline,
+.tagline {
+  margin-top: 8px;
+  color: var(--casa-muted);
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-size: 11px;
+}
+
+.casa-nav,
+.nav {
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.casa-nav a,
+.nav a {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid transparent;
+  color: var(--casa-bone);
+  padding: 11px 12px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.casa-nav a.active,
+.nav a.active,
+.casa-nav a:hover,
+.nav a:hover {
+  border-color: rgba(212,166,74,.25);
+  background:
+    linear-gradient(90deg, rgba(95,29,138,.55), rgba(0,0,0,.1));
+  color: var(--casa-gold-2);
+  box-shadow: inset 3px 0 0 rgba(212,166,74,.75);
+}
+
+.casa-nav .disabled,
+.nav .disabled {
+  opacity: .48;
+  pointer-events: none;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.casa-main,
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.casa-topbar,
+.topbar {
+  min-height: 88px;
+  border: 1px solid var(--casa-line);
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.70), rgba(10,5,15,.76)),
+    radial-gradient(circle at 50% 0%, rgba(122,35,174,.28), transparent 60%);
+  box-shadow: var(--casa-shadow);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.casa-top-left,
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.casa-tiny-logo,
+.tiny-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(212,166,74,.45));
+}
+
+.casa-top-title,
+.top-title {
+  min-width: 0;
+}
+
+.casa-top-title strong,
+.top-title strong {
+  display: block;
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 20px;
+}
+
+.casa-top-title span,
+.top-title span {
+  display: block;
+  color: var(--casa-muted);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* =========================================================
+   WALLET / STATUS
+========================================================= */
+
+.casa-wallet-pill,
+.wallet-pill {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  border: 1px solid rgba(212,166,74,.3);
+  background: rgba(0,0,0,.48);
+  padding: 10px 14px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.casa-wallet-stat,
+.wallet-stat {
+  display: grid;
+  gap: 3px;
+}
+
+.casa-wallet-stat small,
+.wallet-stat small {
+  color: var(--casa-muted);
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-size: 10px;
+}
+
+.casa-wallet-stat b,
+.wallet-stat b {
+  color: var(--casa-gold-2);
+  font-family: var(--font-title);
+  font-size: 24px;
+  letter-spacing: .05em;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.casa-hero,
+.hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--casa-line);
+  min-height: 340px;
+  padding: 34px 24px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.76)),
+    radial-gradient(circle at 50% 0%, rgba(122,35,174,.38), transparent 44%),
+    linear-gradient(135deg, rgba(212,166,74,.08), transparent 25%, rgba(122,35,174,.15));
+  box-shadow: var(--casa-shadow);
+}
+
+/* Add this image later:
+   background-image: linear-gradient(...), url("./images/lobby-bg.webp");
+*/
+
+.casa-hero::before,
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 28%, rgba(241,208,106,.11), transparent 18%),
+    radial-gradient(circle at 78% 24%, rgba(241,208,106,.09), transparent 20%),
+    linear-gradient(90deg, transparent, rgba(255,255,255,.035), transparent);
+  pointer-events: none;
+}
+
+.casa-hero-inner,
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.casa-kicker,
+.hero-kicker {
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  text-transform: uppercase;
+  letter-spacing: .34em;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.casa-hero h1,
+.hero h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  font-size: clamp(44px, 7vw, 86px);
+  line-height: .92;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 20px rgba(212,166,74,.28),
+    0 8px 30px rgba(0,0,0,.85);
+}
+
+.casa-motto,
+.hero-motto {
+  margin-top: 20px;
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  text-transform: uppercase;
+  letter-spacing: .28em;
+  font-size: 18px;
+}
+
+.casa-copy,
+.hero-copy {
+  margin: 18px auto 0;
+  color: var(--casa-bone);
+  max-width: 640px;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* =========================================================
+   PANELS / CARDS
+========================================================= */
+
+.casa-panel,
+.side-panel,
+.quick-box {
+  border: 1px solid var(--casa-line);
+  background:
+    linear-gradient(180deg, rgba(12,7,17,.88), rgba(5,3,8,.92));
+  box-shadow: var(--casa-shadow);
+  padding: 14px;
+}
+
+.casa-panel-title,
+.panel-title,
+.quick-box-title {
+  color: var(--casa-gold-2);
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-size: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.casa-section-title,
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--casa-gold-2);
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-size: 20px;
+  justify-content: center;
+  margin: 4px 0 0;
+}
+
+.casa-section-title::before,
+.casa-section-title::after,
+.section-title::before,
+.section-title::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  max-width: 280px;
+  background: linear-gradient(90deg, transparent, rgba(212,166,74,.55), transparent);
+}
+
+/* =========================================================
+   NOTICE STRIP
+========================================================= */
+
+.casa-notice-strip,
+.notice-strip {
+  margin: 24px auto 0;
+  max-width: 880px;
+  border: 1px solid rgba(212,166,74,.32);
+  background: rgba(0,0,0,.48);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.casa-notice-item,
+.notice-item {
+  padding: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  border-right: 1px solid rgba(212,166,74,.16);
+}
+
+.casa-notice-item:last-child,
+.notice-item:last-child {
+  border-right: 0;
+}
+
+.casa-notice-icon,
+.notice-icon {
+  color: var(--casa-gold-2);
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.casa-notice-item b,
+.notice-item b {
+  display: block;
+  color: var(--casa-gold-2);
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  font-family: var(--font-ui);
+  font-size: 18px;
+}
+
+.casa-notice-item span,
+.notice-item span {
+  color: var(--casa-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   GAME CARDS
+========================================================= */
+
+.casa-games,
+.games {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.casa-game-card,
+.game-card {
+  min-height: 330px;
+  border: 1px solid rgba(212,166,74,.32);
+  background:
+    linear-gradient(180deg, rgba(40,14,60,.58), rgba(0,0,0,.80)),
+    radial-gradient(circle at 50% 0%, rgba(212,166,74,.13), transparent 45%);
+  box-shadow: 0 18px 50px rgba(0,0,0,.45);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.casa-game-card::before,
+.game-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(241,208,106,.15), transparent 18%),
+    linear-gradient(135deg, rgba(255,255,255,.05), transparent 30%);
+  opacity: .85;
+  z-index: -1;
+}
+
+.casa-game-card:hover,
+.game-card:hover {
+  border-color: rgba(241,208,106,.75);
+  box-shadow:
+    0 22px 60px rgba(0,0,0,.55),
+    0 0 24px rgba(122,35,174,.28);
+  transform: translateY(-2px);
+}
+
+.casa-game-title,
+.game-title {
+  font-family: var(--font-title);
+  color: var(--casa-gold-2);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 28px;
+  text-align: center;
+  margin: 2px 0 12px;
+  line-height: 1;
+}
+
+.casa-game-art,
+.game-art {
+  flex: 1;
+  min-height: 150px;
+  border: 1px solid rgba(212,166,74,.13);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,.1), rgba(0,0,0,.8) 75%);
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.casa-game-art img,
+.game-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .88;
+}
+
+.big-icon {
+  font-size: 78px;
+  filter: drop-shadow(0 0 18px rgba(212,166,74,.25));
+}
+
+.casa-game-copy,
+.game-copy {
+  color: var(--casa-bone);
+  text-align: center;
+  line-height: 1.5;
+  font-size: 13px;
+  min-height: 42px;
+  margin-bottom: 12px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.casa-btn,
+.enter-btn,
+.quick-actions a,
+.quick-box a {
+  display: block;
+  border: 1px solid rgba(212,166,74,.42);
+  background: linear-gradient(180deg, rgba(72,25,101,.9), rgba(25,9,35,.95));
+  color: var(--casa-gold-2);
+  padding: 11px 12px;
+  text-align: center;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-family: var(--font-ui);
+  font-weight: 900;
+  font-size: 17px;
+}
+
+.casa-btn:hover,
+.enter-btn:hover,
+.quick-actions a:hover,
+.quick-box a:hover {
+  border-color: var(--casa-line-strong);
+  box-shadow: var(--casa-gold-glow);
+}
+
+.casa-btn.gold,
+.enter-btn.gold {
+  background: linear-gradient(180deg, #d7b456, #916719);
+  color: #130814;
+}
+
+.casa-btn.disabled,
+.enter-btn.disabled {
+  opacity: .55;
+  pointer-events: none;
+}
+
+/* =========================================================
+   RIGHTBAR
+========================================================= */
+
+.casa-rightbar,
+.rightbar {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  position: sticky;
+  top: 10px;
+  height: calc(100vh - 20px);
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.profile-row,
+.leader-row,
+.announce {
+  border-top: 1px solid rgba(212,166,74,.13);
+  padding: 10px 0;
+  line-height: 1.5;
+}
+
+.profile-row:first-of-type,
+.leader-row:first-of-type,
+.announce:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.profile-row span:first-child {
+  color: var(--casa-muted);
+}
+
+.profile-row b,
+.leader-row b {
+  color: var(--casa-gold-2);
+  font-weight: 400;
+}
+
+.announce {
+  color: var(--casa-bone);
+  font-size: 13px;
+}
+
+.announce::before {
+  content: "•";
+  color: var(--casa-purple-3);
+  margin-right: 8px;
+}
+
+.quick-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.status-good {
+  color: var(--casa-good) !important;
+}
+
+.status-bad {
+  color: var(--casa-bad) !important;
+}
+
+/* =========================================================
+   FORMS
+========================================================= */
+
+.form-grid {
+  display: grid;
+  gap: 9px;
+}
+
+label {
+  display: block;
+  color: var(--casa-muted);
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid rgba(212, 166, 74, .25);
+  background: rgba(0,0,0,.55);
+  color: var(--casa-bone);
+  border-radius: 10px;
+  padding: 11px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(241, 208, 106, .65);
+  box-shadow: 0 0 0 3px rgba(212,166,74,.08);
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.message,
+.casa-message {
+  color: var(--casa-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.casa-footer,
+.footer {
+  border: 1px solid var(--casa-line);
+  background: rgba(0,0,0,.48);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  color: var(--casa-muted);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-size: 12px;
+}
+
+.casa-footer img,
+.footer .mark {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(212,166,74,.45));
+}
+
+/* =========================================================
+   TABLE / GAME PAGE HELPERS
+========================================================= */
+
+.casa-game-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 12px 10px 36px;
+}
+
+.casa-game-panel {
+  border: 1px solid var(--casa-line);
+  background:
+    linear-gradient(180deg, rgba(12,7,17,.88), rgba(5,3,8,.96));
+  box-shadow: var(--casa-shadow);
+  overflow: hidden;
+}
+
+.casa-game-header {
+  border-bottom: 1px solid rgba(212,166,74,.18);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  background: rgba(0,0,0,.28);
+}
+
+.casa-game-header-title {
+  color: var(--casa-gold-2);
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  font-size: 20px;
+}
+
+.casa-control-panel {
+  border: 1px solid var(--casa-line);
+  background: rgba(0,0,0,.68);
+  padding: 14px;
+  box-shadow: var(--casa-shadow);
+}
+
+/* =========================================================
+   DESKTOP TABLET
+========================================================= */
+
+@media (max-width: 1100px) {
+  .casa-shell,
+  .page {
+    grid-template-columns: 220px minmax(0,1fr);
+  }
+
+  .casa-rightbar,
+  .rightbar {
+    grid-column: 1 / -1;
+    position: static;
+    height: auto;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .casa-games,
+  .games {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* =========================================================
+   MOBILE PORTRAIT
+========================================================= */
+
+@media (max-width: 760px) {
+  .casa-shell,
+  .page {
+    display: block;
+    padding: 0;
+  }
+
+  .casa-rail,
+  .rail,
+  .casa-rightbar,
+  .rightbar {
+    position: static;
+    height: auto;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .casa-rail,
+  .rail {
+    border-top: 0;
+  }
+
+  .casa-crest-block,
+  .crest-block {
+    padding: 16px 12px 10px;
+  }
+
+  .casa-logo,
+  .logo {
+    width: 86px;
+    height: 86px;
+  }
+
+  .casa-brand-name,
+  .brand-name {
+    font-size: 22px;
+  }
+
+  .casa-tagline,
+  .tagline {
+    font-size: 10px;
+  }
+
+  .casa-nav,
+  .nav {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 10px;
+  }
+
+  .casa-nav a,
+  .nav a {
+    justify-content: center;
+    font-size: 15px;
+    padding: 10px 8px;
+  }
+
+  .quick-box {
+    margin: 10px;
+  }
+
+  .casa-main,
+  .main {
+    gap: 10px;
+  }
+
+  .casa-topbar,
+  .topbar {
+    border-left: 0;
+    border-right: 0;
+    grid-template-columns: 1fr;
+    border-radius: 0;
+  }
+
+  .casa-wallet-pill,
+  .wallet-pill {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    white-space: normal;
+  }
+
+  .casa-wallet-stat b,
+  .wallet-stat b {
+    font-size: 18px;
+  }
+
+  .casa-wallet-stat small,
+  .wallet-stat small {
+    font-size: 9px;
+  }
+
+  .casa-hero,
+  .hero {
+    border-left: 0;
+    border-right: 0;
+    padding: 30px 14px;
+    min-height: 330px;
+  }
+
+  .casa-kicker,
+  .hero-kicker {
+    font-size: 13px;
+    letter-spacing: .24em;
+  }
+
+  .casa-hero h1,
+  .hero h1 {
+    font-size: clamp(42px, 13vw, 68px);
+  }
+
+  .casa-motto,
+  .hero-motto {
+    font-size: 14px;
+    letter-spacing: .20em;
+  }
+
+  .casa-copy,
+  .hero-copy {
+    font-size: 14px;
+  }
+
+  .casa-notice-strip,
+  .notice-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .casa-notice-item,
+  .notice-item {
+    border-right: 0;
+    border-bottom: 1px solid rgba(212,166,74,.16);
+  }
+
+  .casa-notice-item:last-child,
+  .notice-item:last-child {
+    border-bottom: 0;
+  }
+
+  .casa-section-title,
+  .section-title {
+    padding: 0 12px;
+    font-size: 17px;
+  }
+
+  .casa-games,
+  .games {
+    grid-template-columns: 1fr;
+    padding: 0 10px;
+  }
+
+  .casa-game-card,
+  .game-card {
+    min-height: 300px;
+  }
+
+  .casa-game-title,
+  .game-title {
+    font-size: 26px;
+  }
+
+  .casa-game-art,
+  .game-art {
+    min-height: 165px;
+  }
+
+  .casa-rightbar,
+  .rightbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .casa-panel,
+  .side-panel {
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .casa-footer,
+  .footer {
+    grid-template-columns: 1fr;
+    text-align: center;
+    justify-items: center;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+}
