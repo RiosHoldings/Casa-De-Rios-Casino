@@ -143,7 +143,7 @@ body {
 }
 
 .chip-zone.selected {
-  box-shadow: 0 0 0 3px rgba(255, 207, 72, 0.75), 0 0 18px rgba(255, 190, 44, 0.95);
+  box-shadow:transparent;
 }
 
 .c50 { left: 15.5%; }
@@ -212,8 +212,8 @@ body {
 }
 
 .bet-selected {
-  background: rgba(255, 210, 70, 0.22) !important;
-  outline: 2px solid rgba(255, 210, 70, 0.85) !important;
+  background:transparent;
+  outline:none;
   box-shadow: 0 0 18px rgba(255, 190, 40, 0.9);
 }
 .live-panel {
