@@ -124,7 +124,7 @@ rouletteBall.style.opacity = '1';
 rouletteBall.style.transform = 'rotate(0deg) translateY(-70px)';
 
 setTimeout(() => {
-  visualBallRotation += 1800 + Math.floor(Math.random() * 360);
+  visualBallRotation += 1800 + pocketAngle);
   rouletteBall.style.transition = 'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
   rouletteBall.style.transform = `rotate(${visualBallRotation}deg) translateY(-70px)`;
 }, 30);
