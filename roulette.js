@@ -15,6 +15,8 @@ const totalBetText = document.getElementById('totalBetText');
 const lastWinText = document.getElementById('lastWinText');
 const lastColorText = document.getElementById('lastColorText');
 const toast = document.getElementById('toast');
+const rouletteBall = document.getElementById('rouletteBall');
+let visualBallRotation = 0;
 
 function money(value) {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -115,8 +117,16 @@ function spinRoulette() {
   if (spinning) return;
   if (!currentBet) return showToast('Place a bet first');
   if (balance < chip) return showToast('Not enough balance');
-
   spinning = true;
+  rouletteBall.style.transition = 'none';
+rouletteBall.style.opacity = '1';
+rouletteBall.style.transform = 'rotate(0deg) translateY(-92px)';
+
+setTimeout(() => {
+  visualBallRotation += 1800 + Math.floor(Math.random() * 360);
+  rouletteBall.style.transition = 'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
+  rouletteBall.style.transform = `rotate(${visualBallRotation}deg) translateY(-92px)`;
+}, 30);
   balance -= chip;
   updateMoney();
 
@@ -141,6 +151,7 @@ function spinRoulette() {
     lastWinText.textContent = winning;
     lastColorText.textContent = color.toUpperCase();
     updateMoney();
+    rouletteBall.style.opacity = '0';
     spinning = false;
     spinButton.disabled = false;
   }, 4200);
@@ -190,11 +201,3 @@ document.getElementById('rebetButton').addEventListener('click', rebet);
 updateMoney();
 showToast('Tap the table to place a bet');
 
-const rouletteBall = document.getElementById('rouletteBall');
-
-rouletteBall.style.opacity = '1';
-rouletteBall.style.transform = 'rotate(1440deg) translateY(-92px)';
-
-setTimeout(() => {
-  rouletteBall.style.opacity = '0';
-}, 4200);

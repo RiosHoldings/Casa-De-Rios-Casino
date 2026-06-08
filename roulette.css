@@ -266,18 +266,3 @@ body {
   width: 15.5% !important;
   height: 3.2% !important;
 }
-.roulette-ball {
-  position: absolute;
-  z-index: 60;
-  left: 50%;
-  top: 32%;
-  width: 11px;
-  height: 11px;
-  margin-left: -5.5px;
-  margin-top: -5.5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #ddd 55%, #777);
-  box-shadow: 0 0 7px rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.8);
-  opacity: 0;
-  pointer-events: none;
-}
