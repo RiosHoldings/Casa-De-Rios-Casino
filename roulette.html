@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Casa de Ríos Roulette</title>
+  <link rel="stylesheet" href="roulette.css" />
+</head>
+<body>
+  <main class="game-shell" aria-label="Casa de Ríos Roulette">
+    <img class="screen-art" src="assets/roulette-bg.png" alt="Casa de Ríos Roulette table" />
+
+    <section class="wheel-stage" aria-label="Roulette wheel">
+      <img id="wheel" class="wheel-img" src="assets/wheel.png" alt="Spinning roulette wheel" />
+      <div id="ball" class="ball" aria-hidden="true"></div>
+      <div class="wheel-shade" aria-hidden="true"></div>
+    </section>
+
+    <section class="live-panel balance-panel" aria-label="Balance">
+      <span>BALANCE</span>
+      <strong id="balanceText">$5,000.00</strong>
+    </section>
+
+    <section class="live-panel win-panel" aria-label="Last win">
+      <span>LAST WIN</span>
+      <strong id="lastWinText">—</strong>
+      <em id="lastColorText">PLACE BET</em>
+    </section>
+
+    <section class="live-panel total-panel" aria-label="Total bet">
+      <span>TOTAL BET</span>
+      <strong id="totalBetText">$100.00</strong>
+    </section>
+
+    <div class="board-hotspots" aria-label="Betting table">
+      <button class="zone z-zero" data-bet="number" data-value="0" aria-label="Bet 0"></button>
+      <button class="zone z-red" data-bet="color" data-value="red" aria-label="Bet red"></button>
+      <button class="zone z-black" data-bet="color" data-value="black" aria-label="Bet black"></button>
+      <button class="zone z-even" data-bet="oddEven" data-value="even" aria-label="Bet even"></button>
+      <button class="zone z-odd" data-bet="oddEven" data-value="odd" aria-label="Bet odd"></button>
+      <button class="zone z-low" data-bet="range" data-value="low" aria-label="Bet 1 to 18"></button>
+      <button class="zone z-high" data-bet="range" data-value="high" aria-label="Bet 19 to 36"></button>
+      <button class="zone z-d1" data-bet="dozen" data-value="1" aria-label="Bet first 12"></button>
+      <button class="zone z-d2" data-bet="dozen" data-value="2" aria-label="Bet second 12"></button>
+      <button class="zone z-d3" data-bet="dozen" data-value="3" aria-label="Bet third 12"></button>
+      <button class="zone z-numbers" data-bet="number-grid" aria-label="Bet a number"></button>
+    </div>
+
+    <div class="chip-hotspots" aria-label="Chip selection">
+      <button class="chip-zone c50" data-chip="50" aria-label="Select 50 chip"></button>
+      <button class="chip-zone c100 selected" data-chip="100" aria-label="Select 100 chip"></button>
+      <button class="chip-zone c250" data-chip="250" aria-label="Select 250 chip"></button>
+      <button class="chip-zone c500" data-chip="500" aria-label="Select 500 chip"></button>
+      <button class="chip-zone c1000" data-chip="1000" aria-label="Select 1000 chip"></button>
+    </div>
+
+    <button id="spinButton" class="spin-hotspot" aria-label="Spin roulette">SPIN</button>
+    <button id="clearButton" class="clear-hotspot" aria-label="Clear bet"></button>
+    <button id="doubleButton" class="double-hotspot" aria-label="Double bet"></button>
+    <button id="rebetButton" class="rebet-hotspot" aria-label="Rebet"></button>
+
+    <div id="toast" class="toast">Tap the table to place a bet.</div>
+  </main>
+
+  <script src="roulette.js"></script>
+</body>
+</html>
