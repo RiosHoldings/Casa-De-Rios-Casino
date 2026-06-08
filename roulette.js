@@ -208,7 +208,7 @@ function spinRoulette() {
 
     spinning = false;
     spinButton.disabled = false;
-  }
+  }, 4200);
 }
 
 function clearBet() {
