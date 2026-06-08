@@ -214,7 +214,7 @@ body {
 .bet-selected {
   background:transparent;
   outline:none;
-  box-shadow: 0 0 18px rgba(255, 190, 40, 0.9);
+  box-shadow:none;
 }
 .live-panel {
   position: absolute !important;
