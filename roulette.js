@@ -178,6 +178,10 @@ document.querySelectorAll('.zone').forEach(btn => {
   });
 });
 
+document.querySelectorAll('.chip-zone').forEach(btn => {
+  btn.addEventListener('click', () => setChip(Number(btn.dataset.chip)));
+});
+
 spinButton.addEventListener('click', spinRoulette);
 document.getElementById('clearButton').addEventListener('click', clearBet);
 document.getElementById('doubleButton').addEventListener('click', doubleBet);
