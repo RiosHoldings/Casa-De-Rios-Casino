@@ -232,15 +232,16 @@ body {
 .live-panel strong {
   display: block;
   color: #ffe29a;
-  font-size: 24px;
+  font-size: 17px;
   line-height: 1;
+  white-space: nowrap;
   text-shadow: 0 2px 2px #000;
 }
 
 .live-panel em {
   display: block;
   color: #ff4433;
-  font-size: 12px;
+  font-size: 9px;
   line-height: 1;
   font-style: normal;
 }
