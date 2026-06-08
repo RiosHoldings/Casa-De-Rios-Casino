@@ -162,57 +162,51 @@ body {
   box-shadow: 0 0 18px rgba(255, 190, 40, 0.9);
 }
 .live-panel {
-  position: absolute;
-  z-index: 10;
-  display: grid;
-  place-items: center;
-  text-align: center;
+  position: absolute !important;
+  z-index: 50 !important;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(24, 7, 4, 0.96), rgba(7, 2, 2, 0.96));
-  border: 1px solid rgba(230, 185, 70, 0.75);
-  border-radius: 9px;
-  box-shadow:
-    inset 0 0 10px rgba(255, 210, 90, 0.18),
-    0 4px 12px rgba(0, 0, 0, 0.55);
+  text-align: center;
+  background: rgba(8, 2, 1, 0.9);
+  border-radius: 4px;
 }
 
 .live-panel span {
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: #f4c95d;
+  display: none;
 }
 
 .live-panel strong {
-  font-size: 15px;
-  line-height: 1;
+  display: block;
   color: #ffe29a;
+  font-size: 16px;
+  line-height: 1;
+  text-shadow: 0 2px 2px #000;
 }
 
 .live-panel em {
-  font-size: 8px;
+  display: block;
+  color: #ff4433;
+  font-size: 9px;
+  line-height: 1;
   font-style: normal;
-  color: #ff4a34;
-  font-weight: 800;
 }
 
 .balance-panel {
-  left: 7%;
-  top: 40.5%;
-  width: 21%;
-  height: 5%;
+  left: 8.6% !important;
+  top: 44.1% !important;
+  width: 18.5% !important;
+  height: 2.1% !important;
 }
 
 .win-panel {
-  left: 39%;
-  top: 40.6%;
-  width: 22%;
-  height: 5.7%;
+  left: 43.5% !important;
+  top: 43.8% !important;
+  width: 13% !important;
+  height: 3.2% !important;
 }
 
 .total-panel {
-  right: 7%;
-  top: 40.5%;
-  width: 21%;
-  height: 5%;
+  right: 8.6% !important;
+  top: 44.1% !important;
+  width: 18.5% !important;
+  height: 2.1% !important;
 }
