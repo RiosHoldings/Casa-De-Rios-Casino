@@ -118,6 +118,7 @@ function spinRoulette() {
   if (!currentBet) return showToast('Place a bet first');
   if (balance < chip) return showToast('Not enough balance');
   spinning = true;
+  showToast(rouletteBall ? 'Ball found' : 'Ball missing');
   rouletteBall.style.transition = 'none';
 rouletteBall.style.opacity = '1';
 rouletteBall.style.transform = 'rotate(0deg) translateY(-92px)';
