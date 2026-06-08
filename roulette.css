@@ -316,3 +316,13 @@ body {
   font-size: 8px;
   font-weight: 900;
 }
+.lobby-hotspot {
+  position: absolute;
+  z-index: 80;
+  left: 2.8%;
+  top: 8.1%;
+  width: 9%;
+  height: 6%;
+  display: block;
+  background: transparent;
+}
