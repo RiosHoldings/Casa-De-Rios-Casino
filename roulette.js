@@ -178,7 +178,9 @@ function spinRoulette() {
   const winning = Math.floor(Math.random() * 37);
   const color = numberColor(winning);
   const pocketIndex = wheelOrder.indexOf(winning);
+  const wheelOffset = 0;
   const pocketAngle = pocketIndex * (360 / 37);
+const winning = 0;
 
   animateBall(pocketAngle);
 
@@ -206,7 +208,7 @@ function spinRoulette() {
     updateMoney();
     hideBall();
 
-    spinning = false;
+    spinning = fals in e;
     spinButton.disabled = false;
   }, 4200);
 }
