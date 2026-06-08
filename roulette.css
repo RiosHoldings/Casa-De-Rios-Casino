@@ -91,6 +91,12 @@ body {
 .z-30 { left: 72.9%; top: 50.2%; width: 5.9%; height: 4.1%; }
 .z-33 { left: 79.9%; top: 50.2%; width: 5.9%; height: 4.1%; }
 .z-36 { left: 86.9%; top: 50.2%; width: 5.9%; height: 4.1%; }
+.z-21 { margin-left: -8px; }
+.z-24 { margin-left: -10px; }
+.z-27 { margin-left: -12px; }
+.z-30 { margin-left: -14px; }
+.z-33 { margin-left: -16px; }
+.z-36 { margin-left: -18px; }
 
 .chip-zone {
   top: 79.7%;
