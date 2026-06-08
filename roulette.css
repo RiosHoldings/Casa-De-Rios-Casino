@@ -282,3 +282,25 @@ body {
   transition: transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease;
   pointer-events: none;
 }
+.chip-marker-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.bet-chip-marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 18%, #d7b44a 19% 45%, #5b0808 46% 100%);
+  border: 2px solid #f8d878;
+  box-shadow: 0 2px 7px rgba(0,0,0,.75);
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  color: #fff3bd;
+  font-size: 8px;
+  font-weight: 900;
+}

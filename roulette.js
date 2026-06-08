@@ -8,6 +8,7 @@ let previousBet = null;
 let spinning = false;
 let visualBallRotation = 0;
 
+const chipMarkerLayer = document.getElementById('chipMarkerLayer');
 const spinButton = document.getElementById('spinButton');
 const balanceText = document.getElementById('balanceText');
 const totalBetText = document.getElementById('totalBetText');
@@ -33,6 +34,28 @@ function showToast(message) {
 function updateMoney() {
   balanceText.textContent = money(balance);
   totalBetText.textContent = money(chip);
+}
+
+function showBetChip(zone) {
+  if (!chipMarkerLayer || !zone) return;
+
+  chipMarkerLayer.innerHTML = '';
+
+  const shell = document.querySelector('.game-shell');
+  const shellRect = shell.getBoundingClientRect();
+  const zoneRect = zone.getBoundingClientRect();
+
+  const x = zoneRect.left - shellRect.left + zoneRect.width / 2;
+  const y = zoneRect.top - shellRect.top + zoneRect.height / 2;
+
+  const marker = document.createElement('div');
+  marker.className = 'bet-chip-marker';
+  marker.textContent = chip >= 1000 ? '1K' : chip;
+
+  marker.style.left = `${x}px`;
+  marker.style.top = `${y}px`;
+
+  chipMarkerLayer.appendChild(marker);
 }
 
 function numberColor(number) {
@@ -73,6 +96,8 @@ function placeBet(type, value) {
   if (selectedZone) {
     selectedZone.classList.add('bet-selected');
   }
+
+  showBetChip(selectedZone);
 
   let label = parsed;
 
