@@ -92,13 +92,19 @@ function didWin(number, color) {
   if (type === 'oddEven') return value === 'odd' ? number % 2 === 1 : number % 2 === 0;
   if (type === 'range') return value === 'low' ? number >= 1 && number <= 18 : number >= 19 && number <= 36;
   if (type === 'dozen') return value === 1 ? number <= 12 : value === 2 ? number >= 13 && number <= 24 : number >= 25;
+  if (type === 'column') {
+  if (number === 0) return false;
+  if (value === 1) return number % 3 === 1;
+  if (value === 2) return number % 3 === 2;
+  if (value === 3) return number % 3 === 0;
+}
   return false;
 }
 
 function payoutMultiplier() {
   if (!currentBet) return 0;
   if (currentBet.type === 'number') return 36;
-  if (currentBet.type === 'dozen') return 3;
+  if (currentBet.type === 'dozen' || currentBet.type === 'column') return 3;
   return 2;
 }
 
