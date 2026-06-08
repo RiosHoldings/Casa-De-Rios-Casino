@@ -76,6 +76,18 @@ function placeBet(type, value) {
 
   let label = parsed;
 
+  if (type === 'color') {
+    label = String(parsed).toUpperCase();
+  }
+
+  if (type === 'oddEven') {
+    label = String(parsed).toUpperCase();
+  }
+
+  if (type === 'range') {
+    label = parsed === 'low' ? '1–18' : '19–36';
+  }
+
   if (type === 'dozen') {
     label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
   }
@@ -87,10 +99,9 @@ function placeBet(type, value) {
       'BOTTOM 2 TO 1';
   }
 
-  showToast(`Bet placed: ${String(label).toUpperCase()}`);
-
   lastWinText.textContent = '—';
   lastColorText.textContent = 'PLACE BET';
+  showToast(`Bet placed: ${String(label).toUpperCase()}`);
 }
 
 function didWin(number, color) {
@@ -115,4 +126,147 @@ function didWin(number, color) {
 
   if (type === 'dozen') {
     if (value === 1) return number >= 1 && number <= 12;
-    if (value
+    if (value === 2) return number >= 13 && number <= 24;
+    if (value === 3) return number >= 25 && number <= 36;
+  }
+
+  if (type === 'column') {
+    if (value === 1) return number % 3 === 1;
+    if (value === 2) return number % 3 === 2;
+    if (value === 3) return number % 3 === 0;
+  }
+
+  return false;
+}
+
+function payoutMultiplier() {
+  if (!currentBet) return 0;
+  if (currentBet.type === 'number') return 36;
+  if (currentBet.type === 'dozen') return 3;
+  if (currentBet.type === 'column') return 3;
+  return 2;
+}
+
+function animateBall(pocketAngle) {
+  if (!rouletteBall) return;
+
+  rouletteBall.style.transition = 'none';
+  rouletteBall.style.opacity = '1';
+  rouletteBall.style.transform = 'rotate(0deg) translateY(-70px)';
+
+  setTimeout(() => {
+    visualBallRotation += 1800 + pocketAngle;
+    rouletteBall.style.transition =
+      'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
+    rouletteBall.style.transform =
+      `rotate(${visualBallRotation}deg) translateY(-70px)`;
+  }, 30);
+}
+
+function hideBall() {
+  if (!rouletteBall) return;
+  rouletteBall.style.opacity = '0';
+}
+
+function spinRoulette() {
+  if (spinning) return;
+  if (!currentBet) return showToast('Place a bet first');
+  if (balance < chip) return showToast('Not enough balance');
+
+  spinning = true;
+
+  const winning = Math.floor(Math.random() * 37);
+  const color = numberColor(winning);
+  const pocketIndex = wheelOrder.indexOf(winning);
+  const pocketAngle = pocketIndex * (360 / 37);
+
+  animateBall(pocketAngle);
+
+  balance -= chip;
+  updateMoney();
+
+  lastWinText.textContent = '...';
+  lastColorText.textContent = 'SPINNING';
+  spinButton.disabled = true;
+
+  setTimeout(() => {
+    const won = didWin(winning, color);
+
+    if (won) {
+      const amount = chip * payoutMultiplier();
+      balance += amount;
+      showToast(`You won ${money(amount)}`);
+    } else {
+      showToast(`Landed on ${winning} ${color.toUpperCase()}`);
+    }
+
+    lastWinText.textContent = winning;
+    lastColorText.textContent = color.toUpperCase();
+
+    updateMoney();
+    hideBall();
+
+    spinning = false;
+    spinButton.disabled = false;
+  }, 4200);
+}
+
+function clearBet() {
+  currentBet = null;
+
+  document.querySelectorAll('.zone').forEach(btn => {
+    btn.classList.remove('bet-selected');
+  });
+
+  lastWinText.textContent = '—';
+  lastColorText.textContent = 'PLACE BET';
+  showToast('Bet cleared');
+}
+
+function doubleBet() {
+  chip = Math.min(chip * 2, 1000);
+  updateMoney();
+  showToast(`Bet doubled to ${money(chip)}`);
+}
+
+function rebet() {
+  if (!previousBet) return showToast('No previous bet');
+
+  currentBet = previousBet;
+
+  document.querySelectorAll('.zone').forEach(btn => {
+    btn.classList.remove('bet-selected');
+  });
+
+  const selectedZone = document.querySelector(
+    `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
+  );
+
+  if (selectedZone) {
+    selectedZone.classList.add('bet-selected');
+  }
+
+  lastWinText.textContent = '—';
+  lastColorText.textContent = 'PLACE BET';
+  showToast('Previous bet restored');
+}
+
+document.querySelectorAll('.zone').forEach(btn => {
+  btn.addEventListener('click', () => {
+    placeBet(btn.dataset.bet, btn.dataset.value);
+  });
+});
+
+document.querySelectorAll('.chip-zone').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setChip(Number(btn.dataset.chip));
+  });
+});
+
+spinButton.addEventListener('click', spinRoulette);
+document.getElementById('clearButton').addEventListener('click', clearBet);
+document.getElementById('doubleButton').addEventListener('click', doubleBet);
+document.getElementById('rebetButton').addEventListener('click', rebet);
+
+updateMoney();
+showToast('Tap the table to place a bet');
