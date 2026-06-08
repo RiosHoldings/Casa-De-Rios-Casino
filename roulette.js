@@ -9,8 +9,6 @@ let wheelRotation = 0;
 let ballRotation = 0;
 let spinning = false;
 
-const wheel = document.getElementById('wheel');
-const ball = document.getElementById('ball');
 const spinButton = document.getElementById('spinButton');
 const balanceText = document.getElementById('balanceText');
 const totalBetText = document.getElementById('totalBetText');
@@ -92,12 +90,6 @@ function spinRoulette() {
   const color = numberColor(winning);
   const pocketIndex = wheelOrder.indexOf(winning);
   const pocketAngle = pocketIndex * (360 / 37);
-
-  wheelRotation += 2520 + pocketAngle;
-  ballRotation -= 3960 + pocketAngle + 8;
-
-  wheel.style.transform = `rotate(${wheelRotation}deg)`;
-  ball.style.transform = `rotate(${ballRotation}deg) translateY(-39%)`;
 
   lastWinText.textContent = '...';
   lastColorText.textContent = 'SPINNING';
