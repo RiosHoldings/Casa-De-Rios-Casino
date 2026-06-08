@@ -180,7 +180,7 @@ function spinRoulette() {
   const pocketIndex = wheelOrder.indexOf(winning);
   const wheelOffset = 0;
   const pocketAngle = pocketIndex * (360 / 37);
-const winning = 0;
+  const winning = 0;
 
   animateBall(pocketAngle);
 
