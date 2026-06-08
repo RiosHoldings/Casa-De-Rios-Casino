@@ -147,7 +147,7 @@ function payoutMultiplier() {
   return 2;
 }
 
-function animateBall(pocketAngle) {
+function animateBall() {
   if (!rouletteBall) return;
 
   rouletteBall.style.transition = 'none';
@@ -155,7 +155,7 @@ function animateBall(pocketAngle) {
   rouletteBall.style.transform = 'rotate(0deg) translateY(-70px)';
 
   setTimeout(() => {
-    visualBallRotation += 1800 + pocketAngle;
+    visualBallRotation += 1800 + Math.floor(Math.random() * 360);
     rouletteBall.style.transition =
       'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
     rouletteBall.style.transform =
@@ -180,7 +180,7 @@ function spinRoulette() {
   const pocketIndex = wheelOrder.indexOf(winning);
   const pocketAngle = pocketIndex * (360 / 37);
 
-  animateBall(pocketAngle);
+  animateBall();
 
   balance -= chip;
   updateMoney();
