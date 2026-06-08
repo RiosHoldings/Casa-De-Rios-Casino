@@ -73,8 +73,11 @@ function placeBet(type, value) {
   }
 
   if (type === 'column') {
-    label = `${parsed} TO 1`;
-  }
+  label =
+    parsed === 3 ? 'TOP 2 TO 1' :
+    parsed === 2 ? 'MIDDLE 2 TO 1' :
+    'BOTTOM 2 TO 1';
+}
 
   showToast(`Bet placed: ${String(label).toUpperCase()}`);
 

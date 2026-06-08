@@ -76,9 +76,9 @@ body {
 .z-black { left: 51.1%; top: 70.9%; width: 13.4%; height: 3.3%; }
 .z-odd { left: 65.1%; top: 70.9%; width: 15.8%; height: 3.3%; }
 .z-high { left: 81.2%; top: 70.9%; width: 14.2%; height: 3.5%; }
-.z-col3 { left: 91.7%; top: 52.7%; width: 5.6%; height: 4.5%; }
-.z-col2 { left: 91.7%; top: 57.4%; width: 5.6%; height: 4.5%; }
-.z-col1 { left: 91.7%; top: 62.1%; width: 5.6%; height: 4.5%; }
+.z-col3 { left: 91.7%; top: 51.6%; width: 5.6%; height: 4.5%; }
+.z-col2 { left: 91.7%; top: 56.3%; width: 5.6%; height: 4.5%; }
+.z-col1 { left: 91.7%; top: 61.0%; width: 5.6%; height: 4.5%; }
 
 .chip-zone {
   top: 79.7%;
