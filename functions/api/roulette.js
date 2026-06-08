@@ -19,24 +19,91 @@ function spinNumber() {
 }
 
 function checkWin(betType, betValue, resultNumber, resultColor) {
-  if (betType === "red") return resultColor === "red";
-  if (betType === "black") return resultColor === "black";
-  if (betType === "odd") return resultNumber !== 0 && resultNumber % 2 === 1;
-  if (betType === "even") return resultNumber !== 0 && resultNumber % 2 === 0;
-  if (betType === "low") return resultNumber >= 1 && resultNumber <= 18;
-  if (betType === "high") return resultNumber >= 19 && resultNumber <= 36;
   if (betType === "number") return Number(betValue) === resultNumber;
+  if (betType === "color") return betValue === resultColor;
+
+  if (resultNumber === 0) return false;
+
+  if (betType === "oddEven") {
+    return betValue === "odd"
+      ? resultNumber % 2 === 1
+      : resultNumber % 2 === 0;
+  }
+
+  if (betType === "range") {
+    return betValue === "low"
+      ? resultNumber >= 1 && resultNumber <= 18
+      : resultNumber >= 19 && resultNumber <= 36;
+  }
+
+  if (betType === "dozen") {
+    const dozen = Number(betValue);
+    if (dozen === 1) return resultNumber >= 1 && resultNumber <= 12;
+    if (dozen === 2) return resultNumber >= 13 && resultNumber <= 24;
+    if (dozen === 3) return resultNumber >= 25 && resultNumber <= 36;
+  }
+
+  if (betType === "column") {
+    const column = Number(betValue);
+    if (column === 1) return resultNumber % 3 === 1;
+    if (column === 2) return resultNumber % 3 === 2;
+    if (column === 3) return resultNumber % 3 === 0;
+  }
+
   return false;
 }
 
 function payoutTotal(betType, betAmount, won) {
   if (!won) return 0;
 
-  if (betType === "number") {
-    return betAmount * 36;
-  }
+  if (betType === "number") return betAmount * 36;
+  if (betType === "dozen") return betAmount * 3;
+  if (betType === "column") return betAmount * 3;
 
   return betAmount * 2;
+}
+
+function validateBet(betType, betValue) {
+  const allowedTypes = ["number", "color", "oddEven", "range", "dozen", "column"];
+
+  if (!allowedTypes.includes(betType)) {
+    return "Invalid bet type.";
+  }
+
+  if (betType === "number") {
+    const n = Number(betValue);
+    if (!Number.isInteger(n) || n < 0 || n > 36) {
+      return "Number bet must be 0 through 36.";
+    }
+  }
+
+  if (betType === "color" && !["red", "black"].includes(betValue)) {
+    return "Color bet must be red or black.";
+  }
+
+  if (betType === "oddEven" && !["odd", "even"].includes(betValue)) {
+    return "Odd/even bet must be odd or even.";
+  }
+
+  if (betType === "range" && !["low", "high"].includes(betValue)) {
+    return "Range bet must be low or high.";
+  }
+
+  if (betType === "dozen") {
+    const dozen = Number(betValue);
+    if (![1, 2, 3].includes(dozen)) {
+      return "Dozen bet must be 1, 2, or 3.";
+    }
+  }
+
+  if (betType === "column") {
+    const column = Number(betValue);
+    if (![1, 2, 3].includes(column)) {
+      return "Column bet must be 1, 2, or 3.";
+    }
+  }
+
+  return null;
 }
 
 export async function onRequestPost(context) {
@@ -55,8 +122,6 @@ export async function onRequestPost(context) {
     const betValue = String(body.betValue || "").trim();
     const betAmount = Math.floor(Number(body.betAmount || 0));
 
-    const allowedTypes = ["red", "black", "odd", "even", "low", "high", "number"];
-
     if (!playerId || !playerId.startsWith("CDR-")) {
       return json({ ok: false, error: "Invalid Player ID." }, 400);
     }
@@ -65,8 +130,9 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Invalid Player Secret." }, 400);
     }
 
-    if (!allowedTypes.includes(betType)) {
-      return json({ ok: false, error: "Invalid bet type." }, 400);
+    const betError = validateBet(betType, betValue);
+    if (betError) {
+      return json({ ok: false, error: betError }, 400);
     }
 
     if (!Number.isFinite(betAmount) || betAmount <= 0) {
@@ -75,13 +141,6 @@ export async function onRequestPost(context) {
 
     if (betAmount > 50000) {
       return json({ ok: false, error: "Max roulette bet is 50,000." }, 400);
-    }
-
-    if (betType === "number") {
-      const n = Number(betValue);
-      if (!Number.isInteger(n) || n < 0 || n > 36) {
-        return json({ ok: false, error: "Number bet must be 0 through 36." }, 400);
-      }
     }
 
     const player = await db.prepare(`
@@ -96,6 +155,10 @@ export async function onRequestPost(context) {
 
     if (player.player_secret !== playerSecret) {
       return json({ ok: false, error: "Player Secret mismatch." }, 401);
+    }
+
+    if (player.status && player.status !== "active") {
+      return json({ ok: false, error: "Player account is not active." }, 403);
     }
 
     const wallet = await db.prepare(`
@@ -195,7 +258,7 @@ export async function onRequestPost(context) {
       playerId,
       netChange,
       finalWallet.chips,
-      `Bet ${betAmount} on ${betType}${betType === "number" ? " " + betValue : ""}. Result ${resultNumber} ${resultColor}.`
+      `Bet ${betAmount} on ${betType} ${betValue}. Result ${resultNumber} ${resultColor}.`
     ).run();
 
     return json({
@@ -204,6 +267,8 @@ export async function onRequestPost(context) {
       resultNumber,
       resultColor,
       won,
+      betType,
+      betValue,
       betAmount,
       payout,
       netChange,
