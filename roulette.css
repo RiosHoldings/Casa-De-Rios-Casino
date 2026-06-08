@@ -114,6 +114,25 @@ body {
 .z-29 { margin-left: -14px; }
 .z-32 { margin-left: -16px; }
 .z-35 { margin-left: -18px; }
+/* Third row: 1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34 */
+.z-1  { left: 9.9%;  top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-4  { left: 16.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-7  { left: 23.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-10 { left: 30.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-13 { left: 37.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-16 { left: 44.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-19 { left: 51.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-22 { left: 58.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-25 { left: 65.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-28 { left: 72.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-31 { left: 79.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-34 { left: 86.9%; top: 59.4%; width: 5.9%; height: 4.1%; }
+.z-19 { margin-left: -8px; }
+.z-22 { margin-left: -10px; }
+.z-25 { margin-left: -12px; }
+.z-28 { margin-left: -14px; }
+.z-31 { margin-left: -16px; }
+.z-34 { margin-left: -18px; }
 
 .chip-zone {
   top: 79.7%;
