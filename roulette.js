@@ -1,5 +1,4 @@
 const redNumbers = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
-const wheelOrder = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
 
 let balance = 5000;
 let chip = 100;
@@ -18,13 +17,21 @@ const toast = document.getElementById('toast');
 const rouletteBall = document.getElementById('rouletteBall');
 
 function money(value) {
-  return `$${value.toLocaleString(undefined, {
+  return `$${Number(value || 0).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`;
 }
 
+function getPlayerCredentials() {
+  return {
+    playerId: localStorage.getItem('casa_rios_player_id'),
+    playerSecret: localStorage.getItem('casa_rios_player_secret')
+  };
+}
+
 function showToast(message) {
+  if (!toast) return;
   toast.textContent = message;
   toast.classList.add('show');
   clearTimeout(showToast.timer);
@@ -32,8 +39,45 @@ function showToast(message) {
 }
 
 function updateMoney() {
-  balanceText.textContent = money(balance);
-  totalBetText.textContent = money(chip);
+  if (balanceText) balanceText.textContent = money(balance);
+  if (totalBetText) totalBetText.textContent = money(chip);
+}
+
+async function loadWalletBalance() {
+  const { playerId, playerSecret } = getPlayerCredentials();
+
+  if (!playerId || !playerSecret) {
+    showToast('Player login missing');
+    updateMoney();
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/wallet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, playerSecret })
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      showToast(data.error || 'Wallet unavailable');
+      updateMoney();
+      return;
+    }
+
+    balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance);
+    updateMoney();
+  } catch (error) {
+    showToast('Wallet connection error');
+    updateMoney();
+  }
+}
+
+function numberColor(number) {
+  if (number === 0) return 'green';
+  return redNumbers.has(number) ? 'red' : 'black';
 }
 
 function showBetChip(zone) {
@@ -56,11 +100,6 @@ function showBetChip(zone) {
   marker.style.top = `${y}px`;
 
   chipMarkerLayer.appendChild(marker);
-}
-
-function numberColor(number) {
-  if (number === 0) return 'green';
-  return redNumbers.has(number) ? 'red' : 'black';
 }
 
 function setChip(amount) {
@@ -101,21 +140,10 @@ function placeBet(type, value) {
 
   let label = parsed;
 
-  if (type === 'color') {
-    label = String(parsed).toUpperCase();
-  }
-
-  if (type === 'oddEven') {
-    label = String(parsed).toUpperCase();
-  }
-
-  if (type === 'range') {
-    label = parsed === 'low' ? '1–18' : '19–36';
-  }
-
-  if (type === 'dozen') {
-    label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
-  }
+  if (type === 'color') label = String(parsed).toUpperCase();
+  if (type === 'oddEven') label = String(parsed).toUpperCase();
+  if (type === 'range') label = parsed === 'low' ? '1–18' : '19–36';
+  if (type === 'dozen') label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
 
   if (type === 'column') {
     label =
@@ -124,52 +152,10 @@ function placeBet(type, value) {
       'BOTTOM 2 TO 1';
   }
 
-  lastWinText.textContent = '—';
-  lastColorText.textContent = 'PLACE BET';
+  if (lastWinText) lastWinText.textContent = '—';
+  if (lastColorText) lastColorText.textContent = 'PLACE BET';
+
   showToast(`Bet placed: ${String(label).toUpperCase()}`);
-}
-
-function didWin(number, color) {
-  if (!currentBet) return false;
-
-  const { type, value } = currentBet;
-
-  if (type === 'number') return number === value;
-  if (type === 'color') return color === value;
-
-  if (number === 0) return false;
-
-  if (type === 'oddEven') {
-    return value === 'odd' ? number % 2 === 1 : number % 2 === 0;
-  }
-
-  if (type === 'range') {
-    return value === 'low'
-      ? number >= 1 && number <= 18
-      : number >= 19 && number <= 36;
-  }
-
-  if (type === 'dozen') {
-    if (value === 1) return number >= 1 && number <= 12;
-    if (value === 2) return number >= 13 && number <= 24;
-    if (value === 3) return number >= 25 && number <= 36;
-  }
-
-  if (type === 'column') {
-    if (value === 1) return number % 3 === 1;
-    if (value === 2) return number % 3 === 2;
-    if (value === 3) return number % 3 === 0;
-  }
-
-  return false;
-}
-
-function payoutMultiplier() {
-  if (!currentBet) return 0;
-  if (currentBet.type === 'number') return 36;
-  if (currentBet.type === 'dozen') return 3;
-  if (currentBet.type === 'column') return 3;
-  return 2;
 }
 
 function animateBall() {
@@ -179,8 +165,10 @@ function animateBall() {
   rouletteBall.style.opacity = '1';
   rouletteBall.style.transform = 'rotate(0deg) translateY(-70px)';
 
+  rouletteBall.offsetHeight;
+
   setTimeout(() => {
-    visualBallRotation += 1800 + Math.floor(Math.random() * 360);
+    visualBallRotation = 1800 + Math.floor(Math.random() * 360);
     rouletteBall.style.transition =
       'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
     rouletteBall.style.transform =
@@ -193,47 +181,75 @@ function hideBall() {
   rouletteBall.style.opacity = '0';
 }
 
-function spinRoulette() {
+async function spinRoulette() {
   if (spinning) return;
   if (!currentBet) return showToast('Place a bet first');
-  if (balance < chip) return showToast('Not enough balance');
+
+  const { playerId, playerSecret } = getPlayerCredentials();
+
+  if (!playerId || !playerSecret) {
+    return showToast('Player login missing');
+  }
+
+  if (balance < chip) {
+    return showToast('Not enough balance');
+  }
 
   spinning = true;
-
-  const winning = Math.floor(Math.random() * 37);
-  const color = numberColor(winning);
-  const pocketIndex = wheelOrder.indexOf(winning);
-  const pocketAngle = pocketIndex * (360 / 37);
+  spinButton.disabled = true;
 
   animateBall();
 
-  balance -= chip;
-  updateMoney();
+  if (lastWinText) lastWinText.textContent = '...';
+  if (lastColorText) lastColorText.textContent = 'SPINNING';
 
-  lastWinText.textContent = '...';
-  lastColorText.textContent = 'SPINNING';
-  spinButton.disabled = true;
+  try {
+    const response = await fetch('/api/roulette', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerId,
+        playerSecret,
+        betType: currentBet.type,
+        betValue: String(currentBet.value),
+        betAmount: chip
+      })
+    });
 
-  setTimeout(() => {
-    const won = didWin(winning, color);
+    const data = await response.json();
 
-    if (won) {
-      const amount = chip * payoutMultiplier();
-      balance += amount;
-      showToast(`You won ${money(amount)}`);
-    } else {
-      showToast(`Landed on ${winning} ${color.toUpperCase()}`);
+    if (!data.ok) {
+      showToast(data.error || 'Roulette failed');
+      hideBall();
+      spinning = false;
+      spinButton.disabled = false;
+      return;
     }
 
-    lastWinText.textContent = winning;
-    lastColorText.textContent = color.toUpperCase();
+    setTimeout(() => {
+      balance = Number(data.balanceAfter);
 
-    updateMoney();
+      if (lastWinText) lastWinText.textContent = data.resultNumber;
+      if (lastColorText) lastColorText.textContent = String(data.resultColor).toUpperCase();
+
+      updateMoney();
+      hideBall();
+
+      if (data.won) {
+        showToast(`You won ${money(data.payout)}`);
+      } else {
+        showToast(`Landed on ${data.resultNumber} ${String(data.resultColor).toUpperCase()}`);
+      }
+
+      spinning = false;
+      spinButton.disabled = false;
+    }, 4200);
+  } catch (error) {
+    showToast('Connection error');
     hideBall();
-
     spinning = false;
     spinButton.disabled = false;
-  }, 4200);
+  }
 }
 
 function clearBet() {
@@ -243,8 +259,11 @@ function clearBet() {
     btn.classList.remove('bet-selected');
   });
 
-  lastWinText.textContent = '—';
-  lastColorText.textContent = 'PLACE BET';
+  if (chipMarkerLayer) chipMarkerLayer.innerHTML = '';
+
+  if (lastWinText) lastWinText.textContent = '—';
+  if (lastColorText) lastColorText.textContent = 'PLACE BET';
+
   showToast('Bet cleared');
 }
 
@@ -269,10 +288,12 @@ function rebet() {
 
   if (selectedZone) {
     selectedZone.classList.add('bet-selected');
+    showBetChip(selectedZone);
   }
 
-  lastWinText.textContent = '—';
-  lastColorText.textContent = 'PLACE BET';
+  if (lastWinText) lastWinText.textContent = '—';
+  if (lastColorText) lastColorText.textContent = 'PLACE BET';
+
   showToast('Previous bet restored');
 }
 
@@ -288,10 +309,11 @@ document.querySelectorAll('.chip-zone').forEach(btn => {
   });
 });
 
-spinButton.addEventListener('click', spinRoulette);
-document.getElementById('clearButton').addEventListener('click', clearBet);
-document.getElementById('doubleButton').addEventListener('click', doubleBet);
-document.getElementById('rebetButton').addEventListener('click', rebet);
+if (spinButton) spinButton.addEventListener('click', spinRoulette);
+document.getElementById('clearButton')?.addEventListener('click', clearBet);
+document.getElementById('doubleButton')?.addEventListener('click', doubleBet);
+document.getElementById('rebetButton')?.addEventListener('click', rebet);
 
 updateMoney();
+loadWalletBalance();
 showToast('Tap the table to place a bet');
