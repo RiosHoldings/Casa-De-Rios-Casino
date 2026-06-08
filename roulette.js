@@ -189,3 +189,12 @@ document.getElementById('rebetButton').addEventListener('click', rebet);
 
 updateMoney();
 showToast('Tap the table to place a bet');
+
+const rouletteBall = document.getElementById('rouletteBall');
+
+rouletteBall.style.opacity = '1';
+rouletteBall.style.transform = 'rotate(1440deg) translateY(-92px)';
+
+setTimeout(() => {
+  rouletteBall.style.opacity = '0';
+}, 4200);

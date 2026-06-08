@@ -270,16 +270,14 @@ body {
   position: absolute;
   z-index: 60;
   left: 50%;
-  top: 27.5%;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  margin-top: -6px;
+  top: 32%;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  margin-top: -5.5px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffffff, #d9d9d9 55%, #777);
-  box-shadow: 0 0 8px rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.8);
-  transform: rotate(0deg) translateY(-105px);
-  transform-origin: center center;
-  transition: transform 3.8s cubic-bezier(.12,.75,.18,1);
+  background: radial-gradient(circle at 35% 30%, #fff, #ddd 55%, #777);
+  box-shadow: 0 0 7px rgba(255,255,255,.9), 0 2px 5px rgba(0,0,0,.8);
+  opacity: 0;
   pointer-events: none;
 }
