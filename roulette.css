@@ -108,6 +108,12 @@ body {
 .z-29 { left: 72.9%; top: 54.5%; width: 5.9%; height: 4.1%; }
 .z-32 { left: 79.9%; top: 54.5%; width: 5.9%; height: 4.1%; }
 .z-35 { left: 86.9%; top: 54.5%; width: 5.9%; height: 4.1%; }
+.z-20 { margin-left: -8px; }
+.z-23 { margin-left: -10px; }
+.z-26 { margin-left: -12px; }
+.z-29 { margin-left: -14px; }
+.z-32 { margin-left: -16px; }
+.z-35 { margin-left: -18px; }
 
 .chip-zone {
   top: 79.7%;
