@@ -270,3 +270,7 @@ document.getElementById('rebetButton').addEventListener('click', rebet);
 
 updateMoney();
 showToast('Tap the table to place a bet');
+
+hideBall();
+spinning = false;
+spinButton.disabled = false;
