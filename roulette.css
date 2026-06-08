@@ -65,17 +65,17 @@ body {
   outline: 1px solid rgba(255, 210, 70, 0.5);
 }
 
-.z-zero { left: 3.5%; top: 53.3%; width: 8%; height: 13.8%; }
+.z-zero { left: 3.8%; top: 49.8%; width: 4.8%; height: 15.2%; }
 .z-numbers { left: 11%; top: 53.1%; width: 85%; height: 13.8%; }
-.z-d1 { left: 10.5%; top: 67.1%; width: 28%; height: 4.2%; }
-.z-d2 { left: 38.8%; top: 67.1%; width: 28%; height: 4.2%; }
-.z-d3 { left: 67%; top: 67.1%; width: 28%; height: 4.2%; }
-.z-low { left: 8%; top: 71.7%; width: 14%; height: 4.7%; }
-.z-even { left: 22.4%; top: 71.7%; width: 15%; height: 4.7%; }
-.z-red { left: 37.8%; top: 71.7%; width: 14%; height: 4.7%; }
-.z-black { left: 52%; top: 71.7%; width: 14%; height: 4.7%; }
-.z-odd { left: 66.4%; top: 71.7%; width: 15%; height: 4.7%; }
-.z-high { left: 81.7%; top: 71.7%; width: 14%; height: 4.7%; }
+.z-d1 { left: 9.8%; top: 64.3%; width: 27.8%; height: 4.0%; }
+.z-d2 { left: 36.7%; top: 64.3%; width: 27.8%; height: 4.0%; }
+.z-d3 { left: 63.6%; top: 64.3%; width: 27.8%; height: 4.0%; }
+.z-low { left: 7.4%; top: 71.4%; width: 14.2%; height: 3.5%; }
+.z-even { left: 21.2%; top: 72.2%; width: 15.8%; height: 3.3%; }
+.z-red { left: 37.4%; top: 72.2%; width: 13.4%; height: 3.3%; }
+.z-black { left: 51.1%; top: 72.2%; width: 13.4%; height: 3.3%; }
+.z-odd { left: 65.1%; top: 72.2%; width: 15.8%; height: 3.3%; }
+.z-high { left: 81.2%; top: 71.4%; width: 14.2%; height: 3.5%; }
 
 .chip-zone {
   top: 79.7%;
