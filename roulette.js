@@ -81,9 +81,9 @@ function placeBet(type, value) {
 
   showToast(`Bet placed: ${String(label).toUpperCase()}`);
 
-  previousBet = currentBet;
-  lastWinText.textContent = 'BET';
-  lastColorText.textContent = String(label).toUpperCase();
+  previousBet = currentBet
+  lastWinText.textContent = '-';
+  lastColorText.textContent = 'PLACE BET';
 }
 
 function didWin(number, color) {
