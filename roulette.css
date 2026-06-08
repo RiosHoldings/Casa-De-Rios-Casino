@@ -70,12 +70,12 @@ body {
 .z-d1 { left: 9.8%; top: 64.3%; width: 27.8%; height: 4.0%; }
 .z-d2 { left: 36.7%; top: 64.3%; width: 27.8%; height: 4.0%; }
 .z-d3 { left: 63.6%; top: 64.3%; width: 27.8%; height: 4.0%; }
-.z-low { left: 7.4%; top: 71.4%; width: 14.2%; height: 3.5%; }
-.z-even { left: 21.2%; top: 72.2%; width: 15.8%; height: 3.3%; }
-.z-red { left: 37.4%; top: 72.2%; width: 13.4%; height: 3.3%; }
-.z-black { left: 51.1%; top: 72.2%; width: 13.4%; height: 3.3%; }
-.z-odd { left: 65.1%; top: 72.2%; width: 15.8%; height: 3.3%; }
-.z-high { left: 81.2%; top: 71.4%; width: 14.2%; height: 3.5%; }
+.z-low { left: 7.4%; top: 70.9%; width: 14.2%; height: 3.5%; }
+.z-even { left: 21.2%; top: 70.9%; width: 15.8%; height: 3.3%; }
+.z-red { left: 37.4%; top: 70.9%; width: 13.4%; height: 3.3%; }
+.z-black { left: 51.1%; top: 70.9%; width: 13.4%; height: 3.3%; }
+.z-odd { left: 65.1%; top: 70.9%; width: 15.8%; height: 3.3%; }
+.z-high { left: 81.2%; top: 70.9%; width: 14.2%; height: 3.5%; }
 
 .chip-zone {
   top: 79.7%;
