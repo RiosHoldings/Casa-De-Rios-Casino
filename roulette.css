@@ -294,13 +294,25 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 18%, #d7b44a 19% 45%, #4B1E78 46% 100%);
-  border: 2px solid #f8d878;
+  background: radial-gradient(
+    circle,
+    #f8e8a0 0 18%,      /* gold center */
+    #d4af37 19% 45%,    /* rich gold ring */
+    #4b1e78 46% 100%    /* royal purple outer */
+  );
+  border: 2px solid #f8e8a0;
   box-shadow: 0 2px 7px rgba(0,0,0,.75);
   transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
+
   color: #000;
+  text-shadow:
+    -1px -1px 0 #f8e8a0,
+     1px -1px 0 #f8e8a0,
+    -1px  1px 0 #f8e8a0,
+     1px  1px 0 #f8e8a0;
+
   font-size: 8px;
   font-weight: 900;
 }
