@@ -45,17 +45,42 @@ function setChip(amount) {
 }
 
 function placeBet(type, value) {
-  if (type === 'number-grid') {
-    currentBet = { type: 'number', value: Math.floor(Math.random() * 36) + 1 };
-    showToast(`Number bet placed: ${currentBet.value}`);
-  } else {
-    const parsed = type === 'number' || type === 'dozen' ? Number(value) : value;
-    currentBet = { type, value: parsed };
-    showToast(`Bet placed: ${String(value).toUpperCase()}`);
+  const parsed =
+    type === 'number' ||
+    type === 'dozen' ||
+    type === 'column'
+      ? Number(value)
+      : value;
+
+  currentBet = { type, value: parsed };
+
+  document.querySelectorAll('.zone').forEach(btn => {
+    btn.classList.remove('bet-selected');
+  });
+
+  const selectedZone = document.querySelector(
+    `.zone[data-bet="${type}"][data-value="${value}"]`
+  );
+
+  if (selectedZone) {
+    selectedZone.classList.add('bet-selected');
   }
+
+  let label = parsed;
+
+  if (type === 'dozen') {
+    label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
+  }
+
+  if (type === 'column') {
+    label = `${parsed} TO 1`;
+  }
+
+  showToast(`Bet placed: ${String(label).toUpperCase()}`);
+
   previousBet = currentBet;
   lastWinText.textContent = 'BET';
-  lastColorText.textContent = String(currentBet.value).toUpperCase();
+  lastColorText.textContent = String(label).toUpperCase();
 }
 
 function didWin(number, color) {
@@ -133,12 +158,15 @@ function rebet() {
   showToast('Previous bet restored');
 }
 
-document.querySelectorAll('.chip-zone').forEach(btn => {
-  btn.addEventListener('click', () => setChip(Number(btn.dataset.chip)));
-});
-
 document.querySelectorAll('.zone').forEach(btn => {
-  btn.addEventListener('click', () => placeBet(btn.dataset.bet, btn.dataset.value));
+  btn.addEventListener('click', (e) => {
+    if (btn.dataset.bet === 'number-grid') {
+      const picked = numberFromBoardClick(e);
+      placeBet('number', picked);
+    } else {
+      placeBet(btn.dataset.bet, btn.dataset.value);
+    }
+  });
 });
 
 spinButton.addEventListener('click', spinRoulette);

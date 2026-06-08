@@ -157,3 +157,8 @@ body {
   .live-panel strong { font-size: 16px; }
   .live-panel span { font-size: 9px; }
 }
+.bet-selected {
+  background: rgba(255, 210, 70, 0.22) !important;
+  outline: 2px solid rgba(255, 210, 70, 0.85) !important;
+  box-shadow: 0 0 18px rgba(255, 190, 40, 0.9);
+}
