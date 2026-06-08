@@ -206,9 +206,9 @@ function spinRoulette() {
     updateMoney();
     hideBall();
 
-    spinning = fals in e;
+    spinning = false;
     spinButton.disabled = false;
-  }, 4200);
+  }
 }
 
 function clearBet() {
@@ -270,7 +270,3 @@ document.getElementById('rebetButton').addEventListener('click', rebet);
 
 updateMoney();
 showToast('Tap the table to place a bet');
-
-hideBall();
-spinning = false;
-spinButton.disabled = false;
