@@ -177,7 +177,7 @@ body {
 .live-panel strong {
   display: block;
   color: #ffe29a;
-  font-size: 16px;
+  font-size: 24px;
   line-height: 1;
   text-shadow: 0 2px 2px #000;
 }
@@ -185,28 +185,28 @@ body {
 .live-panel em {
   display: block;
   color: #ff4433;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1;
   font-style: normal;
 }
 
 .balance-panel {
-  left: 9.7% !important;
-  top: 43.4% !important;
-  width: 16.5% !important;
-  height: 2.1% !important;
+  left: 6.5% !important;
+  top: 43.6% !important;
+  width: 20% !important;
+  height: 4.5% !important;
 }
 
 .win-panel {
-  left: 44.2% !important;
-  top: 43.4% !important;
-  width: 11.5% !important;
-  height: 3.2% !important;
+  left: 38.5% !important;
+  top: 43.2% !important;
+  width: 23% !important;
+  height: 5.5% !important;
 }
 
 .total-panel {
-  right: 9.7% !important;
-  top: 44.5% !important;
-  width: 16.5% !important;
-  height: 2.1% !important;
+  right: 6.5% !important;
+  top: 43.6% !important;
+  width: 20% !important;
+  height: 4.5% !important;
 }
