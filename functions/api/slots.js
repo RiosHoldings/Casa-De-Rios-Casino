@@ -194,8 +194,8 @@ function evaluateSpin(reels, betAmount) {
     };
   }
 
-  if (a.name === cherries) {
-    if (b.name === cherries) {
+  if (a.name === Cherries) {
+    if (b.name === Cherries) {
       return {
         result: "Two Cherries",
         payout: betAmount * 2
