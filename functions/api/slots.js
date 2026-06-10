@@ -197,15 +197,15 @@ function evaluateSpin(reels, betAmount) {
   if (a.name === cherries) {
     if (b.name === cherries) {
       return {
-      result: "Pair of Cherries",
-      payout: betAmount * pairSymbol.pair
+        result: "Two Cherries",
+        payout: betAmount * 2
+       };
+    }
+
+    return {
+      result: "One Cherry",
+      payout: betAmount
     };
-  }
-  
-  return {
-    result: "One cherry",
-    payout: betAmount
-  };
   }
   return {
     result: "No Match",
