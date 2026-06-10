@@ -23,7 +23,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 28px 0 130px;
+  padding: 18px 0 90px;
 }
 
 .machine {
@@ -152,9 +152,9 @@ body {
 .status-box {
   position: fixed;
   left: 50%;
-  bottom: 30px;
+  bottom: 95px;
   transform: translateX(-50%);
-  width: min(92vw, 560px);
+  width: min(96vw, 600px);
   padding: 10px 14px;
   border: 1px solid rgba(255, 215, 0, 0.45);
   border-radius: 12px;
