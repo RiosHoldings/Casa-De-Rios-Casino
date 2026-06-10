@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Casa de Ríos Slots</title>
+
+  <link rel="stylesheet" href="./slots.css" />
+</head>
+
+<body>
+  <a id="lobbyBtn" href="../index.html" aria-label="Return to Lobby"></a>
+
+  <main class="slots-page">
+    <section class="machine">
+      <img class="machine-ui" src="./assets/slots-ui.png" alt="Casa de Ríos Slot Machine" />
+
+      <div class="reels-window">
+        <div class="reel" id="reel1"></div>
+        <div class="reel" id="reel2"></div>
+        <div class="reel" id="reel3"></div>
+      </div>
+
+      <div class="number-display" id="betDisplay">1,000</div>
+      <div class="number-display" id="balanceDisplay">0</div>
+      <div class="number-display" id="winDisplay">0</div>
+
+      <button class="hit-btn" id="minusBet" type="button" aria-label="Decrease Bet"></button>
+      <button class="hit-btn" id="spinBtn" type="button" aria-label="Spin"></button>
+      <button class="hit-btn" id="plusBet" type="button" aria-label="Increase Bet"></button>
+    </section>
+  </main>
+
+  <div class="status-box" id="statusBox">Loading wallet...</div>
+
+  <script src="./slots.js"></script>
+</body>
+</html>
