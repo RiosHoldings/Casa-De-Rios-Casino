@@ -184,14 +184,6 @@ body {
     width: 100vw;
   }
 
-.machine::after {
-  content: "";
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  bottom: -8.5%;
-  height: 13%;
-
   .status-box {
     bottom: 6px;
     font-size: 12px;
