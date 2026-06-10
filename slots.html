@@ -3,650 +3,281 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Ríos Fortune Slots | Casino Casa de Ríos</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Saira+Condensed:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="./styles-casa.css">
+  <title>Casa de Ríos Slots</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Georgia, serif;
+      background:
+        linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.70)),
+        url("./assets/slots-bg.png") center / cover no-repeat fixed;
+      color: gold;
+    }
+
     .slots-page {
       min-height: 100vh;
-    }
-
-    .slots-wrap {
-      position: relative;
-      z-index: 1;
-      width: min(1320px, 100%);
-      margin: 0 auto;
-      padding: 12px 10px 36px;
-    }
-
-    .slots-header {
-      border: 1px solid var(--casa-line);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.76), rgba(12,7,17,.88)),
-        radial-gradient(circle at 50% 0%, rgba(122,35,174,.34), transparent 62%);
-      box-shadow: var(--casa-shadow);
-      padding: 12px 14px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .slots-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .slots-brand img {
-      width: 62px;
-      height: 62px;
-      object-fit: contain;
-      filter: drop-shadow(0 0 16px rgba(212,166,74,.48));
-    }
-
-    .slots-brand h1 {
-      margin: 0;
-      font-family: var(--font-title);
-      color: var(--casa-gold-2);
-      text-transform: uppercase;
-      letter-spacing: .11em;
-      font-size: clamp(24px, 4vw, 42px);
-      line-height: .95;
-    }
-
-    .slots-brand span {
-      display: block;
-      margin-top: 5px;
-      color: var(--casa-muted);
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: 11px;
-    }
-
-    .slots-header-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .slots-layout {
-      display: grid;
-      grid-template-columns: 280px minmax(0, 1fr) 300px;
-      gap: 14px;
-      align-items: start;
-    }
-
-    .slots-panel {
-      border: 1px solid var(--casa-line);
-      background:
-        linear-gradient(180deg, rgba(12,7,17,.90), rgba(5,3,8,.96)),
-        radial-gradient(circle at 50% 0%, rgba(122,35,174,.12), transparent 60%);
-      box-shadow: var(--casa-shadow);
+      justify-content: center;
       padding: 14px;
     }
 
-    .slots-panel-title {
-      font-family: var(--font-title);
-      color: var(--casa-gold-2);
-      text-transform: uppercase;
-      letter-spacing: .13em;
-      font-size: 16px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .machine-card {
+    .machine {
       position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(241,208,106,.42);
-      background:
-        radial-gradient(circle at 50% 8%, rgba(241,208,106,.18), transparent 18%),
-        radial-gradient(circle at 50% 36%, rgba(122,35,174,.38), transparent 42%),
-        linear-gradient(180deg, rgba(11,6,16,.98), rgba(0,0,0,.96));
-      box-shadow:
-        0 30px 90px rgba(0,0,0,.70),
-        0 0 35px rgba(122,35,174,.25);
-      padding: 16px;
-      isolation: isolate;
+      width: min(96vw, 620px);
+      filter: drop-shadow(0 30px 45px rgba(0,0,0,.75));
     }
 
-    .machine-card::before {
-      content: "";
-      position: absolute;
-      inset: 14px;
-      border: 1px solid rgba(241,208,106,.22);
+    .machine-ui {
+      width: 100%;
+      display: block;
+      user-select: none;
       pointer-events: none;
-      box-shadow: inset 0 0 50px rgba(212,166,74,.08);
-      z-index: -1;
     }
 
-    .machine-top {
-      text-align: center;
-      padding: 16px 10px 12px;
-      border: 1px solid rgba(212,166,74,.26);
-      background:
-        linear-gradient(180deg, rgba(72,25,101,.58), rgba(0,0,0,.58));
-      margin-bottom: 14px;
-    }
-
-    .machine-crown {
-      color: var(--casa-gold-2);
-      font-size: 28px;
-      margin-bottom: 4px;
-      filter: drop-shadow(0 0 12px rgba(212,166,74,.5));
-    }
-
-    .machine-title {
-      margin: 0;
-      font-family: var(--font-title);
-      color: var(--casa-gold-2);
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      font-size: clamp(34px, 7vw, 76px);
-      line-height: .9;
-      text-shadow:
-        0 0 12px rgba(241,208,106,.38),
-        0 0 28px rgba(122,35,174,.5),
-        0 10px 28px rgba(0,0,0,.95);
-    }
-
-    .machine-subtitle {
-      margin-top: 10px;
-      color: var(--casa-muted);
-      text-transform: uppercase;
-      letter-spacing: .22em;
-      font-size: 12px;
-    }
-
-    .reel-stage {
-      position: relative;
-      border: 1px solid rgba(241,208,106,.34);
-      background:
-        radial-gradient(circle at 50% 50%, rgba(122,35,174,.22), transparent 52%),
-        linear-gradient(180deg, rgba(0,0,0,.68), rgba(0,0,0,.90));
-      padding: 18px;
-      box-shadow:
-        inset 0 0 55px rgba(0,0,0,.88),
-        0 0 28px rgba(212,166,74,.10);
-    }
-
-    .reels {
+    .reels-window {
+      position: absolute;
+      top: 24.1%;
+      left: 13.8%;
+      width: 72.5%;
+      height: 27.2%;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      overflow: hidden;
+      background: radial-gradient(circle, #2b062a 0%, #080008 75%);
+      border-radius: 6px;
     }
 
-    .reel-window {
-      min-height: 180px;
-      border: 2px solid rgba(241,208,106,.46);
-      background:
-        linear-gradient(180deg, rgba(241,208,106,.10), rgba(0,0,0,.18), rgba(0,0,0,.72)),
-        radial-gradient(circle at 50% 45%, rgba(122,35,174,.28), transparent 58%);
-      display: grid;
-      place-items: center;
-      box-shadow:
-        inset 0 0 32px rgba(0,0,0,.82),
-        0 0 18px rgba(212,166,74,.14);
+    .reel {
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid rgba(255, 215, 0, .45);
+      border-right: 1px solid rgba(255, 215, 0, .45);
       overflow: hidden;
     }
 
-    .reel-window::before {
-      content: "";
+    .reel img {
+      width: 78%;
+      max-height: 82%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(255,215,0,.35));
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .reel.spinning img {
+      transform: translateY(8px) scale(1.05);
+      filter: blur(1px) drop-shadow(0 0 10px rgba(255,215,0,.5));
+    }
+
+    .number-display {
       position: absolute;
-      inset: 8px;
-      border: 1px solid rgba(212,166,74,.18);
-      pointer-events: none;
-    }
-
-    .reel-symbol {
-      position: relative;
-      z-index: 1;
-      font-family: var(--font-title);
-      font-size: clamp(56px, 10vw, 104px);
-      color: var(--casa-gold-2);
-      text-shadow:
-        0 0 14px rgba(241,208,106,.45),
-        0 0 24px rgba(122,35,174,.55),
-        0 10px 24px rgba(0,0,0,.95);
-      transition: transform .18s ease, filter .18s ease;
-    }
-
-    .reel-symbol.spinning {
-      transform: scale(1.08);
-      filter: blur(1px);
-    }
-
-    .slot-result {
-      margin-top: 14px;
-      border: 1px solid rgba(212,166,74,.24);
-      background: rgba(0,0,0,.58);
-      padding: 12px;
+      color: #ffd968;
+      font-weight: 900;
+      font-size: clamp(14px, 3.4vw, 24px);
       text-align: center;
+      text-shadow: 0 2px 4px #000, 0 0 8px rgba(255,215,0,.55);
+      pointer-events: none;
+      line-height: 1;
     }
 
-    .slot-result strong {
-      display: block;
-      font-family: var(--font-title);
-      color: var(--casa-gold-2);
-      text-transform: uppercase;
-      letter-spacing: .14em;
-      font-size: 18px;
-      margin-bottom: 5px;
+    #betDisplay {
+      top: 58.15%;
+      left: 13.2%;
+      width: 18%;
     }
 
-    .slot-result span {
-      color: var(--casa-muted);
-      font-size: 13px;
-      line-height: 1.4;
+    #balanceDisplay {
+      top: 58.15%;
+      left: 39.6%;
+      width: 22%;
     }
 
-    .spin-controls {
-      margin-top: 14px;
-      display: grid;
-      gap: 12px;
-      border: 1px solid rgba(212,166,74,.20);
-      background: rgba(0,0,0,.46);
-      padding: 14px;
+    #winDisplay {
+      top: 58.15%;
+      left: 69.2%;
+      width: 18%;
     }
 
-    .bet-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: end;
+    .hit-btn {
+      position: absolute;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .bet-buttons {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 8px;
+    .hit-btn:active {
+      transform: scale(.96);
     }
 
-    .mini-bet {
-      border: 1px solid rgba(212,166,74,.32);
-      background: rgba(0,0,0,.46);
-      color: var(--casa-gold-2);
-      border-radius: 8px;
-      padding: 9px 8px;
-      font-family: var(--font-ui);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .08em;
+    #minusBet {
+      top: 65.8%;
+      left: 12%;
+      width: 20%;
+      height: 7.5%;
     }
 
-    .spin-button {
-      width: 100%;
-      min-height: 62px;
-      border: 1px solid rgba(241,208,106,.70);
-      background:
-        linear-gradient(180deg, #f1d06a, #b48223 48%, #6d4210);
-      color: #140816;
+    #spinBtn {
+      top: 64.5%;
+      left: 36%;
+      width: 28%;
+      height: 9.5%;
+      border-radius: 999px;
+    }
+
+    #plusBet {
+      top: 65.8%;
+      left: 69%;
+      width: 20%;
+      height: 7.5%;
+    }
+
+    #lobbyBtn {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 90px;
+      height: 70px;
+      opacity: 0;
+      z-index: 20;
+    }
+
+    .status-box {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      width: min(92vw, 560px);
+      padding: 10px 14px;
+      border: 1px solid rgba(255,215,0,.45);
       border-radius: 12px;
-      font-family: var(--font-title);
-      text-transform: uppercase;
-      letter-spacing: .16em;
-      font-size: 25px;
-      font-weight: 900;
-      box-shadow:
-        0 0 22px rgba(212,166,74,.28),
-        0 12px 30px rgba(0,0,0,.55);
-    }
-
-    .spin-button:disabled {
-      opacity: .62;
-      cursor: not-allowed;
-    }
-
-    .payout-row,
-    .wallet-row,
-    .recent-row {
-      border-top: 1px solid rgba(212,166,74,.13);
-      padding: 10px 0;
-      line-height: 1.45;
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      align-items: center;
-      font-size: 13px;
-    }
-
-    .payout-row:first-of-type,
-    .wallet-row:first-of-type,
-    .recent-row:first-of-type {
-      border-top: 0;
-      padding-top: 0;
-    }
-
-    .payout-row span:first-child,
-    .wallet-row span:first-child {
-      color: var(--casa-muted);
-    }
-
-    .payout-row b,
-    .wallet-row b {
-      color: var(--casa-gold-2);
-      font-weight: 400;
-      text-align: right;
-    }
-
-    .recent-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .recent-row {
-      display: block;
-      background: rgba(0,0,0,.26);
-      border: 1px solid rgba(212,166,74,.12);
-      padding: 10px;
-    }
-
-    .recent-reels {
-      color: var(--casa-gold-2);
-      font-size: 20px;
-      letter-spacing: .12em;
-      margin-bottom: 4px;
-    }
-
-    .recent-meta {
-      color: var(--casa-muted);
-      font-size: 12px;
-      line-height: 1.45;
+      background: rgba(0,0,0,.72);
+      text-align: center;
+      color: #ffd968;
+      font-size: 14px;
+      box-shadow: 0 0 18px rgba(0,0,0,.7);
     }
 
     .good {
-      color: var(--casa-good) !important;
+      color: #82ff91;
     }
 
     .bad {
-      color: var(--casa-bad) !important;
+      color: #ff7878;
     }
 
-    @media (max-width: 1100px) {
-      .slots-layout {
-        grid-template-columns: 1fr;
+    @media (max-width: 520px) {
+      .slots-page {
+        align-items: center;
+        padding: 6px;
       }
 
-      .machine-card {
-        order: 1;
+      .machine {
+        width: 100vw;
       }
 
-      .payout-card {
-        order: 2;
-      }
-
-      .status-card {
-        order: 3;
-      }
-    }
-
-    @media (max-width: 760px) {
-      .slots-wrap {
-        padding: 0 0 28px;
-      }
-
-      .slots-header {
-        border-left: 0;
-        border-right: 0;
-        grid-template-columns: 1fr;
-        margin-bottom: 10px;
-      }
-
-      .slots-brand {
-        justify-content: center;
-        text-align: center;
-      }
-
-      .slots-brand img {
-        width: 54px;
-        height: 54px;
-      }
-
-      .slots-header-actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .slots-layout {
-        gap: 10px;
-      }
-
-      .machine-card,
-      .slots-panel {
-        border-left: 0;
-        border-right: 0;
-      }
-
-      .machine-card {
-        padding: 10px;
-      }
-
-      .machine-top {
-        padding: 15px 8px 12px;
-      }
-
-      .machine-title {
-        font-size: clamp(42px, 14vw, 70px);
-        letter-spacing: .08em;
-      }
-
-      .machine-subtitle {
-        font-size: 10px;
-        letter-spacing: .16em;
-      }
-
-      .reel-stage {
-        padding: 10px;
-      }
-
-      .reels {
-        gap: 8px;
-      }
-
-      .reel-window {
-        min-height: 138px;
-      }
-
-      .reel-symbol {
-        font-size: clamp(46px, 16vw, 72px);
-      }
-
-      .bet-row {
-        grid-template-columns: 1fr;
-      }
-
-      .bet-buttons {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .spin-button {
-        min-height: 60px;
-        font-size: 22px;
+      .status-box {
+        bottom: 6px;
+        font-size: 12px;
       }
     }
   </style>
 </head>
 
-<body class="slots-page">
-  <div class="slots-wrap">
-    <header class="slots-header">
-      <div class="slots-brand">
-        <img src="./images/casa-rios-logo.webp" alt="Casa de Ríos Logo" />
-        <div>
-          <h1>Ríos Fortune</h1>
-          <span>Casa de Ríos Premium Slots</span>
+<body>
+  <a id="lobbyBtn" href="./index.html" aria-label="Return to Lobby"></a>
+
+  <main class="slots-page">
+    <section class="machine">
+      <img class="machine-ui" src="./assets/Slots-Ui.png" alt="Casa de Ríos Slot Machine" />
+
+      <div class="reels-window">
+        <div class="reel" id="reel1">
+          <img src="./assets/cherries.png" alt="Cherries" />
+        </div>
+
+        <div class="reel" id="reel2">
+          <img src="./assets/seven.png" alt="Seven" />
+        </div>
+
+        <div class="reel" id="reel3">
+          <img src="./assets/bell.png" alt="Bell" />
         </div>
       </div>
 
-      <div class="slots-header-actions">
-        <a class="casa-btn" href="./index.html">Lobby</a>
-        <button class="casa-btn" id="refreshWalletBtn">Refresh</button>
-      </div>
-    </header>
+      <div class="number-display" id="betDisplay">1,000</div>
+      <div class="number-display" id="balanceDisplay">0</div>
+      <div class="number-display" id="winDisplay">0</div>
 
-    <main class="slots-layout">
-      <aside class="slots-panel payout-card">
-        <div class="slots-panel-title">♛ Payout Table</div>
+      <button class="hit-btn" id="minusBet" type="button" aria-label="Decrease Bet"></button>
+      <button class="hit-btn" id="spinBtn" type="button" aria-label="Spin"></button>
+      <button class="hit-btn" id="plusBet" type="button" aria-label="Increase Bet"></button>
+    </section>
+  </main>
 
-        <div class="payout-row">
-          <span>🍒 🍒 🍒</span>
-          <b>3x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>🍋 🍋 🍋</span>
-          <b>4x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>🔔 🔔 🔔</span>
-          <b>6x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>💎 💎 💎</span>
-          <b>10x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>👑 👑 👑</span>
-          <b>20x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>R R R</span>
-          <b>35x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>💀 💀 💀</span>
-          <b>50x</b>
-        </div>
-
-        <div class="payout-row">
-          <span>Any Pair</span>
-          <b>1x-6x</b>
-        </div>
-
-        <div class="slot-result" style="margin-top: 14px;">
-          <strong>House Rule</strong>
-          <span>All chips are RP only. Payouts are logged and reviewed by Casa de Ríos.</span>
-        </div>
-      </aside>
-
-      <section class="machine-card">
-        <div class="machine-top">
-          <div class="machine-crown">♛</div>
-          <h2 class="machine-title">Ríos Fortune</h2>
-          <div class="machine-subtitle">Luck. Honor. Loyalty.</div>
-        </div>
-
-        <div class="reel-stage">
-          <div class="reels">
-            <div class="reel-window">
-              <div class="reel-symbol" id="reel1">👑</div>
-            </div>
-
-            <div class="reel-window">
-              <div class="reel-symbol" id="reel2">💎</div>
-            </div>
-
-            <div class="reel-window">
-              <div class="reel-symbol" id="reel3">R</div>
-            </div>
-          </div>
-
-          <div class="slot-result">
-            <strong id="resultTitle">Ready to Spin</strong>
-            <span id="resultText">Set your bet and test your luck against the house.</span>
-          </div>
-        </div>
-
-        <div class="spin-controls">
-          <div class="bet-row">
-            <div>
-              <label for="betAmount">Bet Amount</label>
-              <input id="betAmount" type="number" min="100" max="50000" step="100" value="1000" />
-            </div>
-
-            <button class="casa-btn gold" id="maxBetBtn" type="button">Max 50K</button>
-          </div>
-
-          <div class="bet-buttons">
-            <button class="mini-bet" type="button" data-bet="100">100</button>
-            <button class="mini-bet" type="button" data-bet="500">500</button>
-            <button class="mini-bet" type="button" data-bet="1000">1K</button>
-            <button class="mini-bet" type="button" data-bet="5000">5K</button>
-            <button class="mini-bet" type="button" data-bet="10000">10K</button>
-          </div>
-
-          <button class="spin-button" id="spinBtn" type="button">Spin</button>
-        </div>
-      </section>
-
-      <aside class="slots-panel status-card">
-        <div class="slots-panel-title">🪙 Wallet</div>
-
-        <div class="wallet-row">
-          <span>Balance</span>
-          <b><span id="walletBalance">0</span> chips</b>
-        </div>
-
-        <div class="wallet-row">
-          <span>Status</span>
-          <b id="playerStatus">Loading</b>
-        </div>
-
-        <div class="wallet-row">
-          <span>VIP Tier</span>
-          <b id="vipTier">None</b>
-        </div>
-
-        <div class="wallet-row">
-          <span>Player ID</span>
-          <b id="playerId">---</b>
-        </div>
-
-        <div class="wallet-row">
-          <span>Last Payout</span>
-          <b id="lastPayout">0</b>
-        </div>
-
-        <div class="wallet-row">
-          <span>Net Change</span>
-          <b id="netChange">0</b>
-        </div>
-
-        <div class="slots-panel-title" style="margin-top: 18px;">🎰 Recent Spins</div>
-        <div class="recent-list" id="recentList">
-          <div class="recent-row">
-            <div class="recent-reels">---</div>
-            <div class="recent-meta">No spins yet.</div>
-          </div>
-        </div>
-      </aside>
-    </main>
-  </div>
+  <div class="status-box" id="statusBox">Loading wallet...</div>
 
   <script>
     const PLAYER_KEY = "casa_rios_player_id";
     const PLAYER_SECRET_KEY = "casa_rios_player_secret";
-    const RECENT_KEY = "casa_rios_slots_recent";
 
-    const SYMBOLS = ["🍒", "🍋", "🔔", "💎", "👑", "R", "💀"];
+    const SYMBOLS = [
+      { name: "logo", img: "./assets/logo.png", multiplier: 25 },
+      { name: "crown", img: "./assets/crown.png", multiplier: 50 },
+      { name: "seven", img: "./assets/seven.png", multiplier: 15 },
+      { name: "coin", img: "./assets/coin.png", multiplier: 10 },
+      { name: "bell", img: "./assets/bell.png", multiplier: 8 },
+      { name: "whiskey", img: "./assets/whiskey.png", multiplier: 5 },
+      { name: "bar", img: "./assets/bar.png", multiplier: 4 },
+      { name: "cherries", img: "./assets/cherries.png", multiplier: 3 }
+    ];
 
+    const WEIGHTED_SYMBOLS = [
+      "cherries", "cherries", "cherries", "cherries", "cherries", "cherries",
+      "bar", "bar", "bar", "bar", "bar",
+      "whiskey", "whiskey", "whiskey", "whiskey",
+      "bell", "bell", "bell",
+      "coin", "coin",
+      "seven", "seven",
+      "logo",
+      "crown"
+    ];
+
+    let balance = 0;
+    let bet = 1000;
+    let lastWin = 0;
+    let spinning = false;
     let spinTimer = null;
+
+    const betDisplay = document.getElementById("betDisplay");
+    const balanceDisplay = document.getElementById("balanceDisplay");
+    const winDisplay = document.getElementById("winDisplay");
+    const statusBox = document.getElementById("statusBox");
+
+    const reelEls = [
+      document.getElementById("reel1"),
+      document.getElementById("reel2"),
+      document.getElementById("reel3")
+    ];
+
+    function money(n) {
+      return Number(n || 0).toLocaleString("en-US");
+    }
+
+    function setStatus(text, type = "") {
+      statusBox.className = "status-box " + type;
+      statusBox.textContent = text;
+    }
 
     function makeId() {
       if (crypto.randomUUID) {
@@ -686,70 +317,68 @@
       return secret;
     }
 
-    function money(n) {
-      return Number(n || 0).toLocaleString();
+    function updateDisplay() {
+      betDisplay.textContent = money(bet);
+      balanceDisplay.textContent = money(balance);
+      winDisplay.textContent = money(lastWin);
     }
 
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value;
+    function getSymbol(name) {
+      return SYMBOLS.find(s => s.name === name) || SYMBOLS[0];
     }
 
-    function shortId(id) {
-      if (!id) return "---";
-      if (id.length <= 14) return id;
-      return id.slice(0, 12) + "...";
+    function randomSymbolName() {
+      return WEIGHTED_SYMBOLS[Math.floor(Math.random() * WEIGHTED_SYMBOLS.length)];
     }
 
-    function randomSymbol() {
-      return SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    function setReel(index, symbolName) {
+      const symbol = getSymbol(symbolName);
+      reelEls[index].innerHTML = `<img src="${symbol.img}" alt="${symbol.name}" />`;
     }
 
-    function setReels(reels) {
-      setText("reel1", reels[0] || "R");
-      setText("reel2", reels[1] || "R");
-      setText("reel3", reels[2] || "R");
-    }
-
-    function setResult(title, text, good = false) {
-      const titleEl = document.getElementById("resultTitle");
-      const textEl = document.getElementById("resultText");
-
-      titleEl.textContent = title;
-      textEl.textContent = text;
-
-      titleEl.classList.remove("good", "bad");
-      titleEl.classList.add(good ? "good" : "bad");
+    function setReels(names) {
+      names.forEach((name, index) => setReel(index, name));
     }
 
     function startSpinAnimation() {
-      const reelEls = [
-        document.getElementById("reel1"),
-        document.getElementById("reel2"),
-        document.getElementById("reel3")
-      ];
-
-      reelEls.forEach(el => el.classList.add("spinning"));
+      reelEls.forEach(reel => reel.classList.add("spinning"));
 
       spinTimer = setInterval(() => {
-        setReels([randomSymbol(), randomSymbol(), randomSymbol()]);
+        setReels([
+          randomSymbolName(),
+          randomSymbolName(),
+          randomSymbolName()
+        ]);
       }, 75);
     }
 
     function stopSpinAnimation() {
       clearInterval(spinTimer);
       spinTimer = null;
+      reelEls.forEach(reel => reel.classList.remove("spinning"));
+    }
 
-      document.querySelectorAll(".reel-symbol").forEach(el => {
-        el.classList.remove("spinning");
-      });
+    function localCalculatePayout(reels, betAmount) {
+      const [a, b, c] = reels;
+
+      if (a === b && b === c) {
+        return betAmount * getSymbol(a).multiplier;
+      }
+
+      if (a === "cherries" && b === "cherries") {
+        return betAmount * 2;
+      }
+
+      if (a === "cherries") {
+        return betAmount;
+      }
+
+      return 0;
     }
 
     async function loadWallet() {
       const playerId = getPlayerId();
       const playerSecret = getPlayerSecret();
-
-      setText("playerId", shortId(playerId));
 
       try {
         const response = await fetch(
@@ -762,44 +391,38 @@
         const data = await response.json();
 
         if (!data.ok) {
-          setText("walletBalance", "0");
-          setText("playerStatus", "Not Saved");
-          setText("vipTier", "None");
-          setResult("Profile Needed", "Go to the lobby and save your player profile first.", false);
+          balance = 0;
+          updateDisplay();
+          setStatus("Profile needed. Go to lobby and save your player first.", "bad");
           return;
         }
 
-        const p = data.player || {};
-
-        setText("walletBalance", money(p.chips || 0));
-        setText("playerStatus", String(p.status || "active").toUpperCase());
-        setText("vipTier", String(p.vip_tier || "none").toUpperCase());
+        balance = Number(data.player?.chips || 0);
+        updateDisplay();
+        setStatus("Wallet loaded. Ready to spin.", "good");
 
       } catch (error) {
-        setResult("Wallet Error", "Could not load wallet. Check the deployment.", false);
+        balance = 0;
+        updateDisplay();
+        setStatus("Wallet connection error.", "bad");
       }
     }
 
     async function spinSlots() {
-      const spinBtn = document.getElementById("spinBtn");
-      const betInput = document.getElementById("betAmount");
+      if (spinning) return;
 
-      const betAmount = Math.floor(Number(betInput.value || 0));
+      if (bet < 1000) bet = 1000;
+      if (bet > 10000) bet = 10000;
 
-      if (!Number.isFinite(betAmount) || betAmount < 100) {
-        setResult("Invalid Bet", "Minimum bet is 100 chips.", false);
+      if (balance < bet) {
+        setStatus("Not enough chips for that bet.", "bad");
         return;
       }
 
-      if (betAmount > 50000) {
-        setResult("Invalid Bet", "Maximum bet is 50,000 chips.", false);
-        return;
-      }
-
-      spinBtn.disabled = true;
-      spinBtn.textContent = "Spinning...";
-      setResult("Spinning", "The reels are turning. The house is watching.", true);
-
+      spinning = true;
+      lastWin = 0;
+      updateDisplay();
+      setStatus("Spinning...", "good");
       startSpinAnimation();
 
       const startedAt = Date.now();
@@ -813,107 +436,95 @@
           body: JSON.stringify({
             playerId: getPlayerId(),
             playerSecret: getPlayerSecret(),
-            betAmount
+            betAmount: bet
           })
         });
 
         const data = await response.json();
 
         const elapsed = Date.now() - startedAt;
-        const waitMore = Math.max(0, 950 - elapsed);
-
+        const waitMore = Math.max(0, 1100 - elapsed);
         await new Promise(resolve => setTimeout(resolve, waitMore));
 
         stopSpinAnimation();
 
         if (!data.ok) {
-          setResult("Spin Denied", data.error || "The house denied this spin.", false);
+          setStatus(data.error || "Spin denied.", "bad");
+          spinning = false;
           return;
         }
 
-        setReels(data.reels);
+        const finalReels = data.reels || data.symbols || [
+          randomSymbolName(),
+          randomSymbolName(),
+          randomSymbolName()
+        ];
 
-        setText("walletBalance", money(data.balanceAfter));
-        setText("lastPayout", money(data.payout));
-        setText("netChange", (data.netChange >= 0 ? "+" : "") + money(data.netChange));
+        setReels(finalReels);
 
-        if (data.payout > 0) {
-          setResult("Winner", `${data.result}. Payout: ${money(data.payout)} chips.`, true);
+        lastWin = Number(data.payout || 0);
+        balance = Number(data.balanceAfter || data.balance || balance);
+
+        updateDisplay();
+
+        if (lastWin > 0) {
+          setStatus("Winner! Payout: " + money(lastWin) + " chips.", "good");
         } else {
-          setResult("No Match", "No payout this spin. The house keeps this one.", false);
+          setStatus("No win. The house keeps this one.", "bad");
         }
 
-        saveRecentSpin(data);
-        renderRecentSpins();
-
       } catch (error) {
+        const elapsed = Date.now() - startedAt;
+        const waitMore = Math.max(0, 1100 - elapsed);
+        await new Promise(resolve => setTimeout(resolve, waitMore));
+
         stopSpinAnimation();
-        setResult("Spin Failed", "Slots request failed. Check the API deployment.", false);
-      } finally {
-        spinBtn.disabled = false;
-        spinBtn.textContent = "Spin";
-      }
-    }
 
-    function saveRecentSpin(data) {
-      const current = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+        const fallbackReels = [
+          randomSymbolName(),
+          randomSymbolName(),
+          randomSymbolName()
+        ];
 
-      current.unshift({
-        time: new Date().toLocaleTimeString(),
-        reels: data.reels,
-        result: data.result,
-        bet: data.betAmount,
-        payout: data.payout,
-        net: data.netChange
-      });
+        setReels(fallbackReels);
 
-      localStorage.setItem(RECENT_KEY, JSON.stringify(current.slice(0, 8)));
-    }
+        balance -= bet;
+        lastWin = localCalculatePayout(fallbackReels, bet);
+        balance += lastWin;
 
-    function renderRecentSpins() {
-      const list = document.getElementById("recentList");
-      const spins = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+        updateDisplay();
 
-      if (!spins.length) {
-        list.innerHTML = `
-          <div class="recent-row">
-            <div class="recent-reels">---</div>
-            <div class="recent-meta">No spins yet.</div>
-          </div>
-        `;
-        return;
+        if (lastWin > 0) {
+          setStatus("Local test win: " + money(lastWin) + " chips. API not connected.", "good");
+        } else {
+          setStatus("Local test spin. API not connected.", "bad");
+        }
       }
 
-      list.innerHTML = spins.map(spin => `
-        <div class="recent-row">
-          <div class="recent-reels">${spin.reels.join(" ")}</div>
-          <div class="recent-meta">
-            ${spin.result}<br>
-            Bet: ${money(spin.bet)} | Payout: ${money(spin.payout)} | Net: ${(spin.net >= 0 ? "+" : "") + money(spin.net)}
-          </div>
-        </div>
-      `).join("");
+      spinning = false;
     }
+
+    document.getElementById("minusBet").addEventListener("click", () => {
+      if (spinning) return;
+      bet = Math.max(1000, bet - 1000);
+      updateDisplay();
+    });
+
+    document.getElementById("plusBet").addEventListener("click", () => {
+      if (spinning) return;
+      bet = Math.min(10000, bet + 1000);
+      updateDisplay();
+    });
+
+    document.getElementById("spinBtn").addEventListener("click", spinSlots);
 
     document.addEventListener("DOMContentLoaded", () => {
       getPlayerId();
       getPlayerSecret();
 
+      setReels(["cherries", "seven", "bell"]);
+      updateDisplay();
       loadWallet();
-      renderRecentSpins();
-
-      document.getElementById("spinBtn").addEventListener("click", spinSlots);
-      document.getElementById("refreshWalletBtn").addEventListener("click", loadWallet);
-
-      document.getElementById("maxBetBtn").addEventListener("click", () => {
-        document.getElementById("betAmount").value = 50000;
-      });
-
-      document.querySelectorAll("[data-bet]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.getElementById("betAmount").value = btn.dataset.bet;
-        });
-      });
     });
   </script>
 </body>
