@@ -157,7 +157,7 @@ export async function onRequestPost(context) {
     return json({
       ok: true,
       roundId,
-      reels: reels.map(s => s.icon),
+      reels: reels.map(s => s.name .toLowerCase()),
       result,
       betAmount,
       payout,
