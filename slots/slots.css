@@ -141,12 +141,23 @@ body {
 
 #lobbyBtn {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 90px;
-  height: 70px;
-  opacity: 0;
-  z-index: 20;
+  top: 14px;
+  left: 14px;
+  z-index: 50;
+
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 215, 0, 0.65);
+  border-radius: 12px;
+
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffd968;
+
+  font-family: Georgia, serif;
+  font-size: 14px;
+  font-weight: 900;
+  text-decoration: none;
+
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.75);
 }
 
 .status-box {
