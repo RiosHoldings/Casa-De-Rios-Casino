@@ -105,7 +105,8 @@ function calculateWin(reels) {
   return 0;
 }
 
-function spin() {
+
+async function spin() {
   if (spinning) return;
 
   if (balance < bet) {
@@ -114,25 +115,45 @@ function spin() {
   }
 
   spinning = true;
-  balance -= bet;
   lastWin = 0;
   updateDisplay();
   setStatus("Spinning...", true);
   startSpinAnimation();
 
-  setTimeout(() => {
+  const startedAt = Date.now();
+
+  try {
+    const response = await fetch("/api/slots", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerId: localStorage.getItem("casa_rios_player_id"),
+        playerSecret: localStorage.getItem("casa_rios_player_secret"),
+        betAmount: bet
+      })
+    });
+
+    const data = await response.json();
+
+    const elapsed = Date.now() - startedAt;
+    const waitMore = Math.max(0, 1200 - elapsed);
+    await new Promise(resolve => setTimeout(resolve, waitMore));
+
     stopSpinAnimation();
 
-    const result = [
-      randomSymbolName(),
-      randomSymbolName(),
-      randomSymbolName()
-    ];
+    if (!data.ok) {
+      setStatus(data.error || "Spin denied.");
+      spinning = false;
+      return;
+    }
 
-    setReels(result);
+    setReels(data.reels);
 
-    lastWin = calculateWin(result);
-    balance += lastWin;
+    lastWin = Number(data.payout || 0);
+    balance = Number(data.balanceAfter || 0);
+
     updateDisplay();
 
     if (lastWin > 0) {
@@ -141,10 +162,13 @@ function spin() {
       setStatus("No win. The house keeps this one.");
     }
 
-    spinning = false;
-  }, 1200);
-}
+  } catch (error) {
+    stopSpinAnimation();
+    setStatus("Slots connection error.");
+  }
 
+  spinning = false;
+}
 document.getElementById("minusBet").addEventListener("click", () => {
   if (spinning) return;
   bet = Math.max(1000, bet - 1000);
