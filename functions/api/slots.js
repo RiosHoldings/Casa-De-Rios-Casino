@@ -187,25 +187,26 @@ function pickSymbol(symbols) {
 function evaluateSpin(reels, betAmount) {
   const [a, b, c] = reels;
 
-  if (a.icon === b.icon && b.icon === c.icon) {
+  if (a.name === b.name && b.name === c.name) {
     return {
       result: `Triple ${a.name}`,
       payout: betAmount * a.triple
     };
   }
 
-  if (a.icon === b.icon || a.icon === c.icon || b.icon === c.icon) {
-    const pairSymbol =
-      a.icon === b.icon ? a :
-      a.icon === c.icon ? a :
-      b;
-
-    return {
-      result: `Pair of ${pairSymbol.name}`,
+  if (a.name === cherries) {
+    if (b.name === cherries) {
+      return {
+      result: "Pair of Cherries",
       payout: betAmount * pairSymbol.pair
     };
   }
-
+  
+  return {
+    result: "One cherry",
+    payout: betAmount
+  };
+  }
   return {
     result: "No Match",
     payout: 0
