@@ -105,6 +105,30 @@ function calculateWin(reels) {
   return 0;
 }
 
+async function loadWallet() {
+  try {
+    const response = await fetch(
+      "/api/wallet?playerId=" +
+      encodeURIComponent(localStorage.getItem("casa_rios_player_id")) +
+      "&playerSecret=" +
+      encodeURIComponent(localStorage.getItem("casa_rios_player_secret"))
+    );
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      setStatus(data.error || "Wallet not loaded.");
+      return;
+    }
+
+    balance = Number(data.player.chips || 0);
+    updateDisplay();
+    setStatus("Wallet loaded. Ready to spin.", true);
+
+  } catch (error) {
+    setStatus("Wallet connection error.");
+  }
+}
 
 async function spin() {
   if (spinning) return;
@@ -185,4 +209,4 @@ document.getElementById("spinBtn").addEventListener("click", spin);
 
 setReels(["cherries", "seven", "bell"]);
 updateDisplay();
-setStatus("Ready to spin.", true);
+loadWallet();
