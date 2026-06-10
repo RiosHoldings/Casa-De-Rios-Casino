@@ -60,13 +60,13 @@ export async function onRequestPost(context) {
     }
 
     const symbols = [
-      { icon: "cherries", name: "Cherries", weight: 28, triple: 3, pair: 1 },
-      { icon: "bar", name: "bar", weight: 24, triple: 4, pair: 1 },
-      { icon: "whiskey", name: "whiskey", weight: 18, triple: 6, pair: 2 },
-      { icon: "coin", name: "coin", weight: 12, triple: 10, pair: 3 },
-      { icon: "seven", name: "seven", weight: 9, triple: 20, pair: 4 },
-      { icon: "logo", name: "logo", weight: 6, triple: 35, pair: 5 },
-      { icon: "crown", name: "crown", weight: 3, triple: 50, pair: 6 }
+      { name: "cherries", weight: 28, triple: 3 },
+      { name: "bar", weight: 24, triple: 4 },
+      { name: "whiskey", weight: 18, triple: 6 },
+      { name: "coin", weight: 12, triple: 10 },
+      { name: "seven", weight: 9, triple: 20 },
+      { name: "logo", weight: 6, triple: 35 },
+      { name: "crown", weight: 3, triple: 50 }
     ];
 
     const reels = [
@@ -81,8 +81,8 @@ export async function onRequestPost(context) {
     const result = evaluation.result;
     const netChange = payout - betAmount;
     const balanceAfter = currentBalance + netChange;
-
     const roundId = crypto.randomUUID();
+    const reelNames = reels.map(s => s.name);
 
     await env.DB.batch([
       env.DB.prepare(`
@@ -106,7 +106,7 @@ export async function onRequestPost(context) {
         roundId,
         playerId,
         betAmount,
-        JSON.stringify(reels.map(s => s.icon)),
+        JSON.stringify(reelNames),
         result,
         payout
       ),
@@ -157,20 +157,27 @@ export async function onRequestPost(context) {
     return json({
       ok: true,
       roundId,
-      reels: reels.map(s => s.name),
+      reels: reelNames,
       result,
       betAmount,
       payout,
       netChange,
       balanceAfter
     });
+
   } catch (error) {
-    return json({ ok: false, error: "Slots failed." }, 500);
+    return json({
+      ok: false,
+      error: String(error.message || error || "Slots failed.")
+    }, 500);
   }
 }
 
 function pickSymbol(symbols) {
-  const totalWeight = symbols.reduce((sum, s) => sum + s.weight, 0);
+  const totalWeight = symbols.reduce((sum, symbol) => {
+    return sum + Number(symbol.weight || 0);
+  }, 0);
+
   let roll = Math.random() * totalWeight;
 
   for (const symbol of symbols) {
@@ -189,17 +196,17 @@ function evaluateSpin(reels, betAmount) {
 
   if (a.name === b.name && b.name === c.name) {
     return {
-      result: `Triple ${a.name}`,
+      result: `Triple ${formatSymbolName(a.name)}`,
       payout: betAmount * a.triple
     };
   }
 
-  if (a.name === Cherries) {
-    if (b.name === Cherries) {
+  if (a.name === "cherries") {
+    if (b.name === "cherries") {
       return {
         result: "Two Cherries",
         payout: betAmount * 2
-       };
+      };
     }
 
     return {
@@ -207,10 +214,17 @@ function evaluateSpin(reels, betAmount) {
       payout: betAmount
     };
   }
+
   return {
     result: "No Match",
     payout: 0
   };
+}
+
+function formatSymbolName(name) {
+  return String(name || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
 function json(data, status = 200) {
