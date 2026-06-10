@@ -60,13 +60,13 @@ export async function onRequestPost(context) {
     }
 
     const symbols = [
-      { icon: "🍒", name: "Cherry", weight: 28, triple: 3, pair: 1 },
-      { icon: "🍋", name: "Lemon", weight: 24, triple: 4, pair: 1 },
-      { icon: "🔔", name: "Bell", weight: 18, triple: 6, pair: 2 },
-      { icon: "💎", name: "Diamond", weight: 12, triple: 10, pair: 3 },
-      { icon: "👑", name: "Crown", weight: 9, triple: 20, pair: 4 },
-      { icon: "R", name: "Ríos", weight: 6, triple: 35, pair: 5 },
-      { icon: "💀", name: "Death", weight: 3, triple: 50, pair: 6 }
+      { icon: "cherries", name: "Cherries", weight: 28, triple: 3, pair: 1 },
+      { icon: "bar", name: "bar", weight: 24, triple: 4, pair: 1 },
+      { icon: "whiskey", name: "whiskey", weight: 18, triple: 6, pair: 2 },
+      { icon: "coin", name: "coin", weight: 12, triple: 10, pair: 3 },
+      { icon: "seven", name: "seven", weight: 9, triple: 20, pair: 4 },
+      { icon: "logo", name: "logo", weight: 6, triple: 35, pair: 5 },
+      { icon: "crown", name: "crown", weight: 3, triple: 50, pair: 6 }
     ];
 
     const reels = [
@@ -157,7 +157,7 @@ export async function onRequestPost(context) {
     return json({
       ok: true,
       roundId,
-      reels: reels.map(s => s.name .toLowerCase()),
+      reels: reels.map(s => s.name),
       result,
       betAmount,
       payout,
