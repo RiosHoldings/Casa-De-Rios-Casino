@@ -1,12 +1,12 @@
 const symbols = [
-  { name: "logo", img: "/images/logo.png", multiplier: 25 },
-  { name: "crown", img: "/images/crown.png", multiplier: 50 },
+  { name: "logo", img: "/images/logo.jpeg", multiplier: 25 },
+  { name: "crown", img: "/images/crown.jpeg", multiplier: 50 },
   { name: "seven", img: "/images/seven.png", multiplier: 15 },
-  { name: "coin", img: "/images/coin.png", multiplier: 10 },
-  { name: "bell", img: "/images/bell.png", multiplier: 8 },
-  { name: "whiskey", img: "/images/whiskey.png", multiplier: 5 },
-  { name: "bar", img: "/images/bar.png", multiplier: 4 },
-  { name: "cherries", img: "/images/cherries.png", multiplier: 3 }
+  { name: "coin", img: "/images/coin.jpeg", multiplier: 10 },
+  { name: "bell", img: "/images/bell.jpeg", multiplier: 8 },
+  { name: "whiskey", img: "/images/whiskey.jpeg", multiplier: 5 },
+  { name: "bar", img: "/images/bar.jpeg", multiplier: 4 },
+  { name: "cherries", img: "/images/cherries.jpeg", multiplier: 3 }
 ];
 
 const weightedSymbols = [
