@@ -1509,3 +1509,19 @@ body {
   margin-bottom: 12px;
   padding: 10px;
 }
+
+/* DEBUG HOTSPOT BOXES - remove later */
+.lobby-hotspot {
+  background: rgba(255, 0, 0, 0.18) !important;
+  border: 2px solid red !important;
+}
+
+.hs-blackjack { background: rgba(255, 0, 0, 0.22) !important; }
+.hs-roulette  { background: rgba(0, 255, 0, 0.22) !important; border-color: lime !important; }
+.hs-slots     { background: rgba(0, 128, 255, 0.22) !important; border-color: cyan !important; }
+.hs-texas     { background: rgba(255, 255, 0, 0.22) !important; border-color: yellow !important; }
+
+.hs-cashout { background: rgba(255, 0, 255, 0.22) !important; border-color: magenta !important; }
+.hs-ledger  { background: rgba(255, 165, 0, 0.22) !important; border-color: orange !important; }
+.hs-vip     { background: rgba(128, 0, 255, 0.22) !important; border-color: purple !important; }
+.hs-rules   { background: rgba(255, 255, 255, 0.18) !important; border-color: white !important; }
