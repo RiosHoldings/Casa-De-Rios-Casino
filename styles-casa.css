@@ -1451,7 +1451,7 @@ body {
 .lobby-wallet { 
   position: absolute;
   top: 4.7%; 
-  left: 41.5%; 
+  left: 39.5%; 
   width: 16%; 
 
   z-index: 25;
@@ -1511,15 +1511,15 @@ body {
     pointer-events: none;
 }
 
-.hs-blackjack { left: 3%; top: 32.5%; width: 22%; height: 14%; }
-.hs-roulette { left: 27%; top: 32.5%; width: 22%; height: 14%; }
-.hs-slots { left: 51%; top: 32.5%; width: 22%; height: 14%; }
-.hs-texas { left: 75%; top: 32.5%; width: 22%; height: 14%; }
+.hs-blackjack { left: 3%; top: 32.5%; width: 22%; height: 16%; }
+.hs-roulette { left: 27%; top: 32.5%; width: 22%; height: 16%; }
+.hs-slots { left: 51%; top: 32.5%; width: 22%; height: 16%; }
+.hs-texas { left: 75%; top: 32.5%; width: 22%; height: 16%; }
 
-.hs-cashout { left: 3%; top: 53.5%; width: 22%; height: 7.5%; }
-.hs-ledger { left: 27%; top: 53.5%; width: 22%; height: 7.5%; }
-.hs-vip { left: 51%; top: 53.5%; width: 22%; height: 7.5%; }
-.hs-rules { left: 75%; top: 53.5%; width: 22%; height: 7.5%; }
+.hs-cashout { left: 3%; top: 51.5%; width: 22%; height: 7.5%; }
+.hs-ledger { left: 27%; top: 51.5%; width: 22%; height: 7.5%; }
+.hs-vip { left: 51%; top: 51.5%; width: 22%; height: 7.5%; }
+.hs-rules { left: 75%; top: 51.5%; width: 22%; height: 7.5%; }
 
 .profile-open-btn {
   position: absolute;
