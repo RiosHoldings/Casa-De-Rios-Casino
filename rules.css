@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+.rules-page {
+  min-height: 100vh;
+  font-family: Georgia, serif;
+  color: #ffd968;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.82)),
+    url("./images/rules-bg.jpeg") center / cover no-repeat fixed;
+  overflow-x: hidden;
+}
+
+.rules-back {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 20;
+
+  padding: 10px 14px;
+  border: 1px solid rgba(255, 215, 0, 0.65);
+  border-radius: 12px;
+
+  background: rgba(0, 0, 0, 0.72);
+  color: #ffd968;
+  text-decoration: none;
+  font-weight: 900;
+
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.75);
+}
+
+.rules-card {
+  width: min(92vw, 620px);
+  margin: 0 auto;
+  padding: 90px 18px 40px;
+}
+
+.rules-card h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(36px, 10vw, 68px);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-shadow: 0 4px 8px #000;
+}
+
+.rules-motto {
+  text-align: center;
+  margin: 12px 0 28px;
+  color: #e9c15d;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 900;
+  text-shadow: 0 3px 7px #000;
+}
+
+.rules-list {
+  display: grid;
+  gap: 12px;
+}
+
+.rules-list p {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 215, 0, 0.38);
+  border-radius: 14px;
+
+  background: rgba(0, 0, 0, 0.68);
+  color: #f8df9a;
+  line-height: 1.45;
+  font-size: 16px;
+
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.55);
+}
+
+.rules-list b {
+  color: #ffd968;
+}
+
+.rules-card footer {
+  margin-top: 28px;
+  padding: 14px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 215, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.35);
+
+  background: rgba(0, 0, 0, 0.55);
+  color: #e9c15d;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 13px;
+  font-weight: 900;
+}
