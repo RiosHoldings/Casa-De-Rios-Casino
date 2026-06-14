@@ -174,3 +174,48 @@ body {
     0 0 18px rgba(0, 0, 0, 0.65),
     0 0 22px rgba(255, 215, 0, 0.25);
 }
+
+.vip-current,
+.vip-info {
+  margin-bottom: 14px !important;
+  padding: 16px 18px !important;
+  border: 1px solid rgba(255, 215, 0, 0.38) !important;
+  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.72) !important;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.55) !important;
+}
+
+.vip-current h2,
+.vip-info h2 {
+  margin: 0 0 8px !important;
+  color: #e9c15d !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  font-size: 13px !important;
+}
+
+.vip-current-tier {
+  margin: 8px 0 !important;
+  color: #ffd968 !important;
+  font-size: clamp(30px, 8vw, 46px) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.12em !important;
+  text-align: center !important;
+  text-transform: uppercase !important;
+}
+
+.vip-progress-text {
+  margin-top: 8px !important;
+  color: #f8df9a !important;
+  text-align: center !important;
+  line-height: 1.45 !important;
+  font-size: 15px !important;
+}
+
+.vip-info ul {
+  margin: 0 !important;
+  padding-left: 20px !important;
+  color: #f8df9a !important;
+  line-height: 1.55 !important;
+  font-size: 15px !important;
+}
