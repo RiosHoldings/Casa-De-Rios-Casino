@@ -125,47 +125,52 @@ body {
 
 .vip-current,
 .vip-info {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
   padding: 16px 18px;
-
   border: 1px solid rgba(255, 215, 0, 0.38);
   border-radius: 14px;
-
-  background: rgba(0, 0, 0, 0.68);
-
+  background: rgba(0, 0, 0, 0.72);
   box-shadow: 0 0 18px rgba(0, 0, 0, 0.55);
 }
 
 .vip-current h2,
 .vip-info h2 {
-  margin-top: 0;
-  color: #ffd968;
+  margin: 0 0 8px;
+  color: #e9c15d;
   text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 13px;
 }
 
 .vip-current-tier {
-  margin-top: 12px;
-
+  margin: 8px 0;
   color: #ffd968;
-  font-size: clamp(24px, 7vw, 42px);
+  font-size: clamp(30px, 8vw, 46px);
   font-weight: 900;
+  letter-spacing: 0.12em;
   text-align: center;
-
   text-transform: uppercase;
 }
 
 .vip-progress-text {
-  margin-top: 12px;
-
+  margin-top: 8px;
   color: #f8df9a;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.45;
+  font-size: 15px;
 }
 
 .vip-info ul {
   margin: 0;
-  padding-left: 22px;
-
+  padding-left: 20px;
   color: #f8df9a;
-  line-height: 1.6;
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.vip-tier.active {
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow:
+    0 0 18px rgba(0, 0, 0, 0.65),
+    0 0 22px rgba(255, 215, 0, 0.25);
 }
