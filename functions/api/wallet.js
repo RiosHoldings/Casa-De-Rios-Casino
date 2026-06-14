@@ -30,6 +30,7 @@ export async function onRequestGet(context) {
         players.discord_name,
         players.status,
         players.vip_tier,
+        players.lifetime_wagered,
         wallets.chips,
         wallets.locked
       FROM players
