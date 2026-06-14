@@ -27,6 +27,7 @@ export async function onRequestPost(context) {
         p.discord_name,
         p.status,
         p.vip_tier,
+        p.lifetime_wagered,
         p.player_secret,
         w.chips,
         w.locked
@@ -81,6 +82,19 @@ export async function onRequestPost(context) {
     const result = evaluation.result;
     const netChange = payout - betAmount;
     const balanceAfter = currentBalance + netChange;
+    const newLifetimeWagered = Number(player.lifetime_wagered || 0) + betAmount;
+
+let newVipTier = "patron";
+
+if (String(player.vip_tier || "").toLowerCase() === "la_leyenda") {
+  newVipTier = "la_leyenda";
+} else if (newLifetimeWagered >= 1000000) {
+  newVipTier = "el_jefe";
+} else if (newLifetimeWagered >= 500000) {
+  newVipTier = "magnate";
+} else if (newLifetimeWagered >= 100000) {
+  newVipTier = "caballero";
+}
     const roundId = crypto.randomUUID();
     const reelNames = reels.map(s => s.name);
 
@@ -90,6 +104,14 @@ export async function onRequestPost(context) {
         SET chips = ?, updated_at = CURRENT_TIMESTAMP
         WHERE player_id = ?
       `).bind(balanceAfter, playerId),
+
+      env.DB.prepare(`
+        UPDATE players
+        SET lifetime_wagered = ?,
+        vip_tier = ?,
+        updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        `).bind(newLifetimeWagered, newVipTier, playerId),
 
       env.DB.prepare(`
         INSERT INTO slots_rounds (
