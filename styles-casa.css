@@ -1448,19 +1448,19 @@ body {
   font-size: clamp(11px, 3vw, 18px);
 }
 
-.lobby-wallet { top: 5.8%; left: 41.5%; width: 16%; }
-.lobby-vip { top: 5.8%; left: 59.5%; width: 16%; }
-.lobby-status { top: 5.8%; left: 77.5%; width: 16%; }
+.lobby-wallet { top: 5.1%; left: 41.5%; width: 16%; }
+.lobby-vip { top: 5.1%; left: 59.5%; width: 16%; }
+.lobby-status { top: 5.1%; left: 77.5%; width: 16%; }
 
-.hs-blackjack { left: 3%; top: 39%; width: 22%; height: 22%; }
-.hs-roulette { left: 27%; top: 39%; width: 22%; height: 22%; }
-.hs-slots { left: 51%; top: 39%; width: 22%; height: 22%; }
-.hs-texas { left: 75%; top: 39%; width: 22%; height: 22%; }
+.hs-blackjack { left: 3%; top: 39%; width: 22%; height: 16%; }
+.hs-roulette { left: 27%; top: 39%; width: 22%; height: 16%; }
+.hs-slots { left: 51%; top: 39%; width: 22%; height: 16%; }
+.hs-texas { left: 75%; top: 39%; width: 22%; height: 16%; }
 
-.hs-cashout { left: 3%; top: 72.5%; width: 22%; height: 9%; }
-.hs-ledger { left: 27%; top: 72.5%; width: 22%; height: 9%; }
-.hs-vip { left: 51%; top: 72.5%; width: 22%; height: 9%; }
-.hs-rules { left: 75%; top: 72.5%; width: 22%; height: 9%; }
+.hs-cashout { left: 3%; top: 60.5%; width: 22%; height: 7.5%; }
+.hs-ledger { left: 27%; top: 60.5%; width: 22%; height: 7.5%; }
+.hs-vip { left: 51%; top: 60.5%; width: 22%; height: 7.5%; }
+.hs-rules { left: 75%; top: 60.5%; width: 22%; height: 7.5%; }
 
 .profile-open-btn {
   position: absolute;
