@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>VIP Loyalty | Casino Casa de Ríos</title>
+
   <link rel="stylesheet" href="./vip.css">
 </head>
 
@@ -14,21 +15,27 @@
     <h1>VIP Loyalty</h1>
     <p class="vip-motto">Suerte. Honor. Lealtad.</p>
 
-    <section class="vip-status-box">
-      <small>Your Current Status</small>
-      <strong id="currentVip">Loading...</strong>
-      <p id="vipProgressText">Checking loyalty progress...</p>
+    <section class="vip-current">
+      <h2>Your Current Status</h2>
 
-      <div class="vip-progress">
-        <div id="vipProgressBar"></div>
+      <div class="vip-current-tier" id="currentVipTier">
+        Loading...
+      </div>
+
+      <div class="vip-progress-text" id="vipProgressText">
+        Checking loyalty progress...
       </div>
     </section>
 
-    <section class="vip-info-box">
+    <section class="vip-info">
       <h2>How Loyalty Works</h2>
-      <p>Chips wagered contribute toward your loyalty status.</p>
-      <p>Wins and losses do not affect progress.</p>
-      <p>Promotions are reviewed by the House.</p>
+
+      <ul>
+        <li>Lifetime chips wagered contribute toward your loyalty status.</li>
+        <li>Winning or losing does not affect progress.</li>
+        <li>Promotions are reviewed by the House.</li>
+        <li>La Leyenda is invitation-only and controlled by the House.</li>
+      </ul>
     </section>
 
     <section class="vip-tiers">
@@ -39,12 +46,12 @@
 
       <div class="vip-tier" data-tier="caballero">
         <h2>Caballero</h2>
-        <p><b>50,000 lifetime wagered.</b> Discord recognition and honored member status.</p>
+        <p><b>100,000 lifetime wagered.</b> Discord recognition and honored member status.</p>
       </div>
 
       <div class="vip-tier" data-tier="magnate">
         <h2>Magnate</h2>
-        <p><b>250,000 lifetime wagered.</b> High roller recognition and priority payout review.</p>
+        <p><b>500,000 lifetime wagered.</b> High roller recognition and priority payout review.</p>
       </div>
 
       <div class="vip-tier" data-tier="el_jefe">
@@ -63,132 +70,6 @@
     </footer>
   </main>
 
-  <script>
-    const PLAYER_KEY = "casa_rios_player_id";
-    const PLAYER_SECRET_KEY = "casa_rios_player_secret";
-
-    const tiers = [
-      { key: "patron", label: "PATRÓN", needed: 0 },
-      { key: "caballero", label: "CABALLERO", needed: 50000 },
-      { key: "magnate", label: "MAGNATE", needed: 250000 },
-      { key: "el_jefe", label: "EL JEFE", needed: 1000000 },
-      { key: "la_leyenda", label: "LA LEYENDA", needed: Infinity }
-    ];
-
-    function money(n) {
-      return Number(n || 0).toLocaleString();
-    }
-
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value;
-    }
-
-    function normalizeVip(value) {
-      const clean = String(value || "patron").toLowerCase();
-
-      if (clean === "none") return "patron";
-      if (clean === "el jefe") return "el_jefe";
-      if (clean === "la leyenda") return "la_leyenda";
-
-      return clean;
-    }
-
-    function prettyVip(value) {
-      const tier = tiers.find(t => t.key === normalizeVip(value));
-      return tier ? tier.label : String(value || "PATRÓN").toUpperCase();
-    }
-
-    function calculateLifetimeWagered(transactions) {
-      return transactions.reduce((total, tx) => {
-        const type = String(tx.type || "");
-        const amount = Number(tx.amount || 0);
-
-        if (
-          type.includes("slots_bet") ||
-          type.includes("roulette_spin") ||
-          type.includes("blackjack_bet")
-        ) {
-          return total + Math.abs(amount);
-        }
-
-        return total;
-      }, 0);
-    }
-
-    function updateProgress(vipTier, lifetimeWagered) {
-      const current = normalizeVip(vipTier);
-      const currentIndex = tiers.findIndex(t => t.key === current);
-      const currentTier = tiers[currentIndex] || tiers[0];
-      const nextTier = tiers[currentIndex + 1];
-
-      setText("currentVip", currentTier.label);
-
-      document.querySelectorAll(".vip-tier").forEach(card => {
-        card.classList.toggle("active", card.dataset.tier === currentTier.key);
-      });
-
-      if (!nextTier || nextTier.key === "la_leyenda") {
-        setText(
-          "vipProgressText",
-          `${money(lifetimeWagered)} lifetime chips wagered. La Leyenda is invitation only.`
-        );
-        document.getElementById("vipProgressBar").style.width = "100%";
-        return;
-      }
-
-      const previousNeeded = currentTier.needed;
-      const nextNeeded = nextTier.needed;
-      const progress = Math.max(0, lifetimeWagered - previousNeeded);
-      const neededRange = nextNeeded - previousNeeded;
-      const percent = Math.min(100, (progress / neededRange) * 100);
-      const remaining = Math.max(0, nextNeeded - lifetimeWagered);
-
-      setText(
-        "vipProgressText",
-        `${money(lifetimeWagered)} lifetime wagered. ${money(remaining)} chips until ${nextTier.label}.`
-      );
-
-      document.getElementById("vipProgressBar").style.width = percent + "%";
-    }
-
-    async function loadVip() {
-      const playerId = localStorage.getItem(PLAYER_KEY);
-      const playerSecret = localStorage.getItem(PLAYER_SECRET_KEY);
-
-      if (!playerId || !playerSecret) {
-        setText("currentVip", "PATRÓN");
-        setText("vipProgressText", "Create your player profile from the lobby first.");
-        return;
-      }
-
-      try {
-        const response = await fetch(
-          "/api/history?playerId=" +
-          encodeURIComponent(playerId) +
-          "&playerSecret=" +
-          encodeURIComponent(playerSecret)
-        );
-
-        const data = await response.json();
-
-        if (!data.ok) {
-          setText("currentVip", "PATRÓN");
-          setText("vipProgressText", data.error || "Could not load loyalty progress.");
-          return;
-        }
-
-        const vipTier = data.player?.vip_tier || "patron";
-        const lifetimeWagered = calculateLifetimeWagered(data.transactions || []);
-
-        updateProgress(vipTier, lifetimeWagered);
-      } catch (error) {
-        setText("currentVip", "PATRÓN");
-        setText("vipProgressText", "VIP progress failed to load.");
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", loadVip);
-  </script>
+  <script src="./vip.js"></script>
 </body>
 </html>
