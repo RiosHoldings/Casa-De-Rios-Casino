@@ -1511,27 +1511,28 @@ body {
     pointer-events: none;
 }
 
-.hs-blackjack { left: 3%; top: 37.5%; width: 22%; height: 14%; }
-.hs-roulette { left: 27%; top: 37.5%; width: 22%; height: 14%; }
-.hs-slots { left: 51%; top: 37.5%; width: 22%; height: 14%; }
-.hs-texas { left: 75%; top: 37.5%; width: 22%; height: 14%; }
+.hs-blackjack { left: 3%; top: 32.5%; width: 22%; height: 14%; }
+.hs-roulette { left: 27%; top: 32.5%; width: 22%; height: 14%; }
+.hs-slots { left: 51%; top: 32.5%; width: 22%; height: 14%; }
+.hs-texas { left: 75%; top: 32.5%; width: 22%; height: 14%; }
 
-.hs-cashout { left: 3%; top: 58.5%; width: 22%; height: 7.5%; }
-.hs-ledger { left: 27%; top: 58.5%; width: 22%; height: 7.5%; }
-.hs-vip { left: 51%; top: 58.5%; width: 22%; height: 7.5%; }
-.hs-rules { left: 75%; top: 58.5%; width: 22%; height: 7.5%; }
+.hs-cashout { left: 3%; top: 53.5%; width: 22%; height: 7.5%; }
+.hs-ledger { left: 27%; top: 53.5%; width: 22%; height: 7.5%; }
+.hs-vip { left: 51%; top: 53.5%; width: 22%; height: 7.5%; }
+.hs-rules { left: 75%; top: 53.5%; width: 22%; height: 7.5%; }
 
 .profile-open-btn {
   position: absolute;
   top: 2%;
   left: 3%;
   z-index: 40;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 1px solid rgba(255,215,0,.65);
   border-radius: 10px;
   background: rgba(0,0,0,.7);
   color: #ffd968;
   font-weight: 900;
+  font-size: 0.9rem;
 }
 
 .profile-panel {
