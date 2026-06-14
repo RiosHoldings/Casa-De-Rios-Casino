@@ -5,274 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Casino Casa de Ríos</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Saira+Condensed:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="./styles-casa.css">
 </head>
 
 <body>
-  <div class="casa-shell">
-    <aside class="casa-rail">
-      <div class="casa-crest-block">
-        <img class="casa-logo" src="./images/casa-rios-logo.webp" alt="Casa de Ríos Logo" />
-        <div class="casa-brand-name">Casa de Ríos</div>
-        <div class="casa-tagline">The house always wins.</div>
+  <main class="lobby-shell">
+    <img class="lobby-art" src="./images/lobby-ui.jpeg" alt="Casino Casa de Ríos Lobby">
+
+    <div id="walletBalance" class="lobby-live lobby-wallet">0</div>
+    <div id="vipTier" class="lobby-live lobby-vip">None</div>
+    <div id="playerStatus" class="lobby-live lobby-status">Loading</div>
+
+    <a class="lobby-hotspot hs-blackjack" href="./blackjack.html" aria-label="Blackjack"></a>
+    <a class="lobby-hotspot hs-roulette" href="./roulette.html" aria-label="Roulette"></a>
+    <a class="lobby-hotspot hs-slots" href="/slots/slots.html" aria-label="Slots"></a>
+    <a class="lobby-hotspot hs-texas" href="#" aria-label="Texas Hold'em"></a>
+
+    <a class="lobby-hotspot hs-cashout" href="./cashout.html" aria-label="Cash Out"></a>
+    <a class="lobby-hotspot hs-ledger" href="./history.html" aria-label="View Ledger"></a>
+    <a class="lobby-hotspot hs-vip" href="#" aria-label="VIP Loyalty"></a>
+    <a class="lobby-hotspot hs-rules" href="#" aria-label="House Rules"></a>
+
+    <button class="profile-open-btn" id="openProfileBtn" type="button">Profile</button>
+
+    <section class="profile-panel" id="profilePanel">
+      <button class="profile-close-btn" id="closeProfileBtn" type="button">×</button>
+
+      <h2>Player Profile</h2>
+
+      <label>
+        Character Name
+        <input id="characterName" placeholder="Example: Diego Ríos">
+      </label>
+
+      <label>
+        Discord Name
+        <input id="discordName" placeholder="Example: diego_rios">
+      </label>
+
+      <button id="createPlayerBtn" type="button">Save Profile</button>
+      <button id="refreshWalletBtn" type="button">Refresh Wallet</button>
+
+      <div id="profileMsg">Create or update your player profile.</div>
+
+      <div class="profile-info">
+        <p>Player ID: <span id="playerId">---</span></p>
+        <p>Wallet: <span id="walletBalanceSide">0</span> chips</p>
+        <p>VIP: <span id="vipTierSide">None</span></p>
+        <p>Lock: <span id="lockedStatus">Unknown</span></p>
+        <p>Character: <span id="profileCharacter">---</span></p>
+        <p>Discord: <span id="profileDiscord">---</span></p>
       </div>
-
-      <nav class="casa-nav">
-        <a class="active" href="./index.html">⌂ Lobby</a>
-        <a href="./blackjack.html">♠ Blackjack</a>
-        <a href="./roulette.html">◉ Roulette</a>
-        <a href="/slots/slots.html">777 Slots</a>
-        <a class="disabled" href="#">♠ Texas Hold’em</a>
-        <a href="./cashout.html">💰 Cash Out</a>
-        <a href="./history.html">▤ Ledger</a>
-        <a class="disabled" href="#">♛ Lealtad</a>
-        <a class="disabled" href="#">🏆 Winners</a>
-        <a class="disabled" href="#">📜 Rules</a>
-      </nav>
-
-      <div class="quick-box">
-        <div class="quick-box-title">House Office</div>
-        <a href="./admin.html">Admin Panel</a>
-        <a href="./admin-games.html">Game Audit</a>
-      </div>
-    </aside>
-
-    <main class="casa-main">
-      <header class="casa-topbar">
-        <div class="casa-top-left">
-          <img class="casa-tiny-logo" src="./images/casa-rios-logo.webp" alt="Casa de Ríos Logo" />
-          <div class="casa-top-title">
-            <strong>Casino Casa de Ríos</strong>
-            <span>Suerte. Honor. Lealtad.</span>
-          </div>
-        </div>
-
-        <div class="casa-wallet-pill">
-          <div class="casa-wallet-stat">
-            <small>Wallet</small>
-            <b id="walletBalance">0</b>
-          </div>
-
-          <div class="casa-wallet-stat">
-            <small>VIP</small>
-            <b id="vipTier">None</b>
-          </div>
-
-          <div class="casa-wallet-stat">
-            <small>Status</small>
-            <b id="playerStatus">Loading</b>
-          </div>
-        </div>
-      </header>
-
-      <section class="casa-hero">
-        <div class="casa-hero-inner">
-          <div class="casa-kicker">Welcome to</div>
-          <h1>Casa de Ríos</h1>
-          <div class="casa-motto">Suerte. Honor. Lealtad.</div>
-
-          <p class="casa-copy">
-            The most exclusive RP casino in Chernarus. Play with honor,
-            win with luck, and respect the house.
-          </p>
-
-          <div class="casa-notice-strip">
-            <div class="casa-notice-item">
-              <div class="casa-notice-icon">🪙</div>
-              <div>
-                <b>RP Only</b>
-                <span>No real money. RP currency only.</span>
-              </div>
-            </div>
-
-            <div class="casa-notice-item">
-              <div class="casa-notice-icon">🛡️</div>
-              <div>
-                <b>House Review</b>
-                <span>All payouts are reviewed by the house.</span>
-              </div>
-            </div>
-
-            <div class="casa-notice-item">
-              <div class="casa-notice-icon">⚖️</div>
-              <div>
-                <b>Fair Play</b>
-                <span>No exploits. Duplicate accounts may be banned.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div class="casa-section-title">Choose Your Game</div>
-
-      <section class="casa-games">
-        <article class="casa-game-card">
-          <div class="casa-game-title">Blackjack</div>
-
-          <div class="casa-game-art art-blackjack">
-            <div class="big-icon">A♠</div>
-          </div>
-
-          <div class="casa-game-copy">
-            Beat the dealer. Get as close to 21 as you can.
-          </div>
-
-          <a class="enter-btn" href="./blackjack.html">Enter Table</a>
-        </article>
-
-        <article class="casa-game-card">
-          <div class="casa-game-title">Roulette</div>
-
-          <div class="casa-game-art art-roulette">
-            <div class="big-icon">◉</div>
-          </div>
-
-          <div class="casa-game-copy">
-            Place your bets. Spin the wheel. Win big.
-          </div>
-
-          <a class="enter-btn" href="./roulette.html">Enter Table</a>
-        </article>
-
-        <article class="casa-game-card">
-          <div class="casa-game-title">Slots</div>
-
-          <div class="casa-game-art art-slots">
-            <div class="big-icon">777</div>
-          </div>
-
-          <div class="casa-game-copy">
-            Spin the reels. Match symbols. Chase the jackpot.
-          </div>
-
-          <a class="enter-btn" href="/slots/slots.html">Enter Slots</a>
-        </article>
-
-        <article class="casa-game-card">
-          <div class="casa-game-title">Texas Hold’em</div>
-
-          <div class="casa-game-art art-poker">
-            <div class="big-icon">♠</div>
-          </div>
-
-          <div class="casa-game-copy">
-            The private room. Strategy, patience, and nerve.
-          </div>
-
-          <a class="enter-btn disabled" href="#">Coming Soon</a>
-        </article>
-      </section>
-
-      <footer class="casa-footer">
-        <span>Built on loyalty.</span>
-        <img src="./images/casa-rios-logo.webp" alt="Casa de Ríos Mark" />
-        <span>Backed by honor.</span>
-      </footer>
-    </main>
-
-    <aside class="casa-rightbar">
-      <section class="casa-panel">
-        <div class="casa-panel-title">👤 Your Profile</div>
-
-        <div class="form-grid">
-          <div>
-            <label for="characterName">Character Name</label>
-            <input id="characterName" placeholder="Example: Diego Ríos" />
-          </div>
-
-          <div>
-            <label for="discordName">Discord Name</label>
-            <input id="discordName" placeholder="Example: diego_rios" />
-          </div>
-
-          <div class="form-actions">
-            <button class="casa-btn" id="createPlayerBtn">Save</button>
-            <button class="casa-btn" id="refreshWalletBtn">Refresh</button>
-          </div>
-
-          <div class="casa-message" id="profileMsg">
-            Create or update your player profile.
-          </div>
-        </div>
-      </section>
-
-      <section class="casa-panel">
-        <div class="casa-panel-title">♛ Account Status</div>
-
-        <div class="profile-row">
-          <span>Character</span>
-          <b id="profileCharacter">---</b>
-        </div>
-
-        <div class="profile-row">
-          <span>Discord</span>
-          <b id="profileDiscord">---</b>
-        </div>
-
-        <div class="profile-row">
-          <span>Player ID</span>
-          <b id="playerId">---</b>
-        </div>
-
-        <div class="profile-row">
-          <span>Wallet</span>
-          <b><span id="walletBalanceSide">0</span> chips</b>
-        </div>
-
-        <div class="profile-row">
-          <span>VIP Tier</span>
-          <b id="vipTierSide">None</b>
-        </div>
-
-        <div class="profile-row">
-          <span>Wallet Lock</span>
-          <b id="lockedStatus">Unknown</b>
-        </div>
-      </section>
-
-      <section class="casa-panel">
-        <div class="casa-panel-title">📢 Announcements</div>
-
-        <div class="announce">Cashouts may take 24–48 hours.</div>
-        <div class="announce">Multi-accounting is prohibited.</div>
-        <div class="announce">Play fair. Play smart. The house always wins.</div>
-      </section>
-
-      <section class="casa-panel">
-        <div class="casa-panel-title">⚡ Quick Actions</div>
-
-        <div class="quick-actions">
-          <a href="./cashout.html">💰 Cash Out</a>
-          <a href="./history.html">📖 View Ledger</a>
-          <a href="./admin.html">🔐 Admin Panel</a>
-        </div>
-      </section>
-
-      <section class="casa-panel">
-        <div class="casa-panel-title">🏆 Top Winners</div>
-
-        <div class="leader-row">
-          ♛ <b>El Patrón</b><br>
-          <span>3,250,000 chips</span>
-        </div>
-
-        <div class="leader-row">
-          ♕ <b>Vago Loco</b><br>
-          <span>2,180,500 chips</span>
-        </div>
-
-        <div class="leader-row">
-          ♔ <b>La Dama</b><br>
-          <span>1,560,000 chips</span>
-        </div>
-      </section>
-    </aside>
-  </div>
+    </section>
+  </main>
 
   <script>
     const PLAYER_KEY = "casa_rios_player_id";
@@ -445,11 +230,16 @@
       setEmptyState();
       loadWallet();
 
-      const createBtn = document.getElementById("createPlayerBtn");
-      const refreshBtn = document.getElementById("refreshWalletBtn");
+      document.getElementById("createPlayerBtn")?.addEventListener("click", savePlayer);
+      document.getElementById("refreshWalletBtn")?.addEventListener("click", loadWallet);
 
-      if (createBtn) createBtn.addEventListener("click", savePlayer);
-      if (refreshBtn) refreshBtn.addEventListener("click", loadWallet);
+      document.getElementById("openProfileBtn")?.addEventListener("click", () => {
+        document.getElementById("profilePanel").classList.add("open");
+      });
+
+      document.getElementById("closeProfileBtn")?.addEventListener("click", () => {
+        document.getElementById("profilePanel").classList.remove("open");
+      });
     });
   </script>
 </body>
