@@ -122,7 +122,7 @@ export async function onRequestPost(context) {
     }
 
     const player = await db.prepare(`
-      SELECT id, player_secret, status
+      SELECT id, player_secret, status, vip_tier, lifetime_wagered
       FROM players
       WHERE id = ?
     `).bind(playerId).first();
@@ -184,6 +184,33 @@ export async function onRequestPost(context) {
       afterBetWallet.chips,
       `Blackjack bet placed for ${betAmount} chips.`
     );
+
+    const newLifetimeWagered =
+  Number(player.lifetime_wagered || 0) + betAmount;
+
+let newVipTier = "patron";
+
+if (String(player.vip_tier || "").toLowerCase() === "la_leyenda") {
+  newVipTier = "la_leyenda";
+} else if (newLifetimeWagered >= 1000000) {
+  newVipTier = "el_jefe";
+} else if (newLifetimeWagered >= 500000) {
+  newVipTier = "magnate";
+} else if (newLifetimeWagered >= 100000) {
+  newVipTier = "caballero";
+}
+
+await db.prepare(`
+  UPDATE players
+  SET lifetime_wagered = ?,
+      vip_tier = ?,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = ?
+`).bind(
+  newLifetimeWagered,
+  newVipTier,
+  playerId
+).run();
 
     const deck = makeDeck();
     const playerHand = [deck.pop(), deck.pop()];
