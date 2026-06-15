@@ -50,7 +50,7 @@ body::before {
 .cashout-wallet-status,
 .cashout-player-status,
 .cashout-vip {
-  top: 50.9%;
+  top: 53.5%;
   height: 2.8%;
   display: flex;
   align-items: center;
@@ -72,7 +72,7 @@ body::before {
 }
 
 .cashout-wallet-status {
-  left: 29.2%;
+  left: 29.5%;
   width: 18%;
   font-size: 9px !important;
 }
