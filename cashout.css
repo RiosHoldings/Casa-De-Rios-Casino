@@ -44,13 +44,6 @@ body::before {
   text-decoration: none;
 }
 
-/* DEBUG BOXES - remove later */
-.cashout-live,
-.cashout-hotspot {
-  border: transparent;
-  background: rgba(255, 0, 0, 0.22);
-}
-
 /* live values */
 .cashout-balance,
 .cashout-wallet-status,
@@ -100,8 +93,8 @@ body::before {
   align-items: center;
   justify-content: center;
 
-  border: transparent;
-  background: rgba(255, 0, 0, 0.22);
+  border: none;
+  background: transparent;
 
   color: #ffd968;
   font-family: Georgia, serif;
