@@ -108,4 +108,6 @@ body::before {
   height: 4%;
 }
 
-
+.cashout-note {
+  display: none;
+}
