@@ -49,7 +49,7 @@ body::before {
 .cashout-wallet-status,
 .cashout-player-status,
 .cashout-vip {
-  top: 50.4%;
+  top: 50.9%;
   height: 2.8%;
   display: flex;
   align-items: center;
@@ -59,6 +59,8 @@ body::before {
   letter-spacing: 0.02em;
   white-space: nowrap;
   overflow: hidden;
+  color: #f5f5f5;
+  text-shadow: 0 0 6px rgba(0,0,0,.9);
 }
 
 /* individual value boxes */
@@ -84,10 +86,10 @@ body::before {
 
 /* main cashout button */
 .cashout-request-btn {
-  left: 26%;
+  left: 23%;
   top: 61.8%;
-  width: 48%;
-  height: 3.4%;
+  width: 54%;
+  height: 3.6%;
 
   display: flex;
   align-items: center;
@@ -95,17 +97,11 @@ body::before {
 
   border: none;
   background: transparent;
-
-  color: #ffd968;
-  font-family: Georgia, serif;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1;
 }
 
 /* bottom nav */
 .cashout-back {
-  left: 4%;
+  left: 7%;
   top: 93.5%;
   width: 24%;
   height: 4%;
@@ -113,12 +109,10 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 20px;
 }
 
 .cashout-buy {
-  left: 72%;
+  left: 67%;
   top: 93.5%;
   width: 24%;
   height: 4%;
@@ -126,8 +120,6 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  font-size: 20px;
 }
 
 /* hidden result message for now */
