@@ -47,7 +47,7 @@ body::before {
 /* DEBUG BOXES - remove later */
 .cashout-live,
 .cashout-hotspot {
-  border: 2px solid red;
+  border: transparent;
   background: rgba(255, 0, 0, 0.22);
 }
 
@@ -100,7 +100,7 @@ body::before {
   align-items: center;
   justify-content: center;
 
-  border: 2px solid red;
+  border: transparent;
   background: rgba(255, 0, 0, 0.22);
 
   color: #ffd968;
