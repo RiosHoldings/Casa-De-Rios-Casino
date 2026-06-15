@@ -51,7 +51,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(9px 2.25vw 14px);
+  font-size: clamp(9px, 2.25vw, 14px);
   white-space: nowrap;
 }
 
@@ -63,7 +63,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(9px 2.25vw 14px);
+  font-size: clamp(9px, 2.25vw, 14px);
   white-space: nowrap;
 }
 
@@ -75,7 +75,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(9px 2.25vw 14px);
+  font-size: clamp(9px, 2.25vw, 14px);
   white-space: nowrap;
 }
 
@@ -87,7 +87,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(9px 2.25vw 14px);
+  font-size: clamp(9px, 2.25vw, 14px);
   white-space: nowrap;
 }
 
