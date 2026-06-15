@@ -21,7 +21,7 @@ body::before {
 .cashout-shell {
   position: relative;
   width: min(100vw, 700px);
-  height: 100vh;
+  min-height: 100vh;
   margin: 0 auto;
   background:
     url("./images/cashout-bg.jpeg")
@@ -97,11 +97,14 @@ body::before {
 
   border: none;
   background: transparent;
+
+  color: transparent;
+  font-size: 0;
 }
 
 /* bottom nav */
 .cashout-back {
-  left: 7%;
+  left: 9%;
   top: 93.5%;
   width: 24%;
   height: 4%;
@@ -109,10 +112,13 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  color: transparent;
+  font-size: 0;
 }
 
 .cashout-buy {
-  left: 67%;
+  left: 64%;
   top: 93.5%;
   width: 24%;
   height: 4%;
@@ -120,6 +126,9 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  color: transparent;
+  font-size: 0;
 }
 
 /* hidden result message for now */
