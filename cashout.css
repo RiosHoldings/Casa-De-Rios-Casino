@@ -1,0 +1,100 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #030102;
+  color: #ffd968;
+  font-family: Georgia, serif;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(rgba(0,0,0,.08), rgba(0,0,0,.25)),
+    url("./images/cashout-bg.jpeg") center top / cover no-repeat;
+}
+
+.cashout-shell {
+  position: relative;
+  width: min(100vw, 700px);
+  margin: 0 auto;
+  min-height: 100vh;
+}
+.cashout-live,
+.cashout-hotspot,
+.cashout-result {
+  position: absolute;
+  z-index: 10;
+  border: 2px solid red;
+  background: rgba(255, 0, 0, 0.22);
+  color: #ffd968;
+  font-weight: 900;
+  text-align: center;
+}
+
+.cashout-balance {
+  left: 7%;
+  top: 45%;
+  width: 20%;
+  height: 9%;
+}
+
+.cashout-wallet-status {
+  left: 29%;
+  top: 45%;
+  width: 20%;
+  height: 9%;
+}
+
+.cashout-player-status {
+  left: 51%;
+  top: 45%;
+  width: 20%;
+  height: 9%;
+}
+
+.cashout-vip {
+  left: 73%;
+  top: 45%;
+  width: 20%;
+  height: 9%;
+}
+
+.cashout-request-btn {
+  left: 25%;
+  top: 61%;
+  width: 50%;
+  height: 5%;
+}
+
+.cashout-back {
+  left: 5%;
+  top: 94%;
+  width: 25%;
+  height: 4%;
+}
+
+.cashout-buy {
+  left: 68%;
+  top: 94%;
+  width: 25%;
+  height: 4%;
+}
+
+.cashout-result {
+  left: 8%;
+  top: 84%;
+  width: 84%;
+  min-height: 6%;
+}
