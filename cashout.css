@@ -22,12 +22,10 @@ body {
   position: relative;
   width: min(100vw, 700px);
   margin: 0 auto;
-  
   aspect-ratio: 1024 / 1536;
-  
   background:
-  url("./images/cashout-bg.jpeg")
-  center top / 100% 100% 
+   url("./images/cashout-bg.jpeg")
+   center top / 100% 100% 
   no-repeat;
 }
 .cashout-note {
@@ -53,7 +51,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(18px 4.8vw 28px);
+  font-size: clamp(12px 3.4vw 20px);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .cashout-wallet-status {
@@ -64,7 +64,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(18px 4.8vw 28px);
+  font-size: clamp(12px 3.4vw 20px);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .cashout-player-status {
@@ -75,7 +77,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(18px 4.8vw 28px);
+  font-size: clamp(12px 3.4vw 20px);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .cashout-vip {
@@ -86,7 +90,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(18px 4.8vw 28px);
+  font-size: clamp(12px 3.4vw 20px);
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .cashout-request-btn {
@@ -110,3 +116,6 @@ body {
   height: 4%;
 }
 
+.cashout-result {
+  display: none;
+}
