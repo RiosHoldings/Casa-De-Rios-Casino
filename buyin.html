@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Casa de Ríos – Buy-In</title>
+
+  <link rel="stylesheet" href="./buyin.css" />
+</head>
+<body>
+
+  <div class="buyin-shell">
+
+    <!-- Buy-In Form -->
+    <section class="buyin-card">
+
+      <h1>BUY-IN REQUEST</h1>
+
+      <p class="buyin-subtitle">
+        Request chips to begin your experience at Casa de Ríos.
+      </p>
+
+      <label for="buyinAmount">
+        Buy-In Amount
+      </label>
+
+      <input
+        id="buyinAmount"
+        type="number"
+        placeholder="Enter chip amount"
+      />
+
+      <label for="buyinNote">
+        Additional Notes
+      </label>
+
+      <textarea
+        id="buyinNote"
+        rows="3"
+        placeholder="Optional..."
+      ></textarea>
+
+      <button
+        id="buyinBtn"
+        type="button"
+      >
+        Submit Buy-In Request
+      </button>
+
+      <div id="buyinResult">
+        Awaiting request.
+      </div>
+
+    </section>
+
+
+    <!-- Navigation -->
+    <a
+      href="./index.html"
+      class="buyin-hotspot buyin-back"
+      aria-label="Back to Lobby"
+    >
+      Lobby
+    </a>
+
+    <a
+      href="./cashout.html"
+      class="buyin-hotspot buyin-cashier"
+      aria-label="Cashier"
+    >
+      Cashier
+    </a>
+
+  </div>
+
+  <script src="./buyin.js"></script>
+
+</body>
+</html>

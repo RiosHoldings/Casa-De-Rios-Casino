@@ -1,0 +1,126 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #030102;
+}
+
+body {
+  color: #ffd968;
+  font-family: Georgia, serif;
+}
+
+.buyin-shell {
+  position: relative;
+  width: min(100vw, 700px);
+  height: 100vh;
+  margin: 0 auto;
+  background:
+    url("./images/Buy-In-bg.jpeg")
+    center top / 100% 100%
+    no-repeat;
+}
+
+.buyin-card {
+  position: absolute;
+  left: 8%;
+  top: 56%;
+  width: 84%;
+  padding: 16px;
+
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  border-radius: 16px;
+
+  background: rgba(0, 0, 0, 0.72);
+  box-shadow: 0 0 22px rgba(0, 0, 0, 0.8);
+
+  text-align: center;
+}
+
+.buyin-card h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  letter-spacing: 0.08em;
+}
+
+.buyin-subtitle {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: #f4df9c;
+}
+
+.buyin-card label {
+  display: block;
+  margin: 10px 0 5px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.buyin-card input,
+.buyin-card textarea {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff3c4;
+  font-family: Georgia, serif;
+  font-size: 15px;
+}
+
+.buyin-card textarea {
+  resize: none;
+}
+
+#buyinBtn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid rgba(255, 215, 0, 0.75);
+  border-radius: 12px;
+
+  background: linear-gradient(180deg, #4b0f66, #17051f);
+  color: #ffd968;
+
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#buyinResult {
+  margin-top: 12px;
+  min-height: 22px;
+  color: #f4df9c;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.buyin-hotspot {
+  position: absolute;
+  z-index: 10;
+  color: transparent;
+  text-decoration: none;
+}
+
+.buyin-back {
+  left: 7%;
+  top: 93.5%;
+  width: 25%;
+  height: 4%;
+}
+
+.buyin-cashier {
+  left: 68%;
+  top: 93.5%;
+  width: 25%;
+  height: 4%;
+}
