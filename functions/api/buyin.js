@@ -39,7 +39,6 @@ export async function onRequestPost(context) {
         status,
         vip_tier,
         lifetime_wagered,
-        created_at,
         updated_at
       )
       VALUES (?, ?, ?, ?, 'waiting_buyin', 'patron', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -74,8 +73,7 @@ export async function onRequestPost(context) {
         discord_name,
         amount,
         notes,
-        status,
-        created_at
+        status
       )
       VALUES (?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
     `).bind(
