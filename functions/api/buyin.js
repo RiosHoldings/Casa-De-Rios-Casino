@@ -77,7 +77,6 @@ export async function onRequestPost(context) {
       )
       VALUES (?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
     `).bind(
-      requestId,
       playerId,
       characterName,
       discordName,
