@@ -1,103 +1,85 @@
-function json(data, status = 200) {
-  return Response.json(data, { status });
-}
-
-function makePlayerId() {
-  return "CDR-" + crypto.randomUUID().slice(0, 8).toUpperCase();
-}
-
-function makeSecret() {
-  return crypto.randomUUID() + "-" + crypto.randomUUID();
-}
-
 export async function onRequestPost(context) {
+  const { request, env } = context;
+
   try {
-    const db = context.env.DB;
-    const body = await context.request.json();
+    const body = await request.json();
 
-    const playerId = String(body.playerId || "").trim() || makePlayerId();
-    const playerSecret = String(body.playerSecret || "").trim() || makeSecret();
-    const characterName = String(body.characterName || "").trim();
-    const discordName = String(body.discordName || "").trim();
-    const amount = Math.floor(Number(body.amount || 0));
-    const notes = String(body.notes || "").trim();
+    const playerId = body.playerId || crypto.randomUUID();
+    const characterName = body.characterName || "";
+    const discordName = body.discordName || "";
+    const amount = Number(body.amount || 0);
+    const notes = body.notes || "";
 
-    if (!characterName || !discordName) {
-      return json({ ok: false, error: "Character name and Discord name are required." }, 400);
+    if (!characterName || !discordName || !amount) {
+      return json({
+        success: false,
+        error: "Character name, Discord name, and amount are required."
+      }, 400);
     }
 
-    if (!Number.isFinite(amount) || amount <= 0) {
-      return json({ ok: false, error: "Enter a valid buy-in amount." }, 400);
+    if (amount <= 0) {
+      return json({
+        success: false,
+        error: "Buy-in amount must be greater than 0."
+      }, 400);
     }
 
-    await db.prepare(`
-      INSERT INTO players (
-        player_secret,
-        character_name,
-        discord_name,
-        status,
-        vip_tier,
-        lifetime_wagered,
-        updated_at
-      )
-      VALUES (?, ?, ?, 'waiting_buyin', 'patron', 0, CURRENT_TIMESTAMP)
-      ON CONFLICT(id) DO UPDATE SET
-        character_name = excluded.character_name,
-        discord_name = excluded.discord_name,
-        updated_at = CURRENT_TIMESTAMP
-    `).bind(
-      playerId,
-      playerSecret,
-      characterName,
-      discordName
-    ).run();
-
-    await db.prepare(`
-      INSERT OR IGNORE INTO wallets (
-        player_id,
-        chips,
-        locked,
-        updated_at
-      )
-      VALUES (?, 0, 0, CURRENT_TIMESTAMP)
-    `).bind(playerId).run();
-
-    const requestId = crypto.randomUUID();
-
-    await db.prepare(`
-      INSERT INTO buyin_requests (
-        id,
-        player_id,
-        character_name,
-        discord_name,
-        amount,
-        notes,
-        status,
-        created_at
-      )
-      VALUES (?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
+    await env.DB.prepare(`
+      INSERT INTO buyins
+      (player_id, character_name, discord_name, amount, notes, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).bind(
       playerId,
       characterName,
       discordName,
       amount,
-      notes
+      notes,
+      "pending",
+      Date.now()
     ).run();
 
     return json({
-      ok: true,
+      success: true,
       message: "Buy-in request submitted.",
-      playerId,
-      playerSecret,
-      characterName,
-      discordName,
-      amount,
-      status: "pending"
+      playerId
     });
-  } catch (error) {
+
+  } catch (err) {
     return json({
-      ok: false,
-      error: error.message || "Buy-in request failed."
+      success: false,
+      error: err.message
     }, 500);
   }
+}
+
+export async function onRequestGet(context) {
+  const { env } = context;
+
+  try {
+    const result = await env.DB.prepare(`
+      SELECT *
+      FROM buyins
+      ORDER BY created_at DESC
+    `).all();
+
+    return json({
+      success: true,
+      buyins: result.results
+    });
+
+  } catch (err) {
+    return json({
+      success: false,
+      error: err.message
+    }, 500);
+  }
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
 }
