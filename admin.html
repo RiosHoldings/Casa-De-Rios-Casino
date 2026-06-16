@@ -215,6 +215,36 @@
       .actions {
         grid-template-columns: 1fr;
       }
+      .access-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.access-toggle {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  background: rgba(0,0,0,.72);
+  color: #ffd968;
+  font-size: 16px;
+  font-family: Georgia, serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 14px;
+  cursor: pointer;
+}
+
+.access-body {
+  display: none;
+  padding: 14px;
+  border-top: 1px solid rgba(255,215,0,.25);
+}
+
+.access-body.open {
+  display: grid;
+  gap: 10px;
+}
     }
   </style>
 </head>
@@ -226,21 +256,23 @@
       <p>Casino Casa de Ríos Control Room</p>
     </header>
 
-    <section class="admin-card">
-      <h2>Admin Access</h2>
-      <div class="grid">
-        <div>
-          <label>Admin Key</label>
-          <input id="adminKey" type="password" placeholder="Enter house key">
-        </div>
-        <div>
-          <label>Admin Name</label>
-          <input id="adminName" type="text" value="Casa de Ríos Admin">
-        </div>
-        <button class="gold" id="saveAdminBtn">Save Access</button>
-        <div class="msg" id="accessMsg">Enter admin key before using controls.</div>
-      </div>
-    </section>
+    <section class="admin-card access-card">
+  <button class="access-toggle" id="toggleAccessBtn" type="button">
+    🔐 Admin Access
+  </button>
+
+  <div class="access-body" id="accessBody">
+    <label>Admin Key</label>
+    <input id="adminKey" type="password" placeholder="Enter house key">
+
+    <label>Admin Name</label>
+    <input id="adminName" type="text" value="Casa de Ríos Admin">
+
+    <button class="gold" id="saveAdminBtn">Save Access</button>
+
+    <div class="msg" id="accessMsg">Enter admin key before using controls.</div>
+  </div>
+</section>
 
     <section class="admin-card">
       <h2>Buy-In Requests</h2>
@@ -771,7 +803,9 @@
 
       if (savedKey) document.getElementById("adminKey").value = savedKey;
       if (savedName) document.getElementById("adminName").value = savedName;
-
+      document.getElementById("toggleAccessBtn").addEventListener("click", () => {
+      document.getElementById("accessBody").classList.toggle("open");
+});
       document.getElementById("saveAdminBtn").addEventListener("click", saveAccess);
       document.getElementById("searchPlayerBtn").addEventListener("click", searchPlayer);
       document.getElementById("loadBuyinsBtn").addEventListener("click", loadBuyins);
