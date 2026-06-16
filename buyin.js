@@ -2,17 +2,32 @@ const PLAYER_KEY = "casa_rios_player_id";
 const PLAYER_SECRET_KEY = "casa_rios_player_secret";
 
 function setResult(text) {
-  document.getElementById("buyinResult").textContent = text;
+  const el = document.getElementById("buyinResult");
+  if (el) el.textContent = text;
+}
+
+function money(n) {
+  return Number(n || 0).toLocaleString();
 }
 
 async function submitBuyIn() {
   const characterName = document.getElementById("characterName").value.trim();
   const discordName = document.getElementById("discordName").value.trim();
-  const amount = Number(document.getElementById("buyinAmount").value);
+  const amount = Math.floor(Number(document.getElementById("buyinAmount").value || 0));
   const notes = document.getElementById("buyinNote").value.trim();
 
-  const playerId = localStorage.getItem(PLAYER_KEY);
-  const playerSecret = localStorage.getItem(PLAYER_SECRET_KEY);
+  let playerId = localStorage.getItem(PLAYER_KEY);
+  let playerSecret = localStorage.getItem(PLAYER_SECRET_KEY);
+
+  if (!characterName || !discordName) {
+    setResult("Character name and Discord name are required.");
+    return;
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    setResult("Enter a valid buy-in amount.");
+    return;
+  }
 
   setResult("Submitting buy-in request...");
 
@@ -35,7 +50,7 @@ async function submitBuyIn() {
     const data = await response.json();
 
     if (!data.ok) {
-      setResult("Failed: " + data.error);
+      setResult("Failed: " + (data.error || "Buy-in request failed."));
       return;
     }
 
@@ -43,9 +58,11 @@ async function submitBuyIn() {
     localStorage.setItem(PLAYER_SECRET_KEY, data.playerSecret);
 
     setResult(
-      "Buy-in request submitted. Player ID: " +
+      "Buy-in request submitted. " +
+      money(data.amount) +
+      " chips requested. Player ID: " +
       data.playerId +
-      ". Wait for Casa de Ríos staff to approve."
+      ". Wait for Casa de Ríos staff approval."
     );
   } catch (error) {
     setResult("Buy-in request failed. Check deployment.");
@@ -53,5 +70,6 @@ async function submitBuyIn() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("buyinBtn").addEventListener("click", submitBuyIn);
+  const btn = document.getElementById("buyinBtn");
+  if (btn) btn.addEventListener("click", submitBuyIn);
 });
