@@ -1,11 +1,23 @@
-const redNumbers = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const redNumbers = new Set([
+  1, 3, 5, 7, 9, 12, 14, 16, 18,
+  19, 21, 23, 25, 27, 30, 32, 34, 36
+]);
+
+const EUROPEAN_WHEEL = [
+  0, 32, 15, 19, 4, 21, 2, 25, 17, 34,
+  6, 27, 13, 36, 11, 30, 8, 23, 10,
+  5, 24, 16, 33, 1, 20, 14, 31, 9,
+  22, 18, 29, 7, 28, 12, 35, 3, 26
+];
 
 let balance = 5000;
 let chip = 100;
 let currentBet = null;
 let previousBet = null;
 let spinning = false;
-let visualBallRotation = 0;
+
+let wheelRotation = 0;
+let ballRotation = 0;
 
 const chipMarkerLayer = document.getElementById('chipMarkerLayer');
 const spinButton = document.getElementById('spinButton');
@@ -14,6 +26,10 @@ const totalBetText = document.getElementById('totalBetText');
 const lastWinText = document.getElementById('lastWinText');
 const lastColorText = document.getElementById('lastColorText');
 const toast = document.getElementById('toast');
+
+const wheelSpinLayer = document.getElementById('wheelSpinLayer');
+const wheelNumberSvg = document.getElementById('wheelNumberSvg');
+const ballOrbit = document.getElementById('ballOrbit');
 const rouletteBall = document.getElementById('rouletteBall');
 
 function money(value) {
@@ -30,12 +46,20 @@ function getPlayerCredentials() {
   };
 }
 
+function numberColor(number) {
+  if (Number(number) === 0) return 'green';
+  return redNumbers.has(Number(number)) ? 'red' : 'black';
+}
+
 function showToast(message) {
   if (!toast) return;
   toast.textContent = message;
   toast.classList.add('show');
+
   clearTimeout(showToast.timer);
-  showToast.timer = setTimeout(() => toast.classList.remove('show'), 1600);
+  showToast.timer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 1600);
 }
 
 function updateMoney() {
@@ -69,17 +93,84 @@ async function loadWalletBalance() {
 
     balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance);
     updateMoney();
-  } catch (error) {
+  } catch {
     showToast('Wallet connection error');
     updateMoney();
   }
 }
 
-function numberColor(number) {
-  if (number === 0) return 'green';
-  return redNumbers.has(number) ? 'red' : 'black';
+/* SVG WHEEL NUMBERS */
+function buildWheelNumbers() {
+  if (!wheelNumberSvg) return;
+
+  wheelNumberSvg.innerHTML = '';
+
+  const cx = 500;
+  const cy = 500;
+  const radius = 345;
+  const step = 360 / EUROPEAN_WHEEL.length;
+
+  EUROPEAN_WHEEL.forEach((num, index) => {
+    const angle = -90 + index * step;
+    const rad = angle * Math.PI / 180;
+
+    const x = cx + Math.cos(rad) * radius;
+    const y = cy + Math.sin(rad) * radius;
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x);
+    text.setAttribute('y', y);
+    text.setAttribute('fill', '#fff');
+    text.setAttribute('font-size', num === 0 ? '42' : '36');
+    text.setAttribute('font-weight', '900');
+    text.setAttribute('font-family', 'Georgia, serif');
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('paint-order', 'stroke');
+    text.setAttribute('stroke', '#000');
+    text.setAttribute('stroke-width', '5');
+    text.setAttribute('transform', `rotate(${angle + 90} ${x} ${y})`);
+    text.textContent = num;
+
+    wheelNumberSvg.appendChild(text);
+  });
 }
 
+function animateWheelToNumber(resultNumber) {
+  if (!wheelSpinLayer || !ballOrbit || !rouletteBall) return;
+
+  const index = EUROPEAN_WHEEL.indexOf(Number(resultNumber));
+  const step = 360 / EUROPEAN_WHEEL.length;
+
+  if (index < 0) return;
+
+  const targetAngle = index * step;
+
+  rouletteBall.style.opacity = '1';
+
+  wheelSpinLayer.style.transition = 'none';
+  ballOrbit.style.transition = 'none';
+
+  wheelSpinLayer.offsetHeight;
+
+  wheelRotation += 360 * 6 + targetAngle;
+  ballRotation -= 360 * 9 + targetAngle;
+
+  wheelSpinLayer.style.transition =
+    'transform 4.8s cubic-bezier(.12,.72,.14,1)';
+  ballOrbit.style.transition =
+    'transform 4.8s cubic-bezier(.08,.74,.12,1)';
+
+  wheelSpinLayer.style.transform = `rotate(${wheelRotation}deg)`;
+  ballOrbit.style.transform = `rotate(${ballRotation}deg)`;
+}
+
+function hideBall() {
+  if (!rouletteBall) return;
+  rouletteBall.style.opacity = '0';
+}
+
+/* BETTING */
 function showBetChip(zone) {
   if (!chipMarkerLayer || !zone) return;
 
@@ -95,7 +186,6 @@ function showBetChip(zone) {
   const marker = document.createElement('div');
   marker.className = 'bet-chip-marker';
   marker.textContent = chip >= 1000 ? '1K' : chip;
-
   marker.style.left = `${x}px`;
   marker.style.top = `${y}px`;
 
@@ -103,7 +193,7 @@ function showBetChip(zone) {
 }
 
 function setChip(amount) {
-  chip = amount;
+  chip = Number(amount);
 
   document.querySelectorAll('.chip-zone').forEach(btn => {
     btn.classList.toggle('selected', Number(btn.dataset.chip) === chip);
@@ -114,10 +204,10 @@ function setChip(amount) {
 }
 
 function placeBet(type, value) {
+  if (!type || value === undefined) return;
+
   const parsed =
-    type === 'number' ||
-    type === 'dozen' ||
-    type === 'column'
+    type === 'number' || type === 'dozen' || type === 'column'
       ? Number(value)
       : value;
 
@@ -134,9 +224,8 @@ function placeBet(type, value) {
 
   if (selectedZone) {
     selectedZone.classList.add('bet-selected');
+    showBetChip(selectedZone);
   }
-
-  showBetChip(selectedZone);
 
   let label = parsed;
 
@@ -158,29 +247,6 @@ function placeBet(type, value) {
   showToast(`Bet placed: ${String(label).toUpperCase()}`);
 }
 
-function animateBall() {
-  if (!rouletteBall) return;
-
-  rouletteBall.style.transition = 'none';
-  rouletteBall.style.opacity = '1';
-  rouletteBall.style.transform = 'rotate(0deg) translateY(-70px)';
-
-  rouletteBall.offsetHeight;
-
-  setTimeout(() => {
-    visualBallRotation = 1800 + Math.floor(Math.random() * 360);
-    rouletteBall.style.transition =
-      'transform 3.8s cubic-bezier(.12,.75,.18,1), opacity .2s ease';
-    rouletteBall.style.transform =
-      `rotate(${visualBallRotation}deg) translateY(-70px)`;
-  }, 30);
-}
-
-function hideBall() {
-  if (!rouletteBall) return;
-  rouletteBall.style.opacity = '0';
-}
-
 async function spinRoulette() {
   if (spinning) return;
   if (!currentBet) return showToast('Place a bet first');
@@ -197,8 +263,6 @@ async function spinRoulette() {
 
   spinning = true;
   spinButton.disabled = true;
-
-  animateBall();
 
   if (lastWinText) lastWinText.textContent = '...';
   if (lastColorText) lastColorText.textContent = 'SPINNING';
@@ -226,25 +290,30 @@ async function spinRoulette() {
       return;
     }
 
-    setTimeout(() => {
-      balance = Number(data.balanceAfter);
+    const resultNumber = Number(data.resultNumber);
+    const resultColor = data.resultColor || numberColor(resultNumber);
 
-      if (lastWinText) lastWinText.textContent = data.resultNumber;
-      if (lastColorText) lastColorText.textContent = String(data.resultColor).toUpperCase();
+    animateWheelToNumber(resultNumber);
+
+    setTimeout(() => {
+      balance = Number(data.balanceAfter ?? balance);
+
+      if (lastWinText) lastWinText.textContent = resultNumber;
+      if (lastColorText) lastColorText.textContent = String(resultColor).toUpperCase();
 
       updateMoney();
-      hideBall();
 
       if (data.won) {
         showToast(`You won ${money(data.payout)}`);
       } else {
-        showToast(`Landed on ${data.resultNumber} ${String(data.resultColor).toUpperCase()}`);
+        showToast(`Landed on ${resultNumber} ${String(resultColor).toUpperCase()}`);
       }
 
       spinning = false;
       spinButton.disabled = false;
-    }, 4200);
-  } catch (error) {
+    }, 5000);
+
+  } catch {
     showToast('Connection error');
     hideBall();
     spinning = false;
@@ -260,7 +329,6 @@ function clearBet() {
   });
 
   if (chipMarkerLayer) chipMarkerLayer.innerHTML = '';
-
   if (lastWinText) lastWinText.textContent = '—';
   if (lastColorText) lastColorText.textContent = 'PLACE BET';
 
@@ -278,25 +346,23 @@ function rebet() {
 
   currentBet = previousBet;
 
-  document.querySelectorAll('.zone').forEach(btn => {
-    btn.classList.remove('bet-selected');
-  });
-
   const selectedZone = document.querySelector(
     `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
   );
+
+  document.querySelectorAll('.zone').forEach(btn => {
+    btn.classList.remove('bet-selected');
+  });
 
   if (selectedZone) {
     selectedZone.classList.add('bet-selected');
     showBetChip(selectedZone);
   }
 
-  if (lastWinText) lastWinText.textContent = '—';
-  if (lastColorText) lastColorText.textContent = 'PLACE BET';
-
   showToast('Previous bet restored');
 }
 
+/* EVENTS */
 document.querySelectorAll('.zone').forEach(btn => {
   btn.addEventListener('click', () => {
     placeBet(btn.dataset.bet, btn.dataset.value);
@@ -305,7 +371,7 @@ document.querySelectorAll('.zone').forEach(btn => {
 
 document.querySelectorAll('.chip-zone').forEach(btn => {
   btn.addEventListener('click', () => {
-    setChip(Number(btn.dataset.chip));
+    setChip(btn.dataset.chip);
   });
 });
 
@@ -314,6 +380,7 @@ document.getElementById('clearButton')?.addEventListener('click', clearBet);
 document.getElementById('doubleButton')?.addEventListener('click', doubleBet);
 document.getElementById('rebetButton')?.addEventListener('click', rebet);
 
+buildWheelNumbers();
 updateMoney();
 loadWalletBalance();
 showToast('Tap the table to place a bet');
