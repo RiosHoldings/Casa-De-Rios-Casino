@@ -59,10 +59,9 @@ export async function onRequestPost(context) {
         player_id,
         chips,
         locked,
-        created_at,
         updated_at
       )
-      VALUES (?, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES (?, 0, 0, CURRENT_TIMESTAMP)
     `).bind(playerId).run();
 
     const requestId = crypto.randomUUID();
