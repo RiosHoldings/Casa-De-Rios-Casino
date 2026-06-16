@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Casa de Ríos Roulette</title>
+  <link rel="stylesheet" href="roulette.css" />
+</head>
+
+<body>
+  <main class="game-shell" aria-label="Casa de Ríos Roulette">
+
+    <!-- Background -->
+    <img class="roulette-bg" src="assets/roulette-bg.jpeg" alt="" />
+
+    <!-- Wheel Area -->
+    <section class="wheel-area" aria-hidden="true">
+      <div id="wheelSpinLayer" class="wheel-spin-layer">
+        <img id="rouletteWheel" class="roulette-wheel" src="assets/wheel.jpeg" alt="" />
+        <svg id="wheelNumberSvg" class="wheel-number-svg" viewBox="0 0 1000 1000"></svg>
+      </div>
+
+      <div id="ballOrbit" class="ball-orbit">
+        <div id="rouletteBall" class="roulette-ball"></div>
+      </div>
+    </section>
+
+    <!-- Table -->
+    <img class="roulette-table" src="assets/table.jpeg" alt="European roulette betting table" />
+
+    <a class="lobby-hotspot" href="index.html" aria-label="Return to lobby"></a>
+
+    <!-- Live Panels -->
+    <section class="live-panel balance-panel">
+      <span>BALANCE</span>
+      <strong id="balanceText">$5,000.00</strong>
+    </section>
+
+    <section class="live-panel win-panel">
+      <span>LAST WIN</span>
+      <strong id="lastWinText">—</strong>
+      <em id="lastColorText">PLACE BET</em>
+    </section>
+
+    <section class="live-panel total-panel">
+      <span>TOTAL BET</span>
+      <strong id="totalBetText">$100.00</strong>
+    </section>
+
+    <!-- Betting Hotspots -->
+    <div class="board-hotspots" aria-label="Betting table">
+
+      <button class="zone z-zero" data-bet="number" data-value="0" aria-label="Bet 0"></button>
+
+      <button class="zone z-3" data-bet="number" data-value="3"></button>
+      <button class="zone z-6" data-bet="number" data-value="6"></button>
+      <button class="zone z-9" data-bet="number" data-value="9"></button>
+      <button class="zone z-12" data-bet="number" data-value="12"></button>
+      <button class="zone z-15" data-bet="number" data-value="15"></button>
+      <button class="zone z-18" data-bet="number" data-value="18"></button>
+      <button class="zone z-21" data-bet="number" data-value="21"></button>
+      <button class="zone z-24" data-bet="number" data-value="24"></button>
+      <button class="zone z-27" data-bet="number" data-value="27"></button>
+      <button class="zone z-30" data-bet="number" data-value="30"></button>
+      <button class="zone z-33" data-bet="number" data-value="33"></button>
+      <button class="zone z-36" data-bet="number" data-value="36"></button>
+
+      <button class="zone z-2" data-bet="number" data-value="2"></button>
+      <button class="zone z-5" data-bet="number" data-value="5"></button>
+      <button class="zone z-8" data-bet="number" data-value="8"></button>
+      <button class="zone z-11" data-bet="number" data-value="11"></button>
+      <button class="zone z-14" data-bet="number" data-value="14"></button>
+      <button class="zone z-17" data-bet="number" data-value="17"></button>
+      <button class="zone z-20" data-bet="number" data-value="20"></button>
+      <button class="zone z-23" data-bet="number" data-value="23"></button>
+      <button class="zone z-26" data-bet="number" data-value="26"></button>
+      <button class="zone z-29" data-bet="number" data-value="29"></button>
+      <button class="zone z-32" data-bet="number" data-value="32"></button>
+      <button class="zone z-35" data-bet="number" data-value="35"></button>
+
+      <button class="zone z-1" data-bet="number" data-value="1"></button>
+      <button class="zone z-4" data-bet="number" data-value="4"></button>
+      <button class="zone z-7" data-bet="number" data-value="7"></button>
+      <button class="zone z-10" data-bet="number" data-value="10"></button>
+      <button class="zone z-13" data-bet="number" data-value="13"></button>
+      <button class="zone z-16" data-bet="number" data-value="16"></button>
+      <button class="zone z-19" data-bet="number" data-value="19"></button>
+      <button class="zone z-22" data-bet="number" data-value="22"></button>
+      <button class="zone z-25" data-bet="number" data-value="25"></button>
+      <button class="zone z-28" data-bet="number" data-value="28"></button>
+      <button class="zone z-31" data-bet="number" data-value="31"></button>
+      <button class="zone z-34" data-bet="number" data-value="34"></button>
+
+      <button class="zone z-col3" data-bet="column" data-value="3" aria-label="Top column"></button>
+      <button class="zone z-col2" data-bet="column" data-value="2" aria-label="Middle column"></button>
+      <button class="zone z-col1" data-bet="column" data-value="1" aria-label="Bottom column"></button>
+
+      <button class="zone z-d1" data-bet="dozen" data-value="1"></button>
+      <button class="zone z-d2" data-bet="dozen" data-value="2"></button>
+      <button class="zone z-d3" data-bet="dozen" data-value="3"></button>
+
+      <button class="zone z-low" data-bet="range" data-value="low"></button>
+      <button class="zone z-even" data-bet="oddEven" data-value="even"></button>
+      <button class="zone z-red" data-bet="color" data-value="red"></button>
+      <button class="zone z-black" data-bet="color" data-value="black"></button>
+      <button class="zone z-odd" data-bet="oddEven" data-value="odd"></button>
+      <button class="zone z-high" data-bet="range" data-value="high"></button>
+    </div>
+
+    <!-- Chips -->
+    <div class="chip-hotspots" aria-label="Chip selection">
+      <button class="chip-zone c50" data-chip="50"></button>
+      <button class="chip-zone c100 selected" data-chip="100"></button>
+      <button class="chip-zone c250" data-chip="250"></button>
+      <button class="chip-zone c500" data-chip="500"></button>
+      <button class="chip-zone c1000" data-chip="1000"></button>
+    </div>
+
+    <button id="spinButton" class="spin-hotspot">SPIN</button>
+    <button id="doubleButton" class="double-hotspot"></button>
+    <button id="clearButton" class="clear-hotspot"></button>
+    <button id="rebetButton" class="rebet-hotspot"></button>
+
+    <div id="chipMarkerLayer" class="chip-marker-layer"></div>
+    <div id="toast" class="toast">Tap the table to place a bet.</div>
+
+  </main>
+
+  <script src="roulette.js"></script>
+</body>
+</html>
