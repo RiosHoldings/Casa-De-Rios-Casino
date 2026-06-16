@@ -32,7 +32,6 @@ export async function onRequestPost(context) {
 
     await db.prepare(`
       INSERT INTO players (
-        id,
         player_secret,
         character_name,
         discord_name,
@@ -89,7 +88,6 @@ export async function onRequestPost(context) {
     return json({
       ok: true,
       message: "Buy-in request submitted.",
-      requestId,
       playerId,
       playerSecret,
       characterName,
