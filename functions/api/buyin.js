@@ -73,7 +73,8 @@ export async function onRequestPost(context) {
         discord_name,
         amount,
         notes,
-        status
+        status,
+        created_at
       )
       VALUES (?, ?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
     `).bind(
