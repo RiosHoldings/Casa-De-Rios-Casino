@@ -41,7 +41,7 @@ export async function onRequestPost(context) {
         lifetime_wagered,
         updated_at
       )
-      VALUES (?, ?, ?, ?, 'waiting_buyin', 'patron', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      VALUES (?, ?, ?, ?, 'waiting_buyin', 'patron', 0, CURRENT_TIMESTAMP)
       ON CONFLICT(id) DO UPDATE SET
         character_name = excluded.character_name,
         discord_name = excluded.discord_name,
