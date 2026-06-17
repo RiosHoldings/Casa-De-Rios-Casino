@@ -5,29 +5,27 @@
 html,
 body {
   margin: 0;
-  min-height: 100%;
+  width: 100%;
+  height: 100%;
   background: #030102;
-  overflow-x: hidden;
+  overflow: hidden;
   font-family: Georgia, 'Times New Roman', serif;
   color: #f8df9a;
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: block;
 }
 
 .game-shell {
-  position: relative;
-  width: min(100vw, 430px);
-  aspect-ratio: 1024 / 1536;
-  max-height: 100svh;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  aspect-ratio: auto;
   overflow: hidden;
   background: #050202;
-  box-shadow: 0 0 42px rgba(0, 0, 0, 0.9);
-  user-select: none;
-  touch-action: manipulation;
 }
 
 /* IMAGES */
@@ -38,24 +36,24 @@ body {
   height: 100%;
   object-fit: cover;
   z-index: 1;
-  pointer-events: none;
 }
 
 .wheel-area {
   position: absolute;
   left: 50%;
   top: 8%;
-  width: 86%;
-  aspect-ratio: 1 / 1;
+  width: 82vw;
+  max-width: 390px;
+  aspect-ratio: 1;
   transform: translateX(-50%);
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
 }
 
 .wheel-spin-layer {
   position: absolute;
   inset: 0;
-  transform-origin: center;
+  transform-origin: center center;
 }
 
 .roulette-wheel {
@@ -63,7 +61,6 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
 }
 
 .wheel-number-svg {
@@ -71,14 +68,12 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
 }
 
 .ball-orbit {
   position: absolute;
   inset: 0;
-  transform-origin: center;
-  pointer-events: none;
+  transform-origin: center center;
 }
 
 .roulette-ball {
@@ -99,11 +94,11 @@ body {
 .roulette-table {
   position: absolute;
   left: 50%;
-  top: 42%;
-  width: 96%;
-  height: auto;
+  top: 39%;
+  width: 96vw;
+  max-width: 430px;
   transform: translateX(-50%);
-  z-index: 5;
+  z-index: 8;
   pointer-events: none;
 }
 
@@ -213,22 +208,32 @@ body {
 
 /* CHIPS */
 .chip-zone {
-  top: 81%;
-  width: 13.2%;
+  top: 79%;
+  width: 14%;
   aspect-ratio: 1;
   border-radius: 50%;
+  z-index: 45;
+  border: 3px solid #f8d66b;
+  background: radial-gradient(circle, #fff6c5 0 18%, #b48b25 19% 42%, #42146f 43% 100%);
+  color: #000;
+  font-weight: 900;
+  font-size: 14px; 
 }
+
+.chip-zone::after {
+  content: attr(data-chip);
+  color: #000
+}
+
+.c50 { left: 7%; }
+.c100 { left: 25%; }
+.c250 { left: 43%; }
+.c500 { left: 61%; }
+.c1000 { left: 79%; }
 
 .chip-zone.selected {
-  background: rgba(255, 215, 0, 0.35);
-  border-color: #ffd700;
+  box-shadow: 0 0 16px #ffd700;
 }
-
-.c50 { left: 15.5%; }
-.c100 { left: 29.4%; }
-.c250 { left: 43.9%; }
-.c500 { left: 58.8%; }
-.c1000 { left: 73.2%; }
 
 /* CONTROLS */
 .spin-hotspot {
@@ -267,53 +272,52 @@ body {
 /* PANELS */
 .live-panel {
   position: absolute !important;
-  z-index: 50 !important;
-  pointer-events: none;
+  z-index: 40 !important;
+  background: rgba(8, 2, 1, 0.92);
+  border: 1px solid rgba(230, 190, 90, 0.7);
+  border-radius: 10px;
   text-align: center;
-  background: rgba(8, 2, 1, 0.9);
-  border-radius: 4px;
+  padding: 6px 4px;
 }
 
 .live-panel span {
-  display: none;
+  display: block;
+  color: #cfa84d;
+  font-size: 9px;
 }
 
 .live-panel strong {
   display: block;
   color: #ffe29a;
-  font-size: 15px;
-  line-height: 1;
-  white-space: nowrap;
-  text-shadow: 0 2px 2px #000;
+  font-size: 16px;
 }
 
 .live-panel em {
   display: block;
   color: #ff4433;
   font-size: 9px;
-  line-height: 1;
   font-style: normal;
 }
 
 .balance-panel {
-  left: 6.8% !important;
-  top: 72.8% !important;
-  width: 26.2% !important;
-  height: 3.2% !important;
+  left: 4%; 
+  top: 72%;
+  width: 29%;
+  height: auto;
 }
 
 .win-panel {
-  left: 38.5% !important;
-  top: 72.2% !important;
-  width: 23% !important;
-  height: 5.5% !important;
+  left: 36%;
+  top: 72%;
+  width: 28%;
+  height: auto;
 }
 
 .total-panel {
-  right: 6.2% !important;
-  top: 72.8% !important;
-  width: 15.5% !important;
-  height: 3.2% !important;
+  right: 4%;
+  top: 72%;
+  width: 29%;
+  height: auto;
 }
 
 /* MARKERS */
