@@ -10,6 +10,18 @@ const EUROPEAN_WHEEL = [
   22, 18, 29, 7, 28, 12, 35, 3, 26
 ];
 
+/*
+  IMPORTANT:
+  Adjust only WHEEL_OFFSET if the ball is consistently one pocket off.
+  More negative = moves ball/number target counter-clockwise.
+  Less negative = moves ball/number target clockwise.
+*/
+const WHEEL_OFFSET = -72;
+const WHEEL_NUMBER_RADIUS = 390;
+const BALL_SPIN_RADIUS = -128;
+const WHEEL_SPINS = 6;
+const BALL_SPINS = 10;
+
 let balance = 5000;
 let chip = 100;
 let currentBet = null;
@@ -18,11 +30,6 @@ let spinning = false;
 
 let wheelRotation = 0;
 let ballRotation = 0;
-
-const WHEEL_OFFSET = -72;
-const BALL_RADIUS = -155;
-const WHEEL_SPINS = 6;
-const BALL_SPINS = 10;
 
 const chipMarkerLayer = document.getElementById('chipMarkerLayer');
 const spinButton = document.getElementById('spinButton');
@@ -52,19 +59,21 @@ function getPlayerCredentials() {
 }
 
 function numberColor(number) {
-  if (Number(number) === 0) return 'green';
-  return redNumbers.has(Number(number)) ? 'red' : 'black';
+  const n = Number(number);
+  if (n === 0) return 'green';
+  return redNumbers.has(n) ? 'red' : 'black';
 }
 
 function showToast(message) {
   if (!toast) return;
+
   toast.textContent = message;
   toast.classList.add('show');
 
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => {
     toast.classList.remove('show');
-  }, 1600);
+  }, 1700);
 }
 
 function updateMoney() {
@@ -104,7 +113,10 @@ async function loadWalletBalance() {
   }
 }
 
-/* SVG WHEEL NUMBERS */
+/* -----------------------------
+   WHEEL SVG NUMBERS
+----------------------------- */
+
 function buildWheelNumbers() {
   if (!wheelNumberSvg) return;
 
@@ -112,57 +124,73 @@ function buildWheelNumbers() {
 
   const cx = 500;
   const cy = 500;
-  const radius = 390;
   const step = 360 / EUROPEAN_WHEEL.length;
 
   EUROPEAN_WHEEL.forEach((num, index) => {
     const angle = WHEEL_OFFSET + index * step;
     const rad = angle * Math.PI / 180;
 
-    const x = cx + Math.cos(rad) * radius;
-    const y = cy + Math.sin(rad) * radius;
+    const x = cx + Math.cos(rad) * WHEEL_NUMBER_RADIUS;
+    const y = cy + Math.sin(rad) * WHEEL_NUMBER_RADIUS;
 
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
     text.setAttribute('x', x);
     text.setAttribute('y', y);
-    text.setAttribute('fill', '#fff');
+    text.setAttribute('fill', '#ffffff');
     text.setAttribute('font-size', num === 0 ? '42' : '36');
     text.setAttribute('font-weight', '900');
-    text.setAttribute('font-family', 'Georgia, serif');
+    text.setAttribute('font-family', 'Georgia, Times New Roman, serif');
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'middle');
     text.setAttribute('paint-order', 'stroke');
-    text.setAttribute('stroke', '#000');
+    text.setAttribute('stroke', '#000000');
     text.setAttribute('stroke-width', '5');
     text.setAttribute('transform', `rotate(${angle + 90} ${x} ${y})`);
-    text.textContent = num;
 
+    text.textContent = num;
     wheelNumberSvg.appendChild(text);
   });
 }
 
+function setBallRadius() {
+  if (!rouletteBall) return;
+  rouletteBall.style.transform = `rotate(0deg) translateY(${BALL_SPIN_RADIUS}px)`;
+}
+
+/* -----------------------------
+   WHEEL / BALL ANIMATION
+----------------------------- */
+
 function animateWheelToNumber(resultNumber) {
   if (!wheelSpinLayer || !ballOrbit || !rouletteBall) return;
 
-  const index = EUROPEAN_WHEEL.indexOf(Number(resultNumber));
-  if (index < 0) return;
+  const result = Number(resultNumber);
+  const index = EUROPEAN_WHEEL.indexOf(result);
 
-  const step = 360/37
+  if (index === -1) return;
+
+  const step = 360 / EUROPEAN_WHEEL.length;
   const pocketAngle = WHEEL_OFFSET + index * step;
 
   rouletteBall.style.opacity = '1';
 
   wheelSpinLayer.style.transition = 'none';
   ballOrbit.style.transition = 'none';
+
+  // Force repaint before animation starts
   wheelSpinLayer.offsetHeight;
 
+  /*
+    Keep the wheel spinning in one direction.
+    Stop the ball orbit at the exact pocket angle.
+  */
   wheelRotation += 360 * WHEEL_SPINS;
+  ballRotation = ballRotation - 360 * BALL_SPINS - pocketAngle;
 
-  const finalBallAngle = pocketAngle + wheelRotation;
-  ballRotation = finalBallAngle - 360 * BALL_SPINS;
-  
   wheelSpinLayer.style.transition =
     'transform 5s cubic-bezier(.12,.72,.14,1)';
+
   ballOrbit.style.transition =
     'transform 5s cubic-bezier(.08,.74,.12,1)';
 
@@ -175,13 +203,18 @@ function hideBall() {
   rouletteBall.style.opacity = '0';
 }
 
-/* BETTING */
+/* -----------------------------
+   BETTING
+----------------------------- */
+
 function showBetChip(zone) {
   if (!chipMarkerLayer || !zone) return;
 
   chipMarkerLayer.innerHTML = '';
 
   const shell = document.querySelector('.game-shell');
+  if (!shell) return;
+
   const shellRect = shell.getBoundingClientRect();
   const zoneRect = zone.getBoundingClientRect();
 
@@ -189,6 +222,7 @@ function showBetChip(zone) {
   const y = zoneRect.top - shellRect.top + zoneRect.height / 2;
 
   const marker = document.createElement('div');
+
   marker.className = 'bet-chip-marker';
   marker.textContent = chip >= 1000 ? '1K' : chip;
   marker.style.left = `${x}px`;
@@ -217,7 +251,7 @@ function placeBet(type, value) {
       : value;
 
   currentBet = { type, value: parsed };
-  previousBet = currentBet;
+  previousBet = { type, value: parsed };
 
   document.querySelectorAll('.zone').forEach(btn => {
     btn.classList.remove('bet-selected');
@@ -237,7 +271,10 @@ function placeBet(type, value) {
   if (type === 'color') label = String(parsed).toUpperCase();
   if (type === 'oddEven') label = String(parsed).toUpperCase();
   if (type === 'range') label = parsed === 'low' ? '1–18' : '19–36';
-  if (type === 'dozen') label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
+
+  if (type === 'dozen') {
+    label = parsed === 1 ? '1ST 12' : parsed === 2 ? '2ND 12' : '3RD 12';
+  }
 
   if (type === 'column') {
     label =
@@ -267,7 +304,7 @@ async function spinRoulette() {
   }
 
   spinning = true;
-  spinButton.disabled = true;
+  if (spinButton) spinButton.disabled = true;
 
   if (lastWinText) lastWinText.textContent = '...';
   if (lastColorText) lastColorText.textContent = 'SPINNING';
@@ -291,7 +328,7 @@ async function spinRoulette() {
       showToast(data.error || 'Roulette failed');
       hideBall();
       spinning = false;
-      spinButton.disabled = false;
+      if (spinButton) spinButton.disabled = false;
       return;
     }
 
@@ -315,14 +352,14 @@ async function spinRoulette() {
       }
 
       spinning = false;
-      spinButton.disabled = false;
-    }, 5000);
+      if (spinButton) spinButton.disabled = false;
+    }, 5100);
 
   } catch {
     showToast('Connection error');
     hideBall();
     spinning = false;
-    spinButton.disabled = false;
+    if (spinButton) spinButton.disabled = false;
   }
 }
 
@@ -342,6 +379,11 @@ function clearBet() {
 
 function doubleBet() {
   chip = Math.min(chip * 2, 1000);
+
+  document.querySelectorAll('.chip-zone').forEach(btn => {
+    btn.classList.toggle('selected', Number(btn.dataset.chip) === chip);
+  });
+
   updateMoney();
   showToast(`Bet doubled to ${money(chip)}`);
 }
@@ -349,25 +391,31 @@ function doubleBet() {
 function rebet() {
   if (!previousBet) return showToast('No previous bet');
 
-  currentBet = previousBet;
-
-  const selectedZone = document.querySelector(
-    `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
-  );
+  currentBet = { ...previousBet };
 
   document.querySelectorAll('.zone').forEach(btn => {
     btn.classList.remove('bet-selected');
   });
+
+  const selectedZone = document.querySelector(
+    `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
+  );
 
   if (selectedZone) {
     selectedZone.classList.add('bet-selected');
     showBetChip(selectedZone);
   }
 
+  if (lastWinText) lastWinText.textContent = '—';
+  if (lastColorText) lastColorText.textContent = 'PLACE BET';
+
   showToast('Previous bet restored');
 }
 
-/* EVENTS */
+/* -----------------------------
+   EVENTS / INIT
+----------------------------- */
+
 document.querySelectorAll('.zone').forEach(btn => {
   btn.addEventListener('click', () => {
     placeBet(btn.dataset.bet, btn.dataset.value);
@@ -386,6 +434,7 @@ document.getElementById('doubleButton')?.addEventListener('click', doubleBet);
 document.getElementById('rebetButton')?.addEventListener('click', rebet);
 
 buildWheelNumbers();
+setBallRadius();
 updateMoney();
 loadWalletBalance();
 showToast('Tap the table to place a bet');
