@@ -11,14 +11,20 @@ const EUROPEAN_WHEEL = [
 ];
 
 /*
-  IMPORTANT:
-  Adjust only WHEEL_OFFSET if the ball is consistently one pocket off.
-  More negative = moves ball/number target counter-clockwise.
-  Less negative = moves ball/number target clockwise.
+  WHEEL TUNING (only knobs you should ever need):
+  - WHEEL_OFFSET       : angle of pocket index 0. Nudge if a pocket is one off.
+  - WHEEL_NUMBER_RADIUS: how far numbers sit from center. 274 places them
+                         INSIDE the pockets (your image measured 274, not 315).
+  - WHEEL_CENTER_X/Y   : the wheel art's true center (it's slightly off the
+                         image center). Nudge by a few units if the ring still
+                         looks off-center.
+  - BALL_SPIN_RADIUS   : where the ball rests (pixels). Less negative = closer in.
 */
 const WHEEL_OFFSET = -90.5;
-const WHEEL_NUMBER_RADIUS = 315;
-const BALL_SPIN_RADIUS = -128;
+const WHEEL_NUMBER_RADIUS = 274;
+const WHEEL_CENTER_X = 494;
+const WHEEL_CENTER_Y = 489;
+const BALL_SPIN_RADIUS = -95;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
 
@@ -122,8 +128,8 @@ function buildWheelNumbers() {
 
   wheelNumberSvg.innerHTML = '';
 
-  const cx = 500;
-  const cy = 500;
+  const cx = WHEEL_CENTER_X;
+  const cy = WHEEL_CENTER_Y;
   const step = 360 / EUROPEAN_WHEEL.length;
 
   EUROPEAN_WHEEL.forEach((num, index) => {
@@ -171,22 +177,37 @@ function animateWheelToNumber(resultNumber) {
   if (index === -1) return;
 
   const step = 360 / EUROPEAN_WHEEL.length;
-  const pocketAngle = WHEEL_OFFSET + index * step;
+  const TOP_ANGLE = -90; // 12 o'clock — where the winning number comes to rest
 
   rouletteBall.style.opacity = '1';
 
   wheelSpinLayer.style.transition = 'none';
   ballOrbit.style.transition = 'none';
 
-  // Force repaint before animation starts
+  // Force repaint before the animation starts
   wheelSpinLayer.offsetHeight;
 
   /*
-    Keep the wheel spinning in one direction.
-    Stop the ball orbit at the exact pocket angle.
+    WHEEL: spin forward several full turns, then STOP with the winning
+    number at the top. (Previously it did whole turns only, so it always
+    snapped back to the start with 0 on top.)
   */
   wheelRotation += 360 * WHEEL_SPINS;
-  ballRotation = ballRotation - 360 * BALL_SPINS - pocketAngle;
+  const targetNet = (((TOP_ANGLE - (WHEEL_OFFSET + index * step)) % 360) + 360) % 360;
+  const currentNet = ((wheelRotation % 360) + 360) % 360;
+  let wheelAdjust = targetNet - currentNet;
+  if (wheelAdjust < 0) wheelAdjust += 360;   // always finish moving forward
+  wheelRotation += wheelAdjust;
+
+  /*
+    BALL: spin the opposite way and settle at the top, resting in the
+    winning pocket.
+  */
+  ballRotation -= 360 * BALL_SPINS;
+  const currentBall = ((ballRotation % 360) + 360) % 360;
+  let ballAdjust = -currentBall;             // bring the ball back to the top
+  if (ballAdjust > 0) ballAdjust -= 360;     // keep moving the same (backward) way
+  ballRotation += ballAdjust;
 
   wheelSpinLayer.style.transition =
     'transform 5s cubic-bezier(.12,.72,.14,1)';
