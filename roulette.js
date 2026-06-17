@@ -19,6 +19,11 @@ let spinning = false;
 let wheelRotation = 0;
 let ballRotation = 0;
 
+const WHEEL_OFFSET = -72;
+const BALL_RADIUS = -155;
+const WHEEL_SPINS = 6;
+const BALL_SPINS = 10;
+
 const chipMarkerLayer = document.getElementById('chipMarkerLayer');
 const spinButton = document.getElementById('spinButton');
 const balanceText = document.getElementById('balanceText');
@@ -111,8 +116,7 @@ function buildWheelNumbers() {
   const step = 360 / EUROPEAN_WHEEL.length;
 
   EUROPEAN_WHEEL.forEach((num, index) => {
-    const wheelOffset = -72
-    const angle = wheelOffset + index * step;
+    const angle = WHEEL_OFFSET + index * step;
     const rad = angle * Math.PI / 180;
 
     const x = cx + Math.cos(rad) * radius;
@@ -144,21 +148,19 @@ function animateWheelToNumber(resultNumber) {
   if (index < 0) return;
 
   const step = 360/37
-
-  const wheelOffset = -68
-
-  const targetAngle = wheelOffset + index * step;
+  const pocketAngle = WHEEL_OFFSET + index * step;
 
   rouletteBall.style.opacity = '1';
 
   wheelSpinLayer.style.transition = 'none';
   ballOrbit.style.transition = 'none';
-
   wheelSpinLayer.offsetHeight;
 
-  wheelRotation += 360 * 6 - targetAngle;
-  ballRotation -= 360 * 9 + targetAngle;
+  wheelRotation += 360 * WHEEL_SPINS;
 
+  const finalBallAngle = pocketAngle + wheelRotation;
+  ballRotation = finalBallAngle - 360 * BALL_SPINS;
+  
   wheelSpinLayer.style.transition =
     'transform 5s cubic-bezier(.12,.72,.14,1)';
   ballOrbit.style.transition =
