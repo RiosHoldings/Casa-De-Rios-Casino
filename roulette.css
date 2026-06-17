@@ -236,37 +236,55 @@ body {
 }
 
 /* CONTROLS */
+
+.spin-hotspot,
+.double-hotspot,
+.clear-hotspot,
+.rebet-hotspot {
+  z-index: 45;
+  border: 2px solid #d8a638;
+  background: linear-gradient(#f4c25b, #8b5a12);
+  color: #160b02;
+  font-weight: 900;
+  font-size: 18px;
+  border-radius: 999px;
+}
+
 .spin-hotspot {
-  left: 35%;
-  top: 87.1%;
-  width: 30%;
-  height: 7.7%;
-  border-radius: 14px;
-  color: transparent;
+  left: 31%;
+  top: 89%;
+  width: 38%;
+  height: 6%;
+}
+
+.spin-hotspot::after {
+  content: "SPIN";
 }
 
 .double-hotspot {
-  left: 18%;
-  top: 87.4%;
-  width: 13%;
-  height: 7.4%;
-  border-radius: 10px;
+  left: 5%;
+  top: 89%;
+  width: 20%;
+  height: 6%;
+}
+
+.double-hotspot::after {
+  content: "x2";
 }
 
 .clear-hotspot {
-  left: 70.4%;
-  top: 87.4%;
-  width: 12.4%;
-  height: 7.4%;
-  border-radius: 10px;
+  left: 75%;
+  top: 89%;
+  width: 20%;
+  height: 6%;
+}
+
+.clear-hotspot::after {
+  content: "CLR";
 }
 
 .rebet-hotspot {
-  left: 85%;
-  top: 87.4%;
-  width: 12.4%;
-  height: 7.4%;
-  border-radius: 10px;
+  display: none;
 }
 
 /* PANELS */

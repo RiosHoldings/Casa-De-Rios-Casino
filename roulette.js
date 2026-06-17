@@ -141,11 +141,13 @@ function animateWheelToNumber(resultNumber) {
   if (!wheelSpinLayer || !ballOrbit || !rouletteBall) return;
 
   const index = EUROPEAN_WHEEL.indexOf(Number(resultNumber));
-  const step = 360 / EUROPEAN_WHEEL.length;
-
   if (index < 0) return;
 
-  const targetAngle = index * step;
+  const step = 360/37
+
+  const wheelOffset = -68
+
+  const targetAngle = wheelOffset + index * step;
 
   rouletteBall.style.opacity = '1';
 
@@ -154,13 +156,13 @@ function animateWheelToNumber(resultNumber) {
 
   wheelSpinLayer.offsetHeight;
 
-  wheelRotation += 360 * 6 + targetAngle;
+  wheelRotation += 360 * 6 - targetAngle;
   ballRotation -= 360 * 9 + targetAngle;
 
   wheelSpinLayer.style.transition =
-    'transform 4.8s cubic-bezier(.12,.72,.14,1)';
+    'transform 5s cubic-bezier(.12,.72,.14,1)';
   ballOrbit.style.transition =
-    'transform 4.8s cubic-bezier(.08,.74,.12,1)';
+    'transform 5s cubic-bezier(.08,.74,.12,1)';
 
   wheelSpinLayer.style.transform = `rotate(${wheelRotation}deg)`;
   ballOrbit.style.transform = `rotate(${ballRotation}deg)`;
