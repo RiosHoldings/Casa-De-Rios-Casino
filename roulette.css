@@ -44,8 +44,8 @@ body {
 .wheel-area {
   position: absolute;
   left: 50%;
-  top: 8.5%;
-  width: 70%;
+  top: 8%;
+  width: 86%;
   aspect-ratio: 1 / 1;
   transform: translateX(-50%);
   z-index: 3;
@@ -99,7 +99,7 @@ body {
 .roulette-table {
   position: absolute;
   left: 50%;
-  top: 38.5%;
+  top: 42%;
   width: 96%;
   height: auto;
   transform: translateX(-50%);
@@ -157,44 +157,44 @@ body {
 /* TABLE HOTSPOTS - STARTING POSITIONS */
 .z-zero { left: 7.2%; top: 47.4%; width: 7.0%; height: 13.9%; }
 
-.z-3  { left: 14.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-6  { left: 20.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-9  { left: 26.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-12 { left: 32.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-15 { left: 38.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-18 { left: 44.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-21 { left: 50.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-24 { left: 56.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-27 { left: 62.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-30 { left: 68.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-33 { left: 74.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
-.z-36 { left: 80.0%; top: 47.4%; width: 6.0%; height: 4.65%; }
+.z-3  { left: 14.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-6  { left: 20.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-9  { left: 26.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-12 { left: 32.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-15 { left: 38.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-18 { left: 44.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-21 { left: 50.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-24 { left: 56.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-27 { left: 62.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-30 { left: 68.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-33 { left: 74.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
+.z-36 { left: 80.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
 
-.z-2  { left: 14.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-5  { left: 20.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-8  { left: 26.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-11 { left: 32.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-14 { left: 38.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-17 { left: 44.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-20 { left: 50.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-23 { left: 56.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-26 { left: 62.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-29 { left: 68.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-32 { left: 74.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
-.z-35 { left: 80.0%; top: 52.05%; width: 6.0%; height: 4.65%; }
+.z-2  { left: 14.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-5  { left: 20.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-8  { left: 26.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-11 { left: 32.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-14 { left: 38.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-17 { left: 44.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-20 { left: 50.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-23 { left: 56.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-26 { left: 62.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-29 { left: 68.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-32 { left: 74.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
+.z-35 { left: 80.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
 
-.z-1  { left: 14.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-4  { left: 20.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-7  { left: 26.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-10 { left: 32.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-13 { left: 38.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-16 { left: 44.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-19 { left: 50.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-22 { left: 56.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-25 { left: 62.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-28 { left: 68.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-31 { left: 74.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
-.z-34 { left: 80.0%; top: 56.7%; width: 6.0%; height: 4.65%; }
+.z-1  { left: 14.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-4  { left: 20.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-7  { left: 26.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-10 { left: 32.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-13 { left: 38.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-16 { left: 44.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-19 { left: 50.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-22 { left: 56.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-25 { left: 62.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-28 { left: 68.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-31 { left: 74.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
+.z-34 { left: 80.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
 
 .z-col3 { left: 86.0%; top: 47.4%; width: 7.0%; height: 4.65%; }
 .z-col2 { left: 86.0%; top: 52.05%; width: 7.0%; height: 4.65%; }
@@ -213,7 +213,7 @@ body {
 
 /* CHIPS */
 .chip-zone {
-  top: 76.9%;
+  top: 81%;
   width: 13.2%;
   aspect-ratio: 1;
   border-radius: 50%;

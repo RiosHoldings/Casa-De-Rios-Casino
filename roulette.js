@@ -107,11 +107,12 @@ function buildWheelNumbers() {
 
   const cx = 500;
   const cy = 500;
-  const radius = 345;
+  const radius = 390;
   const step = 360 / EUROPEAN_WHEEL.length;
 
   EUROPEAN_WHEEL.forEach((num, index) => {
-    const angle = -90 + index * step;
+    const wheelOffset = -72
+    const angle = wheelOffset + index * step;
     const rad = angle * Math.PI / 180;
 
     const x = cx + Math.cos(rad) * radius;
