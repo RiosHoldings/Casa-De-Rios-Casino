@@ -17,7 +17,7 @@ const EUROPEAN_WHEEL = [
   Less negative = moves ball/number target clockwise.
 */
 const WHEEL_OFFSET = -91.5;
-const WHEEL_NUMBER_RADIUS = 390;
+const WHEEL_NUMBER_RADIUS = 330;
 const BALL_SPIN_RADIUS = -128;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
