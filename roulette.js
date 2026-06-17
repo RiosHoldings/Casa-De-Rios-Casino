@@ -21,12 +21,16 @@ const EUROPEAN_WHEEL = [
   - BALL_SPIN_RADIUS   : where the ball rests (pixels). Less negative = closer in.
 */
 const WHEEL_OFFSET = -90.5;
-const WHEEL_NUMBER_RADIUS = 274;
+const WHEEL_NUMBER_RADIUS = 266;
 const WHEEL_CENTER_X = 512;
 const WHEEL_CENTER_Y = 512;
 const BALL_SPIN_RADIUS = -95;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
+
+const WHEEL_NUMBER_FONT_SIZE = 22;
+const WHEEL_ZERO_FONT_SIZE = 24;
+const WHEEL_NUMBER_STROKE = 3;
 
 let balance = 5000;
 let chip = 100;
@@ -144,14 +148,14 @@ function buildWheelNumbers() {
     text.setAttribute('x', x);
     text.setAttribute('y', y);
     text.setAttribute('fill', '#ffffff');
-    text.setAttribute('font-size', num === 0 ? '42' : '36');
+    text.setAttribute('font-size', String(num === 0 ? WHEEL_ZERO_FONT_SIZE : WHEEL_NUMBER_FONT_SIZE));
     text.setAttribute('font-weight', '900');
     text.setAttribute('font-family', 'Georgia, Times New Roman, serif');
     text.setAttribute('text-anchor', 'middle');
     text.setAttribute('dominant-baseline', 'middle');
     text.setAttribute('paint-order', 'stroke');
     text.setAttribute('stroke', '#000000');
-    text.setAttribute('stroke-width', '5');
+    text.setAttribute('stroke-width', String(WHEEL_NUMBER_STROKE));
     text.setAttribute('transform', `rotate(${angle + 90} ${x} ${y})`);
 
     text.textContent = num;
