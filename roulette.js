@@ -22,8 +22,8 @@ const EUROPEAN_WHEEL = [
 */
 const WHEEL_OFFSET = -90.5;
 const WHEEL_NUMBER_RADIUS = 270;
-const WHEEL_CENTER_X = 514;
-const WHEEL_CENTER_Y = 512;
+const WHEEL_CENTER_X = 510;
+const WHEEL_CENTER_Y = 511;
 const BALL_SPIN_RADIUS = -95;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
