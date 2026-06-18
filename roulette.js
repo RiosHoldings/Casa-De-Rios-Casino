@@ -21,7 +21,7 @@ const EUROPEAN_WHEEL = [
   - BALL_SPIN_RADIUS   : where the ball rests (pixels). Less negative = closer in.
 */
 const WHEEL_OFFSET = -90.5;
-const WHEEL_NUMBER_RADIUS = 268;
+const WHEEL_NUMBER_RADIUS = 270;
 const WHEEL_CENTER_X = 512;
 const WHEEL_CENTER_Y = 512;
 const BALL_SPIN_RADIUS = -95;
