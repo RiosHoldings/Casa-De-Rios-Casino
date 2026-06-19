@@ -1,59 +1,74 @@
-* {
-  box-sizing: border-box;
-}
+/* ============================================================
+   CASA DE RÍOS ROULETTE
+   Layout model: ONE aspect-locked .stage (840 x 1456, the ratio
+   of the UI art). Every layer is positioned as a % of the stage,
+   so the wheel, the UI chrome, the value text and every hotspot
+   stay locked together on any screen. The background fills the
+   whole viewport (and any letterbox around the stage).
+   ============================================================ */
 
-html,
-body {
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body {
   margin: 0;
-  width: 100%;
+  padding: 0;
   height: 100%;
-  background: #030102;
+  background: #07040a;
   overflow: hidden;
-  font-family: Georgia, 'Times New Roman', serif;
-  color: #f8df9a;
+  font-family: Georgia, "Times New Roman", serif;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
 }
 
-.game-shell {
+/* Background — covers the full viewport including letterbox bars */
+.bg {
   position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100dvh;
-  max-height: none;
-  aspect-ratio: auto;
-  overflow: hidden;
-  background: #050202;
-}
-
-/* IMAGES */
-.roulette-bg {
-  position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 1;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
 }
 
-.wheel-area {
+/* ---------- The stage ---------- */
+.stage {
+  --ss: 400px;                 /* JS sets this to the live stage width */
+  position: relative;
+  width: min(100vw, calc(100dvh * 840 / 1456));
+  aspect-ratio: 840 / 1456;
+  z-index: 1;
+  overflow: visible;
+}
+
+/* ============================================================
+   WHEEL  (upper void of the UI art)
+   ============================================================ */
+.wheel-wrap {
   position: absolute;
-  left: 50%;
-  top: 8%;
-  width: 82vw;
-  max-width: 390px;
-  aspect-ratio: 1;
-  transform: translateX(-50%);
-  z-index: 4;
+  left: 18%;
+  top: 11%;
+  width: 64%;
+  aspect-ratio: 1 / 1;
+  z-index: 2;
   pointer-events: none;
 }
 
-.wheel-spin-layer {
+.wheel-spin-layer,
+.ball-orbit {
   position: absolute;
   inset: 0;
-  transform-origin: center center;
+  transform-origin: 50% 50%;
+  will-change: transform;
 }
 
 .roulette-wheel {
@@ -61,6 +76,8 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  user-select: none;
 }
 
 .wheel-number-svg {
@@ -68,321 +85,282 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 
-.ball-orbit {
-  position: absolute;
-  inset: 0;
-  transform-origin: center center;
-}
+.ball-orbit { z-index: 3; }
 
 .roulette-ball {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 11px;
-  height: 11px;
-  margin-left: -5.5px;
-  margin-top: -5.5px;
+  width: calc(var(--ss) * 0.022);
+  height: calc(var(--ss) * 0.022);
+  margin-left: calc(var(--ss) * -0.011);
+  margin-top: calc(var(--ss) * -0.011);
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff, #d8d8d8 55%, #777);
-  box-shadow: 0 1px 5px rgba(0,0,0,.85);
-  transform: rotate(0deg) translateY(-155px);
-  opacity: 0;
+  background: radial-gradient(circle at 32% 30%, #ffffff, #d9d9d9 55%, #9a9a9a 100%);
+  box-shadow: 0 0 calc(var(--ss) * 0.012) rgba(255, 255, 255, 0.85);
+  opacity: 0;                  /* shown only during/after a spin */
+  transform: translateY(0);    /* JS sets the orbit radius here */
 }
 
-.roulette-table {
+/* ============================================================
+   BETTING TABLE  (lower void) — real HTML cells = real tap targets
+   ============================================================ */
+.table-wrap {
   position: absolute;
-  left: 50%;
-  top: 39%;
-  width: 96vw;
-  max-width: 430px;
-  transform: translateX(-50%);
-  z-index: 8;
+  left: 4%;
+  top: 49.4%;
+  width: 92%;
+  height: 15.6%;
+  z-index: 5;
+  padding: calc(var(--ss) * 0.019);
+  border-radius: calc(var(--ss) * 0.042);
+  background: linear-gradient(158deg, #3c1d15 0%, #1a0c09 52%, #0b0606 100%);
+  box-shadow:
+    0 calc(var(--ss) * 0.012) calc(var(--ss) * 0.04) rgba(0, 0, 0, 0.6),
+    inset 0 0 0 calc(var(--ss) * 0.006) rgba(216, 178, 96, 0.6),
+    inset 0 0 calc(var(--ss) * 0.02) rgba(0, 0, 0, 0.65);
+}
+
+/* subtle gold studs along the top & bottom rail */
+.table-wrap::before,
+.table-wrap::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  height: calc(var(--ss) * 0.012);
+  background-image: radial-gradient(circle, rgba(238, 205, 120, 0.95) 36%, rgba(238, 205, 120, 0) 38%);
+  background-size: calc(var(--ss) * 0.085) 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.8;
   pointer-events: none;
 }
+.table-wrap::before { top: calc(var(--ss) * 0.004); }
+.table-wrap::after  { bottom: calc(var(--ss) * 0.004); }
 
-/* HOTSPOT DEBUG STYLE */
-.zone,
-.chip-zone,
-.spin-hotspot,
-.clear-hotspot,
-.double-hotspot,
-.rebet-hotspot {
-  position: absolute;
-  z-index: 30;
+.felt {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  grid-template-rows: 1fr 1fr 1fr 0.92fr 0.92fr;
+  background: #0c7a34;
+  border-radius: calc(var(--ss) * 0.02);
+  overflow: hidden;
+}
+
+.zone {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-weight: 800;
+  line-height: 1;
   padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  -webkit-tap-highlight-color: rgba(255, 210, 70, 0.22);
-  outline: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: filter 0.12s ease, box-shadow 0.12s ease;
+}
+.zone:active { filter: brightness(1.25); }
 
-  /* DEBUG BOXES */
-  background: rgba(0, 170, 255, 0.18);
-  border: 1px solid rgba(0, 220, 255, 0.95);
+.zone.num     { font-size: calc(var(--ss) * 0.033); }
+.zone.outside,
+.zone.col2to1 { font-size: calc(var(--ss) * 0.026); letter-spacing: 0.2px; }
+
+.zone.green        { background: #0c7a34; }
+.zone.red,
+.zone.swatch-red   { background: #c0152a; }
+.zone.black,
+.zone.swatch-black { background: #161616; }
+
+/* selected bet highlight */
+.zone.bet-selected {
+  box-shadow:
+    inset 0 0 0 2px #ffd24a,
+    0 0 calc(var(--ss) * 0.018) rgba(255, 210, 74, 0.75);
+  filter: brightness(1.12);
+  z-index: 1;
 }
 
-.zone:active,
-.chip-zone:active,
-.spin-hotspot:active,
-.clear-hotspot:active,
-.double-hotspot:active {
-  background: rgba(255, 215, 0, 0.35);
-  border-color: #ffd700;
-}
+/* the digit wrapper — kept upright by default (best on mobile).
+   --- OPTIONAL: to match the mockup's sideways numbers, uncomment ---
+   .felt .zone.num:not(.green) .d { display:inline-block; transform: rotate(-90deg); }
+*/
+.zone .d { display: inline-block; }
 
-.bet-selected {
-  background: rgba(255, 215, 0, 0.35) !important;
-  border-color: #ffd700 !important;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.75);
-}
-
-/* TABLE HOTSPOTS - STARTING POSITIONS */
-.z-zero { left: 7.2%; top: 47.4%; width: 7.0%; height: 13.9%; }
-
-.z-3  { left: 14.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-6  { left: 20.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-9  { left: 26.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-12 { left: 32.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-15 { left: 38.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-18 { left: 44.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-21 { left: 50.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-24 { left: 56.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-27 { left: 62.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-30 { left: 68.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-33 { left: 74.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-.z-36 { left: 80.0%; top: 47.4%; width: 6.0%; height: 5.2%; }
-
-.z-2  { left: 14.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-5  { left: 20.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-8  { left: 26.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-11 { left: 32.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-14 { left: 38.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-17 { left: 44.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-20 { left: 50.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-23 { left: 56.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-26 { left: 62.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-29 { left: 68.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-32 { left: 74.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-.z-35 { left: 80.0%; top: 52.05%; width: 6.0%; height: 5.2%; }
-
-.z-1  { left: 14.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-4  { left: 20.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-7  { left: 26.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-10 { left: 32.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-13 { left: 38.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-16 { left: 44.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-19 { left: 50.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-22 { left: 56.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-25 { left: 62.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-28 { left: 68.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-31 { left: 74.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-.z-34 { left: 80.0%; top: 56.7%; width: 6.0%; height: 5.2%; }
-
-.z-col3 { left: 86.0%; top: 47.4%; width: 7.0%; height: 4.65%; }
-.z-col2 { left: 86.0%; top: 52.05%; width: 7.0%; height: 4.65%; }
-.z-col1 { left: 86.0%; top: 56.7%; width: 7.0%; height: 4.65%; }
-
-.z-d1 { left: 14.0%; top: 61.45%; width: 24.0%; height: 4.8%; }
-.z-d2 { left: 38.0%; top: 61.45%; width: 24.0%; height: 4.8%; }
-.z-d3 { left: 62.0%; top: 61.45%; width: 24.0%; height: 4.8%; }
-
-.z-low   { left: 14.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-.z-even  { left: 26.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-.z-red   { left: 38.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-.z-black { left: 50.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-.z-odd   { left: 62.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-.z-high  { left: 74.0%; top: 66.35%; width: 12.0%; height: 4.5%; }
-
-/* CHIPS */
-.chip-zone {
-  top: 79%;
-  width: 14%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  z-index: 45;
-  border: 3px solid #f8d66b;
-  background: radial-gradient(circle, #fff6c5 0 18%, #b48b25 19% 42%, #42146f 43% 100%);
-  color: #000;
-  font-weight: 900;
-  font-size: 14px; 
-}
-
-.chip-zone::after {
-  content: attr(data-chip);
-  color: #000
-}
-
-.c50 { left: 7%; }
-.c100 { left: 25%; }
-.c250 { left: 43%; }
-.c500 { left: 61%; }
-.c1000 { left: 79%; }
-
-.chip-zone.selected {
-  box-shadow: 0 0 16px #ffd700;
-}
-
-/* CONTROLS */
-
-.spin-hotspot,
-.double-hotspot,
-.clear-hotspot,
-.rebet-hotspot {
-  z-index: 45;
-  border: 2px solid #d8a638;
-  background: linear-gradient(#f4c25b, #8b5a12);
-  color: #160b02;
-  font-weight: 900;
-  font-size: 18px;
-  border-radius: 999px;
-}
-
-.spin-hotspot {
-  left: 31%;
-  top: 89%;
-  width: 38%;
-  height: 6%;
-}
-
-.spin-hotspot::after {
-  content: "SPIN";
-}
-
-.double-hotspot {
-  left: 5%;
-  top: 89%;
-  width: 20%;
-  height: 6%;
-}
-
-.double-hotspot::after {
-  content: "x2";
-}
-
-.clear-hotspot {
-  left: 75%;
-  top: 89%;
-  width: 20%;
-  height: 6%;
-}
-
-.clear-hotspot::after {
-  content: "CLR";
-}
-
-.rebet-hotspot {
-  display: none;
-}
-
-/* PANELS */
-.live-panel {
-  position: absolute !important;
-  z-index: 40 !important;
-  background: rgba(8, 2, 1, 0.92);
-  border: 1px solid rgba(230, 190, 90, 0.7);
-  border-radius: 10px;
-  text-align: center;
-  padding: 6px 4px;
-}
-
-.live-panel span {
-  display: block;
-  color: #cfa84d;
-  font-size: 9px;
-}
-
-.live-panel strong {
-  display: block;
-  color: #ffe29a;
-  font-size: 16px;
-}
-
-.live-panel em {
-  display: block;
-  color: #ff4433;
-  font-size: 9px;
-  font-style: normal;
-}
-
-.balance-panel {
-  left: 4%; 
-  top: 72%;
-  width: 29%;
-  height: auto;
-}
-
-.win-panel {
-  left: 36%;
-  top: 72%;
-  width: 28%;
-  height: auto;
-}
-
-.total-panel {
-  right: 4%;
-  top: 72%;
-  width: 29%;
-  height: auto;
-}
-
-/* MARKERS */
-.chip-marker-layer {
+/* ============================================================
+   UI CHROME OVERLAY + DYNAMIC VALUES
+   ============================================================ */
+.ui-overlay {
   position: absolute;
   inset: 0;
-  z-index: 60;
-  pointer-events: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 3;
+  pointer-events: none;     /* taps fall through to the hotspots */
+  user-select: none;
 }
+
+.values { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+
+.val {
+  position: absolute;
+  top: 70.2%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: calc(var(--ss) * 0.05);
+  color: #f4ecd6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.val-balance { left: 18%; }
+.val-total   { left: 78.6%; }
+.val-win     { left: 49.3%; color: #36e07a; font-size: calc(var(--ss) * 0.052); }
+
+/* result colour subtitle — kept for script compatibility, not shown */
+.val-color { display: none; }
+
+/* ============================================================
+   INVISIBLE HOTSPOTS  (sit exactly over the baked art)
+   ============================================================ */
+.chip-hotspots { position: absolute; inset: 0; z-index: 7; }
+
+.chip-zone {
+  position: absolute;
+  top: 73.6%;
+  width: 13%;
+  height: 7.2%;
+  transform: translateX(-50%);   /* inline `left` is the chip's centre */
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.chip-zone.selected {
+  box-shadow: 0 0 0 2px rgba(255, 210, 74, 0.85), 0 0 14px rgba(255, 210, 74, 0.55);
+}
+
+.ctrl-hotspot,
+.spin-hotspot,
+.lobby-hotspot {
+  position: absolute;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* CLEAR / REBET / DOUBLE / UNDO — inline left+width per button */
+.ctrl-hotspot {
+  top: 83%;
+  height: 9%;
+  border-radius: calc(var(--ss) * 0.02);
+}
+.ctrl-hotspot:active { box-shadow: inset 0 0 0 2px rgba(255, 210, 74, 0.5); }
+
+/* SPIN — the big round centre button */
+.spin-hotspot {
+  left: 37%;
+  width: 23.5%;
+  top: 80.8%;
+  height: 15%;
+  border-radius: 50%;
+  color: transparent;            /* the word SPIN is baked into the art */
+  font-size: 0;
+}
+.spin-hotspot:active { box-shadow: 0 0 0 3px rgba(255, 210, 74, 0.55); }
+.spin-hotspot:disabled { cursor: default; }
+
+/* Lobby / hamburger, top-left */
+.lobby-hotspot {
+  left: 3%;
+  top: 2%;
+  width: 10%;
+  height: 5.5%;
+  border-radius: 50%;
+}
+
+/* ============================================================
+   CHIP MARKER ON THE TABLE + TOAST
+   ============================================================ */
+.chip-marker-layer { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
 
 .bet-chip-marker {
   position: absolute;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #f8e8a0 0 18%, #d4af37 19% 45%, #4b1e78 46% 100%);
-  border: 2px solid #f8e8a0;
-  box-shadow: 0 2px 7px rgba(0,0,0,.75);
   transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  color: #000;
-  font-size: 8px;
-  font-weight: 900;
+  min-width: calc(var(--ss) * 0.075);
+  height: calc(var(--ss) * 0.075);
+  padding: 0 calc(var(--ss) * 0.012);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: calc(var(--ss) * 0.032);
+  font-weight: 800;
+  color: #1a1206;
+  background: radial-gradient(circle at 32% 30%, #ffe7a0, #e9bf57 60%, #b98d2c 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55), inset 0 0 0 2px rgba(255, 255, 255, 0.45);
 }
 
-/* TOAST */
 .toast {
   position: absolute;
-  z-index: 90;
   left: 50%;
-  bottom: 8.7%;
-  transform: translateX(-50%) translateY(12px);
-  width: 78%;
-  padding: 8px 12px;
-  border: 1px solid rgba(235, 191, 77, 0.76);
+  bottom: 1.5%;
+  transform: translate(-50%, 8px);
+  max-width: 86%;
+  z-index: 9;
+  padding: calc(var(--ss) * 0.018) calc(var(--ss) * 0.04);
   border-radius: 999px;
-  background: rgba(10, 3, 2, 0.82);
-  color: #ffe19b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: calc(var(--ss) * 0.034);
+  font-weight: 600;
+  color: #f6efdd;
   text-align: center;
-  font-size: 13px;
-  font-weight: 700;
+  background: rgba(20, 10, 28, 0.86);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(238, 205, 120, 0.4);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   DEBUG  — add class="debug" to <body> to outline every hotspot
+   ============================================================ */
+body.debug .chip-zone,
+body.debug .ctrl-hotspot,
+body.debug .spin-hotspot,
+body.debug .lobby-hotspot { background: rgba(255, 0, 120, 0.28); outline: 1px solid #ff2d8e; }
+body.debug .table-wrap { outline: 1px dashed #00e5ff; }
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+.zone:focus-visible,
+.chip-zone:focus-visible,
+.ctrl-hotspot:focus-visible,
+.spin-hotspot:focus-visible,
+.lobby-hotspot:focus-visible {
+  outline: 2px solid #ffd24a;
+  outline-offset: -2px;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.lobby-hotspot {
-  position: absolute;
-  z-index: 100;
-  left: 2.8%;
-  top: 8.1%;
-  width: 9%;
-  height: 6%;
-  display: block;
-  background: rgba(255, 0, 255, 0.15);
-  border: 1px solid rgba(255, 0, 255, 0.8);
+@media (prefers-reduced-motion: reduce) {
+  .wheel-spin-layer,
+  .ball-orbit { transition: none !important; }
 }

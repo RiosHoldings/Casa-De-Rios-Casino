@@ -2,127 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Casa de Ríos Roulette</title>
   <link rel="stylesheet" href="roulette.css" />
 </head>
 
 <body>
-  <main class="game-shell" aria-label="Casa de Ríos Roulette">
+  <!-- Background fills the whole viewport (and any letterbox around the stage) -->
+  <img class="bg" src="assets/roulette-bg.png" alt="" aria-hidden="true" />
 
-    <!-- Background -->
-    <img class="roulette-bg" src="assets/roulette-bg.jpeg" alt="" />
+  <!-- Aspect-locked stage: every layer is positioned as a % of THIS box,
+       so overlays, hotspots and text can never drift apart. -->
+  <main class="stage" aria-label="Casa de Ríos Roulette">
 
-    <!-- Wheel Area -->
-    <section class="wheel-area" aria-hidden="true">
+    <!-- WHEEL (sits in the upper transparent void of the UI art) -->
+    <section class="wheel-wrap" aria-hidden="true">
       <div id="wheelSpinLayer" class="wheel-spin-layer">
-        <img id="rouletteWheel" class="roulette-wheel" src="assets/wheel.png" alt="" />
-        <svg id="wheelNumberSvg" class="wheel-number-svg" viewBox="0 0 1000 1000"></svg>
+        <img class="roulette-wheel" src="assets/wheel.png" alt="" />
+        <svg id="wheelNumberSvg" class="wheel-number-svg" viewBox="0 0 1036 1036"></svg>
       </div>
-
       <div id="ballOrbit" class="ball-orbit">
         <div id="rouletteBall" class="roulette-ball"></div>
       </div>
     </section>
 
-    <!-- Table -->
-    <img class="roulette-table" src="assets/table.jpeg" alt="European roulette betting table" />
+    <!-- BETTING TABLE — rendered as real HTML cells (each cell IS its own tap
+         target, so alignment can never break again). Sits in the lower void. -->
+    <section class="table-wrap" aria-label="Betting table">
+      <div class="felt">
+    <button class="zone num green" style="grid-area:1/1/4/2" data-bet="number" data-value="0" aria-label="Bet 0"><span class="d">0</span></button>
+    <button class="zone num red" style="grid-area:1/2/2/3" data-bet="number" data-value="3" aria-label="Bet 3"><span class="d">3</span></button>
+    <button class="zone num black" style="grid-area:1/3/2/4" data-bet="number" data-value="6" aria-label="Bet 6"><span class="d">6</span></button>
+    <button class="zone num red" style="grid-area:1/4/2/5" data-bet="number" data-value="9" aria-label="Bet 9"><span class="d">9</span></button>
+    <button class="zone num red" style="grid-area:1/5/2/6" data-bet="number" data-value="12" aria-label="Bet 12"><span class="d">12</span></button>
+    <button class="zone num black" style="grid-area:1/6/2/7" data-bet="number" data-value="15" aria-label="Bet 15"><span class="d">15</span></button>
+    <button class="zone num red" style="grid-area:1/7/2/8" data-bet="number" data-value="18" aria-label="Bet 18"><span class="d">18</span></button>
+    <button class="zone num red" style="grid-area:1/8/2/9" data-bet="number" data-value="21" aria-label="Bet 21"><span class="d">21</span></button>
+    <button class="zone num black" style="grid-area:1/9/2/10" data-bet="number" data-value="24" aria-label="Bet 24"><span class="d">24</span></button>
+    <button class="zone num red" style="grid-area:1/10/2/11" data-bet="number" data-value="27" aria-label="Bet 27"><span class="d">27</span></button>
+    <button class="zone num red" style="grid-area:1/11/2/12" data-bet="number" data-value="30" aria-label="Bet 30"><span class="d">30</span></button>
+    <button class="zone num black" style="grid-area:1/12/2/13" data-bet="number" data-value="33" aria-label="Bet 33"><span class="d">33</span></button>
+    <button class="zone num red" style="grid-area:1/13/2/14" data-bet="number" data-value="36" aria-label="Bet 36"><span class="d">36</span></button>
+    <button class="zone num black" style="grid-area:2/2/3/3" data-bet="number" data-value="2" aria-label="Bet 2"><span class="d">2</span></button>
+    <button class="zone num red" style="grid-area:2/3/3/4" data-bet="number" data-value="5" aria-label="Bet 5"><span class="d">5</span></button>
+    <button class="zone num black" style="grid-area:2/4/3/5" data-bet="number" data-value="8" aria-label="Bet 8"><span class="d">8</span></button>
+    <button class="zone num black" style="grid-area:2/5/3/6" data-bet="number" data-value="11" aria-label="Bet 11"><span class="d">11</span></button>
+    <button class="zone num red" style="grid-area:2/6/3/7" data-bet="number" data-value="14" aria-label="Bet 14"><span class="d">14</span></button>
+    <button class="zone num black" style="grid-area:2/7/3/8" data-bet="number" data-value="17" aria-label="Bet 17"><span class="d">17</span></button>
+    <button class="zone num black" style="grid-area:2/8/3/9" data-bet="number" data-value="20" aria-label="Bet 20"><span class="d">20</span></button>
+    <button class="zone num red" style="grid-area:2/9/3/10" data-bet="number" data-value="23" aria-label="Bet 23"><span class="d">23</span></button>
+    <button class="zone num black" style="grid-area:2/10/3/11" data-bet="number" data-value="26" aria-label="Bet 26"><span class="d">26</span></button>
+    <button class="zone num black" style="grid-area:2/11/3/12" data-bet="number" data-value="29" aria-label="Bet 29"><span class="d">29</span></button>
+    <button class="zone num red" style="grid-area:2/12/3/13" data-bet="number" data-value="32" aria-label="Bet 32"><span class="d">32</span></button>
+    <button class="zone num black" style="grid-area:2/13/3/14" data-bet="number" data-value="35" aria-label="Bet 35"><span class="d">35</span></button>
+    <button class="zone num red" style="grid-area:3/2/4/3" data-bet="number" data-value="1" aria-label="Bet 1"><span class="d">1</span></button>
+    <button class="zone num black" style="grid-area:3/3/4/4" data-bet="number" data-value="4" aria-label="Bet 4"><span class="d">4</span></button>
+    <button class="zone num red" style="grid-area:3/4/4/5" data-bet="number" data-value="7" aria-label="Bet 7"><span class="d">7</span></button>
+    <button class="zone num black" style="grid-area:3/5/4/6" data-bet="number" data-value="10" aria-label="Bet 10"><span class="d">10</span></button>
+    <button class="zone num black" style="grid-area:3/6/4/7" data-bet="number" data-value="13" aria-label="Bet 13"><span class="d">13</span></button>
+    <button class="zone num red" style="grid-area:3/7/4/8" data-bet="number" data-value="16" aria-label="Bet 16"><span class="d">16</span></button>
+    <button class="zone num red" style="grid-area:3/8/4/9" data-bet="number" data-value="19" aria-label="Bet 19"><span class="d">19</span></button>
+    <button class="zone num black" style="grid-area:3/9/4/10" data-bet="number" data-value="22" aria-label="Bet 22"><span class="d">22</span></button>
+    <button class="zone num red" style="grid-area:3/10/4/11" data-bet="number" data-value="25" aria-label="Bet 25"><span class="d">25</span></button>
+    <button class="zone num black" style="grid-area:3/11/4/12" data-bet="number" data-value="28" aria-label="Bet 28"><span class="d">28</span></button>
+    <button class="zone num black" style="grid-area:3/12/4/13" data-bet="number" data-value="31" aria-label="Bet 31"><span class="d">31</span></button>
+    <button class="zone num red" style="grid-area:3/13/4/14" data-bet="number" data-value="34" aria-label="Bet 34"><span class="d">34</span></button>
+    <button class="zone col2to1 green" style="grid-area:1/14/2/15" data-bet="column" data-value="3" aria-label="Top column 2 to 1">2-1</button>
+    <button class="zone col2to1 green" style="grid-area:2/14/3/15" data-bet="column" data-value="2" aria-label="Middle column 2 to 1">2-1</button>
+    <button class="zone col2to1 green" style="grid-area:3/14/4/15" data-bet="column" data-value="1" aria-label="Bottom column 2 to 1">2-1</button>
+    <button class="zone outside dozen" style="grid-area:4/2/5/6" data-bet="dozen" data-value="1">1st 12</button>
+    <button class="zone outside dozen" style="grid-area:4/6/5/10" data-bet="dozen" data-value="2">2nd 12</button>
+    <button class="zone outside dozen" style="grid-area:4/10/5/14" data-bet="dozen" data-value="3">3rd 12</button>
+    <button class="zone outside" style="grid-area:5/2/6/4" data-bet="range" data-value="low">1-18</button>
+    <button class="zone outside" style="grid-area:5/4/6/6" data-bet="oddEven" data-value="even">Even</button>
+    <button class="zone outside swatch-red" style="grid-area:5/6/6/8" data-bet="color" data-value="red">Red</button>
+    <button class="zone outside swatch-black" style="grid-area:5/8/6/10" data-bet="color" data-value="black">Black</button>
+    <button class="zone outside" style="grid-area:5/10/6/12" data-bet="oddEven" data-value="odd">Odd</button>
+    <button class="zone outside" style="grid-area:5/12/6/14" data-bet="range" data-value="high">19-36</button>
+      </div>
+    </section>
 
+    <!-- UI CHROME OVERLAY (logo, panels, chip bar, buttons are baked into this
+         image). pointer-events:none so taps pass through to the hotspots. -->
+    <img class="ui-overlay" src="assets/roulette-ui.png" alt="" aria-hidden="true" />
+
+    <!-- DYNAMIC VALUES drawn over the baked panel labels -->
+    <div class="values" aria-live="polite">
+      <strong id="balanceText" class="val val-balance">$5,000.00</strong>
+      <strong id="lastWinText" class="val val-win">—</strong>
+      <em id="lastColorText" class="val-color">PLACE BET</em>
+      <strong id="totalBetText" class="val val-total">$100.00</strong>
+    </div>
+
+    <!-- INVISIBLE HOTSPOTS over the baked chips -->
+    <div class="chip-hotspots" aria-label="Chip selection">
+      <button class="chip-zone" style="left:22%"  data-chip="50"  aria-label="50 chip"></button>
+      <button class="chip-zone selected" style="left:38%" data-chip="100" aria-label="100 chip"></button>
+      <button class="chip-zone" style="left:52%"  data-chip="250" aria-label="250 chip"></button>
+      <button class="chip-zone" style="left:66%"  data-chip="500" aria-label="500 chip"></button>
+      <button class="chip-zone" style="left:79%"  data-chip="1000" aria-label="1000 chip"></button>
+    </div>
+
+    <!-- INVISIBLE HOTSPOTS over the baked control buttons -->
+    <button id="clearButton"  class="ctrl-hotspot" style="left:4.3%;width:13.1%"  aria-label="Clear bet"></button>
+    <button id="rebetButton"  class="ctrl-hotspot" style="left:19.6%;width:13.4%" aria-label="Rebet"></button>
+    <button id="spinButton"   class="spin-hotspot" aria-label="Spin">SPIN</button>
+    <button id="doubleButton" class="ctrl-hotspot" style="left:63.6%;width:13.3%" aria-label="Double bet"></button>
+    <button id="undoButton"   class="ctrl-hotspot" style="left:79%;width:13.3%"   aria-label="Undo"></button>
+
+    <!-- Lobby (hamburger, top-left) -->
     <a class="lobby-hotspot" href="index.html" aria-label="Return to lobby"></a>
 
-    <!-- Live Panels -->
-    <section class="live-panel balance-panel">
-      <span>BALANCE</span>
-      <strong id="balanceText">$5,000.00</strong>
-    </section>
-
-    <section class="live-panel win-panel">
-      <span>LAST WIN</span>
-      <strong id="lastWinText">—</strong>
-      <em id="lastColorText">PLACE BET</em>
-    </section>
-
-    <section class="live-panel total-panel">
-      <span>TOTAL BET</span>
-      <strong id="totalBetText">$100.00</strong>
-    </section>
-
-    <!-- Betting Hotspots -->
-    <div class="board-hotspots" aria-label="Betting table">
-
-      <button class="zone z-zero" data-bet="number" data-value="0" aria-label="Bet 0"></button>
-
-      <button class="zone z-3" data-bet="number" data-value="3"></button>
-      <button class="zone z-6" data-bet="number" data-value="6"></button>
-      <button class="zone z-9" data-bet="number" data-value="9"></button>
-      <button class="zone z-12" data-bet="number" data-value="12"></button>
-      <button class="zone z-15" data-bet="number" data-value="15"></button>
-      <button class="zone z-18" data-bet="number" data-value="18"></button>
-      <button class="zone z-21" data-bet="number" data-value="21"></button>
-      <button class="zone z-24" data-bet="number" data-value="24"></button>
-      <button class="zone z-27" data-bet="number" data-value="27"></button>
-      <button class="zone z-30" data-bet="number" data-value="30"></button>
-      <button class="zone z-33" data-bet="number" data-value="33"></button>
-      <button class="zone z-36" data-bet="number" data-value="36"></button>
-
-      <button class="zone z-2" data-bet="number" data-value="2"></button>
-      <button class="zone z-5" data-bet="number" data-value="5"></button>
-      <button class="zone z-8" data-bet="number" data-value="8"></button>
-      <button class="zone z-11" data-bet="number" data-value="11"></button>
-      <button class="zone z-14" data-bet="number" data-value="14"></button>
-      <button class="zone z-17" data-bet="number" data-value="17"></button>
-      <button class="zone z-20" data-bet="number" data-value="20"></button>
-      <button class="zone z-23" data-bet="number" data-value="23"></button>
-      <button class="zone z-26" data-bet="number" data-value="26"></button>
-      <button class="zone z-29" data-bet="number" data-value="29"></button>
-      <button class="zone z-32" data-bet="number" data-value="32"></button>
-      <button class="zone z-35" data-bet="number" data-value="35"></button>
-
-      <button class="zone z-1" data-bet="number" data-value="1"></button>
-      <button class="zone z-4" data-bet="number" data-value="4"></button>
-      <button class="zone z-7" data-bet="number" data-value="7"></button>
-      <button class="zone z-10" data-bet="number" data-value="10"></button>
-      <button class="zone z-13" data-bet="number" data-value="13"></button>
-      <button class="zone z-16" data-bet="number" data-value="16"></button>
-      <button class="zone z-19" data-bet="number" data-value="19"></button>
-      <button class="zone z-22" data-bet="number" data-value="22"></button>
-      <button class="zone z-25" data-bet="number" data-value="25"></button>
-      <button class="zone z-28" data-bet="number" data-value="28"></button>
-      <button class="zone z-31" data-bet="number" data-value="31"></button>
-      <button class="zone z-34" data-bet="number" data-value="34"></button>
-
-      <button class="zone z-col3" data-bet="column" data-value="3" aria-label="Top column"></button>
-      <button class="zone z-col2" data-bet="column" data-value="2" aria-label="Middle column"></button>
-      <button class="zone z-col1" data-bet="column" data-value="1" aria-label="Bottom column"></button>
-
-      <button class="zone z-d1" data-bet="dozen" data-value="1"></button>
-      <button class="zone z-d2" data-bet="dozen" data-value="2"></button>
-      <button class="zone z-d3" data-bet="dozen" data-value="3"></button>
-
-      <button class="zone z-low" data-bet="range" data-value="low"></button>
-      <button class="zone z-even" data-bet="oddEven" data-value="even"></button>
-      <button class="zone z-red" data-bet="color" data-value="red"></button>
-      <button class="zone z-black" data-bet="color" data-value="black"></button>
-      <button class="zone z-odd" data-bet="oddEven" data-value="odd"></button>
-      <button class="zone z-high" data-bet="range" data-value="high"></button>
-    </div>
-
-    <!-- Chips -->
-    <div class="chip-hotspots" aria-label="Chip selection">
-      <button class="chip-zone c50" data-chip="50"></button>
-      <button class="chip-zone c100 selected" data-chip="100"></button>
-      <button class="chip-zone c250" data-chip="250"></button>
-      <button class="chip-zone c500" data-chip="500"></button>
-      <button class="chip-zone c1000" data-chip="1000"></button>
-    </div>
-
-    <button id="spinButton" class="spin-hotspot">SPIN</button>
-    <button id="doubleButton" class="double-hotspot"></button>
-    <button id="clearButton" class="clear-hotspot"></button>
-    <button id="rebetButton" class="rebet-hotspot"></button>
-
-    <div id="chipMarkerLayer" class="chip-marker-layer"></div>
-    <div id="toast" class="toast">Tap the table to place a bet.</div>
+    <!-- Chip placed on the table + toast -->
+    <div id="chipMarkerLayer" class="chip-marker-layer" aria-hidden="true"></div>
+    <div id="toast" class="toast" role="status">Tap the table to place a bet</div>
 
   </main>
 
