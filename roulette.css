@@ -55,9 +55,9 @@ body {
    ============================================================ */
 .wheel-wrap {
   position: absolute;
-  left: 18%;
-  top: 11%;
-  width: 64%;
+  left: 24.5%;
+  top: 9.5%;
+  width: 51%;
   aspect-ratio: 1 / 1;
   z-index: 2;
   pointer-events: none;
@@ -106,98 +106,55 @@ body {
 }
 
 /* ============================================================
-   BETTING TABLE  (lower void) — real HTML cells = real tap targets
+   BETTING TABLE — your table image with transparent tap zones.
+   table-wrap matches the image's aspect ratio, so the zones
+   (positioned as % of it) stay locked to every cell on any screen.
    ============================================================ */
 .table-wrap {
   position: absolute;
-  left: 4%;
-  top: 49.4%;
-  width: 92%;
-  height: 15.6%;
+  left: 11.25%;
+  top: 40%;
+  width: 77.5%;
+  aspect-ratio: 1694 / 928;
   z-index: 5;
-  padding: calc(var(--ss) * 0.019);
-  border-radius: calc(var(--ss) * 0.042);
-  background: linear-gradient(158deg, #3c1d15 0%, #1a0c09 52%, #0b0606 100%);
-  box-shadow:
-    0 calc(var(--ss) * 0.012) calc(var(--ss) * 0.04) rgba(0, 0, 0, 0.6),
-    inset 0 0 0 calc(var(--ss) * 0.006) rgba(216, 178, 96, 0.6),
-    inset 0 0 calc(var(--ss) * 0.02) rgba(0, 0, 0, 0.65);
 }
 
-/* subtle gold studs along the top & bottom rail */
-.table-wrap::before,
-.table-wrap::after {
-  content: "";
+.table {
   position: absolute;
-  left: 12%;
-  right: 12%;
-  height: calc(var(--ss) * 0.012);
-  background-image: radial-gradient(circle, rgba(238, 205, 120, 0.95) 36%, rgba(238, 205, 120, 0) 38%);
-  background-size: calc(var(--ss) * 0.085) 100%;
-  background-repeat: repeat-x;
-  background-position: center;
-  opacity: 0.8;
-  pointer-events: none;
-}
-.table-wrap::before { top: calc(var(--ss) * 0.004); }
-.table-wrap::after  { bottom: calc(var(--ss) * 0.004); }
-
-.felt {
+  inset: 0;
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: repeat(14, 1fr);
-  grid-template-rows: 1fr 1fr 1fr 0.92fr 0.92fr;
-  background: #0c7a34;
-  border-radius: calc(var(--ss) * 0.02);
-  overflow: hidden;
+  object-fit: fill;      /* wrap aspect == image aspect → no distortion */
+  display: block;
+  user-select: none;
 }
+
+.zones { position: absolute; inset: 0; }
 
 .zone {
   -webkit-appearance: none;
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  position: absolute;
   background: transparent;
-  color: #fff;
-  font-family: inherit;
-  font-weight: 800;
-  line-height: 1;
+  border: 0;
   padding: 0;
   margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: filter 0.12s ease, box-shadow 0.12s ease;
+  border-radius: calc(var(--ss) * 0.004);
+  transition: box-shadow 0.12s ease, background 0.12s ease;
 }
-.zone:active { filter: brightness(1.25); }
-
-.zone.num     { font-size: calc(var(--ss) * 0.033); }
-.zone.outside,
-.zone.col2to1 { font-size: calc(var(--ss) * 0.026); letter-spacing: 0.2px; }
-
-.zone.green        { background: #0c7a34; }
-.zone.red,
-.zone.swatch-red   { background: #c0152a; }
-.zone.black,
-.zone.swatch-black { background: #161616; }
+.zone:active { background: rgba(255, 255, 255, 0.18); }
 
 /* selected bet highlight */
 .zone.bet-selected {
+  background: rgba(255, 210, 74, 0.14);
   box-shadow:
     inset 0 0 0 2px #ffd24a,
-    0 0 calc(var(--ss) * 0.018) rgba(255, 210, 74, 0.75);
-  filter: brightness(1.12);
+    0 0 calc(var(--ss) * 0.016) rgba(255, 210, 74, 0.7);
   z-index: 1;
 }
-
-/* the digit wrapper — kept upright by default (best on mobile).
-   --- OPTIONAL: to match the mockup's sideways numbers, uncomment ---
-   .felt .zone.num:not(.green) .d { display:inline-block; transform: rotate(-90deg); }
-*/
-.zone .d { display: inline-block; }
 
 /* ============================================================
    UI CHROME OVERLAY + DYNAMIC VALUES
@@ -346,6 +303,7 @@ body.debug .chip-zone,
 body.debug .ctrl-hotspot,
 body.debug .spin-hotspot,
 body.debug .lobby-hotspot { background: rgba(255, 0, 120, 0.28); outline: 1px solid #ff2d8e; }
+body.debug .zone { background: rgba(0, 200, 255, 0.22); outline: 1px solid #00e5ff; }
 body.debug .table-wrap { outline: 1px dashed #00e5ff; }
 
 /* ============================================================

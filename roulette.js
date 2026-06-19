@@ -20,26 +20,35 @@ const EUROPEAN_WHEEL = [
 ];
 
 /* -----------------------------------------------------------
-   WHEEL TUNING — the only knobs you should ever need.
-   These match the new transparent wheel art (1036×1036, the
-   art's true centre is ~512,512 — slightly off the image centre).
-   - WHEEL_OFFSET        : angle of pocket "0". Nudge if a pocket is one off.
-   - WHEEL_NUMBER_RADIUS : how far the painted numbers sit from centre
-                           (in the 1036 viewBox). Bigger = nearer the rim.
-   - BALL_RADIUS_FRACTION: where the ball rests, as a fraction of the
-                           wheel's width. ~0.27 sits it in the pocket ring.
+   WHEEL TUNING — matches the wheel art (1036×1036, true centre ~511,510).
+   The painted pockets on the art are decorative and do NOT follow the real
+   roulette colour order, so the pocket ring is drawn here in SVG with the
+   CORRECT colours over the art — every number always sits on its proper
+   red / black / green.
+   - WHEEL_OFFSET        : angle of pocket "0" (−90 = 12 o'clock).
+   - POCKET_INNER/OUTER_R: the ring that covers the painted pocket band.
+   - WHEEL_NUMBER_RADIUS : where the number text sits (mid-ring).
+   - BALL_RADIUS_FRACTION: ball rest radius as a fraction of wheel width.
 ----------------------------------------------------------- */
-const WHEEL_OFFSET = -90.5;
-const WHEEL_NUMBER_RADIUS = 270;
-const WHEEL_CENTER_X = 512;
-const WHEEL_CENTER_Y = 512;
-const BALL_RADIUS_FRACTION = 0.27;
+const WHEEL_OFFSET = -90;          // green 0 at 12 o'clock
+const WHEEL_CENTER_X = 511;
+const WHEEL_CENTER_Y = 510;
+const POCKET_INNER_R = 206;
+const POCKET_OUTER_R = 293;
+const WHEEL_NUMBER_RADIUS = 250;
+const BALL_RADIUS_FRACTION = 0.275;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
 
-const WHEEL_NUMBER_FONT_SIZE = 24;
-const WHEEL_ZERO_FONT_SIZE = 26;
-const WHEEL_NUMBER_STROKE = 3;
+const POCKET_RED = '#c0152a';      // matches the table's red
+const POCKET_BLACK = '#161616';
+const POCKET_GREEN = '#0c7a34';
+const FRET_GOLD = '#d8b25e';
+const WHEEL_NUMBER_FONT_SIZE = 34;
+const WHEEL_ZERO_FONT_SIZE = 36;
+const WHEEL_NUMBER_STROKE = 2.5;
+
+const SVGNS = 'http://www.w3.org/2000/svg';
 
 let balance = 5000;
 let chip = 100;
@@ -145,23 +154,71 @@ function setStageSize() {
 }
 
 /* -----------------------------
-   WHEEL SVG NUMBERS (painted on the wheel, rotate with it)
+   WHEEL POCKET RING (painted on the wheel, rotates with it)
+   Draws correctly-coloured pockets + gold frets + numbers in SVG,
+   covering the decorative painted band so colours are always right.
 ----------------------------- */
-function buildWheelNumbers() {
+function polar(cx, cy, r, deg) {
+  const a = deg * Math.PI / 180;
+  return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+}
+
+function annularWedge(cx, cy, rIn, rOut, a0, a1) {
+  const [x0o, y0o] = polar(cx, cy, rOut, a0);
+  const [x1o, y1o] = polar(cx, cy, rOut, a1);
+  const [x1i, y1i] = polar(cx, cy, rIn, a1);
+  const [x0i, y0i] = polar(cx, cy, rIn, a0);
+  const large = (a1 - a0) > 180 ? 1 : 0;
+  return `M ${x0o} ${y0o} A ${rOut} ${rOut} 0 ${large} 1 ${x1o} ${y1o} `
+       + `L ${x1i} ${y1i} A ${rIn} ${rIn} 0 ${large} 0 ${x0i} ${y0i} Z`;
+}
+
+function buildWheelPockets() {
   if (!wheelNumberSvg) return;
   wheelNumberSvg.innerHTML = '';
 
-  const cx = WHEEL_CENTER_X;
-  const cy = WHEEL_CENTER_Y;
+  const cx = WHEEL_CENTER_X, cy = WHEEL_CENTER_Y;
   const step = 360 / EUROPEAN_WHEEL.length;
 
-  EUROPEAN_WHEEL.forEach((num, index) => {
-    const angle = WHEEL_OFFSET + index * step;
-    const rad = angle * Math.PI / 180;
-    const x = cx + Math.cos(rad) * WHEEL_NUMBER_RADIUS;
-    const y = cy + Math.sin(rad) * WHEEL_NUMBER_RADIUS;
+  // 1) coloured pocket wedges (correct roulette colours)
+  EUROPEAN_WHEEL.forEach((num, i) => {
+    const aMid = WHEEL_OFFSET + i * step;
+    const path = document.createElementNS(SVGNS, 'path');
+    path.setAttribute('d', annularWedge(cx, cy, POCKET_INNER_R, POCKET_OUTER_R, aMid - step / 2, aMid + step / 2));
+    path.setAttribute('fill', num === 0 ? POCKET_GREEN : (redNumbers.has(num) ? POCKET_RED : POCKET_BLACK));
+    wheelNumberSvg.appendChild(path);
+  });
 
-    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  // 2) gold frets between pockets
+  for (let i = 0; i < EUROPEAN_WHEEL.length; i++) {
+    const aEdge = WHEEL_OFFSET + (i + 0.5) * step;
+    const [xi, yi] = polar(cx, cy, POCKET_INNER_R, aEdge);
+    const [xo, yo] = polar(cx, cy, POCKET_OUTER_R, aEdge);
+    const line = document.createElementNS(SVGNS, 'line');
+    line.setAttribute('x1', xi); line.setAttribute('y1', yi);
+    line.setAttribute('x2', xo); line.setAttribute('y2', yo);
+    line.setAttribute('stroke', FRET_GOLD);
+    line.setAttribute('stroke-width', '1.5');
+    line.setAttribute('opacity', '0.85');
+    wheelNumberSvg.appendChild(line);
+  }
+
+  // 3) gold rings at inner & outer edge
+  [POCKET_INNER_R, POCKET_OUTER_R].forEach(r => {
+    const c = document.createElementNS(SVGNS, 'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy); c.setAttribute('r', r);
+    c.setAttribute('fill', 'none');
+    c.setAttribute('stroke', FRET_GOLD);
+    c.setAttribute('stroke-width', '2');
+    c.setAttribute('opacity', '0.9');
+    wheelNumberSvg.appendChild(c);
+  });
+
+  // 4) numbers, oriented radially
+  EUROPEAN_WHEEL.forEach((num, i) => {
+    const aMid = WHEEL_OFFSET + i * step;
+    const [x, y] = polar(cx, cy, WHEEL_NUMBER_RADIUS, aMid);
+    const text = document.createElementNS(SVGNS, 'text');
     text.setAttribute('x', x);
     text.setAttribute('y', y);
     text.setAttribute('fill', '#ffffff');
@@ -173,7 +230,7 @@ function buildWheelNumbers() {
     text.setAttribute('paint-order', 'stroke');
     text.setAttribute('stroke', '#000000');
     text.setAttribute('stroke-width', String(WHEEL_NUMBER_STROKE));
-    text.setAttribute('transform', `rotate(${angle + 90} ${x} ${y})`);
+    text.setAttribute('transform', `rotate(${aMid + 90} ${x} ${y})`);
     text.textContent = num;
     wheelNumberSvg.appendChild(text);
   });
@@ -419,7 +476,7 @@ window.addEventListener('resize', setStageSize);
 window.addEventListener('orientationchange', setStageSize);
 window.addEventListener('load', setStageSize);
 
-buildWheelNumbers();
+buildWheelPockets();
 setStageSize();
 highlightChip();
 updateMoney();
