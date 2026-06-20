@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Casa de Ríos Roulette</title>
+  <link rel="stylesheet" href="./roulette.css" />
+</head>
+<body>
+  <main class="roulette-app" aria-label="Casa de Ríos Roulette">
+    <div class="backdrop"></div>
+
+    <header class="topbar">
+      <button class="nav-btn" id="lobbyBtn" type="button" aria-label="Return to lobby">← Lobby</button>
+
+      <section class="brand" aria-label="Game title">
+        <div class="crest">R</div>
+        <p>Casa de Ríos</p>
+        <h1>Roulette</h1>
+        <span>Suerte • Honor • Lealtad</span>
+      </section>
+
+      <section class="wallet-card" aria-label="Wallet balance">
+        <span>Balance</span>
+        <strong id="balanceValue">—</strong>
+        <small>chips</small>
+      </section>
+    </header>
+
+    <section class="wheel-stage" aria-label="Roulette wheel">
+      <div class="wheel-wrap">
+        <canvas id="wheelCanvas" width="720" height="720" aria-label="European roulette wheel"></canvas>
+        <div class="wheel-shine" aria-hidden="true"></div>
+      </div>
+
+      <aside class="result-panel" aria-live="polite">
+        <span>Last Winning Number</span>
+        <strong id="lastNumber">—</strong>
+        <small id="lastColor">Place your bets</small>
+        <em id="lastWin">Won 0</em>
+      </aside>
+    </section>
+
+    <section class="status-row" aria-label="Bet summary">
+      <div>
+        <span>Total Bet</span>
+        <strong id="totalBet">0</strong>
+      </div>
+      <div>
+        <span>Max Possible Pay</span>
+        <strong id="potentialWin">0</strong>
+      </div>
+      <div>
+        <span>Selected Chip</span>
+        <strong id="selectedChipLabel">100</strong>
+      </div>
+    </section>
+
+    <section class="table-card" aria-label="Betting table">
+      <div class="table-title">Tap the table to place a bet</div>
+
+      <div class="inside-table" id="insideTable">
+        <button class="zero-cell" type="button" data-bet-type="straight" data-value="0">0</button>
+
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="3">3</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="6">6</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="9">9</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="12">12</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="15">15</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="18">18</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="21">21</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="24">24</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="27">27</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="30">30</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="33">33</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="36">36</button>
+        <button class="col-cell" type="button" data-bet-type="column" data-value="3">2 to 1</button>
+
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="2">2</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="5">5</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="8">8</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="11">11</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="14">14</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="17">17</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="20">20</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="23">23</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="26">26</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="29">29</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="32">32</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="35">35</button>
+        <button class="col-cell" type="button" data-bet-type="column" data-value="2">2 to 1</button>
+
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="1">1</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="4">4</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="7">7</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="10">10</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="13">13</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="16">16</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="19">19</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="22">22</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="25">25</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="28">28</button>
+        <button class="num-cell black" type="button" data-bet-type="straight" data-value="31">31</button>
+        <button class="num-cell red" type="button" data-bet-type="straight" data-value="34">34</button>
+        <button class="col-cell" type="button" data-bet-type="column" data-value="1">2 to 1</button>
+      </div>
+
+      <div class="dozen-row">
+        <button type="button" data-bet-type="dozen" data-value="1">1st 12</button>
+        <button type="button" data-bet-type="dozen" data-value="2">2nd 12</button>
+        <button type="button" data-bet-type="dozen" data-value="3">3rd 12</button>
+      </div>
+
+      <div class="outside-row">
+        <button type="button" data-bet-type="range" data-value="low">1 to 18</button>
+        <button type="button" data-bet-type="parity" data-value="even">Even</button>
+        <button class="diamond red-diamond" type="button" data-bet-type="color" data-value="red" aria-label="Red">◆</button>
+        <button class="diamond black-diamond" type="button" data-bet-type="color" data-value="black" aria-label="Black">◆</button>
+        <button type="button" data-bet-type="parity" data-value="odd">Odd</button>
+        <button type="button" data-bet-type="range" data-value="high">19 to 36</button>
+      </div>
+    </section>
+
+    <section class="chip-rail" aria-label="Chip selection">
+      <button class="chip chip-50" type="button" data-chip="50">50</button>
+      <button class="chip chip-100 active" type="button" data-chip="100">100</button>
+      <button class="chip chip-250" type="button" data-chip="250">250</button>
+      <button class="chip chip-500" type="button" data-chip="500">500</button>
+      <button class="chip chip-1000" type="button" data-chip="1000">1K</button>
+    </section>
+
+    <section class="action-row" aria-label="Game actions">
+      <button class="small-action" id="undoBtn" type="button">Undo</button>
+      <button class="small-action" id="clearBtn" type="button">Clear</button>
+      <button class="spin-btn" id="spinBtn" type="button">Spin</button>
+      <button class="small-action" id="doubleBtn" type="button">×2</button>
+      <button class="small-action" id="rebetBtn" type="button">Rebet</button>
+    </section>
+
+    <section class="recent-card" aria-label="Recent results">
+      <span>Recent Results</span>
+      <div id="recentResults" class="recent-results"></div>
+    </section>
+
+    <nav class="bottom-nav" aria-label="Casino navigation">
+      <a href="./lobby.html">Lobby</a>
+      <a href="./slots.html">Slots</a>
+      <a class="active" href="./roulette.html">Roulette</a>
+      <a href="./blackjack.html">Blackjack</a>
+    </nav>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <script src="./roulette.js"></script>
+</body>
+</html>
