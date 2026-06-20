@@ -134,6 +134,7 @@ body {
   position: absolute;
   inset: 0;
   z-index: 2;
+  pointer-events: auto;
 }
 
 .zone {
@@ -147,6 +148,7 @@ body {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auti;
   border-radius: calc(var(--ss) * 0.004);
   transition:
     box-shadow 0.12s ease,
@@ -221,6 +223,7 @@ body {
   position: absolute;
   inset: 0;
   z-index: 7;
+  pointer-events: none;
 }
 
 .chip-zone {
@@ -235,6 +238,7 @@ body {
   padding: 0;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
 }
 
 .chip-zone.selected {
