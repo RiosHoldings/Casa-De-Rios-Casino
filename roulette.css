@@ -444,3 +444,31 @@ body.debug .wheel-wrap {
   left: 78.4%;
   font-size: calc(var(--ss) * 0.031);
 }
+
+/* FINAL MONEY SIZE FIX */
+.val {
+  top: 70.45%;
+  letter-spacing: -0.8px;
+}
+
+.val-balance {
+  left: 18.3%;
+  font-size: calc(var(--ss) * 0.025);
+}
+
+.val-win {
+  left: 49.3%;
+  font-size: calc(var(--ss) * 0.034);
+}
+
+.val-total {
+  left: 78.2%;
+  font-size: calc(var(--ss) * 0.029);
+}
+
+#wheelNumberSvg,
+.wheel-number-svg {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}

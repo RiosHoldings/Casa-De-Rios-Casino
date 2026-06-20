@@ -225,7 +225,7 @@ function annularWedge(cx, cy, rIn, rOut, a0, a1) {
   `;
 }
 
-function buildWheelPockets() {
+// function buildWheelPockets() {
   if (!wheelNumberSvg) return;
 
   wheelNumberSvg.innerHTML = "";
@@ -317,7 +317,7 @@ function buildWheelPockets() {
 
     wheelNumberSvg.appendChild(text);
   });
-}
+
 
 /* ============================================================
    WHEEL / BALL ANIMATION
