@@ -1,144 +1,683 @@
-/*
-  OPTIONAL Cloudflare Pages Function: /functions/api/roulette.js
+/* ============================================================
+   CASA DE RÍOS ROULETTE — game logic
 
-  This is a server-side spin template for D1.
-  You may need to change PLAYER_TABLE / PLAYER_ID_COLUMN / BALANCE_COLUMN to match your exact DB schema.
+   Backend contract:
+     POST /api/wallet
+       { playerId, playerSecret }
 
-  Expected request:
-    POST /api/roulette
-    { "playerId": "...", "bets": [{ "type":"straight", "value":"17", "amount":100 }] }
+     POST /api/roulette
+       { playerId, playerSecret, betType, betValue, betAmount }
 
-  Response:
-    { ok, result:{number,color}, totalBet, payout, balance }
-*/
+   Required localStorage:
+     casa_rios_player_id
+     casa_rios_player_secret
+   ============================================================ */
 
-const PLAYER_TABLE = "players";
-const PLAYER_ID_COLUMN = "player_id";
-const BALANCE_COLUMN = "balance";
+const redNumbers = new Set([
+  1, 3, 5, 7, 9, 12, 14, 16, 18,
+  19, 21, 23, 25, 27, 30, 32, 34, 36
+]);
 
-const WHEEL_SEQUENCE = [
-  0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
-  5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26
+const EUROPEAN_WHEEL = [
+  0, 32, 15, 19, 4, 21, 2, 25, 17, 34,
+  6, 27, 13, 36, 11, 30, 8, 23, 10,
+  5, 24, 16, 33, 1, 20, 14, 31, 9,
+  22, 18, 29, 7, 28, 12, 35, 3, 26
 ];
 
-const RED_NUMBERS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
-const BLACK_NUMBERS = new Set(Array.from({ length: 36 }, (_, i) => i + 1).filter(n => !RED_NUMBERS.has(n)));
-const MIN_BET = 50;
-const MAX_TOTAL_BET = 50000;
+/* ============================================================
+   WHEEL TUNING
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
+   This assumes your wheel image is square-ish and centered.
+   SVG pockets/numbers are drawn over the wheel so the coded
+   result always matches real European roulette order.
+   ============================================================ */
+
+const WHEEL_OFFSET = -90;
+const WHEEL_CENTER_X = 511;
+const WHEEL_CENTER_Y = 510;
+
+const POCKET_INNER_R = 206;
+const POCKET_OUTER_R = 293;
+const WHEEL_NUMBER_RADIUS = 250;
+
+const BALL_RADIUS_FRACTION = 0.275;
+const WHEEL_SPINS = 6;
+const BALL_SPINS = 10;
+
+const POCKET_RED = "#c0152a";
+const POCKET_BLACK = "#161616";
+const POCKET_GREEN = "#0c7a34";
+const FRET_GOLD = "#d8b25e";
+
+const WHEEL_NUMBER_FONT_SIZE = 34;
+const WHEEL_ZERO_FONT_SIZE = 36;
+const WHEEL_NUMBER_STROKE = 2.5;
+
+const SVGNS = "http://www.w3.org/2000/svg";
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let balance = 5000;
+let chip = 100;
+let currentBet = null;
+let previousBet = null;
+let spinning = false;
+
+let wheelRotation = 0;
+let ballRotation = 0;
+let ballRadiusPx = 0;
+
+/* ============================================================
+   DOM
+   ============================================================ */
+
+const stage = document.querySelector(".stage");
+const wheelWrap = document.querySelector(".wheel-wrap");
+
+const chipMarkerLayer = document.getElementById("chipMarkerLayer");
+const spinButton = document.getElementById("spinButton");
+const balanceText = document.getElementById("balanceText");
+const totalBetText = document.getElementById("totalBetText");
+const lastWinText = document.getElementById("lastWinText");
+const lastColorText = document.getElementById("lastColorText");
+const toast = document.getElementById("toast");
+
+const wheelSpinLayer = document.getElementById("wheelSpinLayer");
+const wheelNumberSvg = document.getElementById("wheelNumberSvg");
+const ballOrbit = document.getElementById("ballOrbit");
+const rouletteBall = document.getElementById("rouletteBall");
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function money(value) {
+  return `$${Number(value || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function getPlayerCredentials() {
+  return {
+    playerId: localStorage.getItem("casa_rios_player_id"),
+    playerSecret: localStorage.getItem("casa_rios_player_secret")
+  };
+}
+
+function numberColor(number) {
+  const n = Number(number);
+  if (n === 0) return "green";
+  return redNumbers.has(n) ? "red" : "black";
+}
+
+function showToast(message) {
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1700);
+}
+
+function updateMoney() {
+  if (balanceText) balanceText.textContent = money(balance);
+  if (totalBetText) totalBetText.textContent = money(chip);
+}
+
+function resetWinReadout() {
+  if (lastWinText) lastWinText.textContent = "—";
+  if (lastColorText) lastColorText.textContent = "PLACE BET";
+}
+
+function hideBall() {
+  if (rouletteBall) rouletteBall.style.opacity = "0";
+}
+
+/* ============================================================
+   WALLET
+   ============================================================ */
+
+async function loadWalletBalance() {
+  const { playerId, playerSecret } = getPlayerCredentials();
+
+  if (!playerId || !playerSecret) {
+    showToast("Player login missing");
+    updateMoney();
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/wallet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerId,
+        playerSecret
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      showToast(data.error || "Wallet unavailable");
+      updateMoney();
+      return;
+    }
+
+    balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance);
+    updateMoney();
+  } catch (error) {
+    showToast("Wallet connection error");
+    updateMoney();
+  }
+}
+
+/* ============================================================
+   RESPONSIVE SIZING
+   ============================================================ */
+
+function setBallRadius() {
+  if (!rouletteBall || !wheelWrap) return;
+
+  ballRadiusPx = wheelWrap.clientWidth * BALL_RADIUS_FRACTION;
+  rouletteBall.style.transform = `translateY(${-ballRadiusPx}px)`;
+}
+
+function setStageSize() {
+  if (!stage) return;
+
+  stage.style.setProperty("--ss", `${stage.clientWidth}px`);
+  setBallRadius();
+}
+
+/* ============================================================
+   SVG WHEEL POCKETS / NUMBERS
+   ============================================================ */
+
+function polar(cx, cy, r, deg) {
+  const a = deg * Math.PI / 180;
+  return [
+    cx + Math.cos(a) * r,
+    cy + Math.sin(a) * r
+  ];
+}
+
+function annularWedge(cx, cy, rIn, rOut, a0, a1) {
+  const [x0o, y0o] = polar(cx, cy, rOut, a0);
+  const [x1o, y1o] = polar(cx, cy, rOut, a1);
+  const [x1i, y1i] = polar(cx, cy, rIn, a1);
+  const [x0i, y0i] = polar(cx, cy, rIn, a0);
+
+  const large = (a1 - a0) > 180 ? 1 : 0;
+
+  return `
+    M ${x0o} ${y0o}
+    A ${rOut} ${rOut} 0 ${large} 1 ${x1o} ${y1o}
+    L ${x1i} ${y1i}
+    A ${rIn} ${rIn} 0 ${large} 0 ${x0i} ${y0i}
+    Z
+  `;
+}
+
+function buildWheelPockets() {
+  if (!wheelNumberSvg) return;
+
+  wheelNumberSvg.innerHTML = "";
+
+  const cx = WHEEL_CENTER_X;
+  const cy = WHEEL_CENTER_Y;
+  const step = 360 / EUROPEAN_WHEEL.length;
+
+  EUROPEAN_WHEEL.forEach((num, i) => {
+    const aMid = WHEEL_OFFSET + i * step;
+
+    const path = document.createElementNS(SVGNS, "path");
+    path.setAttribute(
+      "d",
+      annularWedge(
+        cx,
+        cy,
+        POCKET_INNER_R,
+        POCKET_OUTER_R,
+        aMid - step / 2,
+        aMid + step / 2
+      )
+    );
+
+    path.setAttribute(
+      "fill",
+      num === 0
+        ? POCKET_GREEN
+        : redNumbers.has(num)
+          ? POCKET_RED
+          : POCKET_BLACK
+    );
+
+    wheelNumberSvg.appendChild(path);
+  });
+
+  for (let i = 0; i < EUROPEAN_WHEEL.length; i++) {
+    const aEdge = WHEEL_OFFSET + (i + 0.5) * step;
+
+    const [xi, yi] = polar(cx, cy, POCKET_INNER_R, aEdge);
+    const [xo, yo] = polar(cx, cy, POCKET_OUTER_R, aEdge);
+
+    const line = document.createElementNS(SVGNS, "line");
+    line.setAttribute("x1", xi);
+    line.setAttribute("y1", yi);
+    line.setAttribute("x2", xo);
+    line.setAttribute("y2", yo);
+    line.setAttribute("stroke", FRET_GOLD);
+    line.setAttribute("stroke-width", "1.5");
+    line.setAttribute("opacity", "0.85");
+
+    wheelNumberSvg.appendChild(line);
+  }
+
+  [POCKET_INNER_R, POCKET_OUTER_R].forEach((r) => {
+    const circle = document.createElementNS(SVGNS, "circle");
+    circle.setAttribute("cx", cx);
+    circle.setAttribute("cy", cy);
+    circle.setAttribute("r", r);
+    circle.setAttribute("fill", "none");
+    circle.setAttribute("stroke", FRET_GOLD);
+    circle.setAttribute("stroke-width", "2");
+    circle.setAttribute("opacity", "0.9");
+
+    wheelNumberSvg.appendChild(circle);
+  });
+
+  EUROPEAN_WHEEL.forEach((num, i) => {
+    const aMid = WHEEL_OFFSET + i * step;
+    const [x, y] = polar(cx, cy, WHEEL_NUMBER_RADIUS, aMid);
+
+    const text = document.createElementNS(SVGNS, "text");
+    text.setAttribute("x", x);
+    text.setAttribute("y", y);
+    text.setAttribute("fill", "#ffffff");
+    text.setAttribute(
+      "font-size",
+      String(num === 0 ? WHEEL_ZERO_FONT_SIZE : WHEEL_NUMBER_FONT_SIZE)
+    );
+    text.setAttribute("font-weight", "900");
+    text.setAttribute("font-family", 'Georgia, "Times New Roman", serif');
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle");
+    text.setAttribute("paint-order", "stroke");
+    text.setAttribute("stroke", "#000000");
+    text.setAttribute("stroke-width", String(WHEEL_NUMBER_STROKE));
+    text.setAttribute("transform", `rotate(${aMid + 90} ${x} ${y})`);
+    text.textContent = num;
+
+    wheelNumberSvg.appendChild(text);
   });
 }
 
-function numberColor(num) {
-  if (num === 0) return "green";
-  return RED_NUMBERS.has(num) ? "red" : "black";
+/* ============================================================
+   WHEEL / BALL ANIMATION
+   ============================================================ */
+
+function animateWheelToNumber(resultNumber) {
+  if (!wheelSpinLayer || !ballOrbit || !rouletteBall) return;
+
+  const result = Number(resultNumber);
+  const index = EUROPEAN_WHEEL.indexOf(result);
+
+  if (index === -1) return;
+
+  const step = 360 / EUROPEAN_WHEEL.length;
+  const TOP_ANGLE = -90;
+
+  rouletteBall.style.opacity = "1";
+
+  wheelSpinLayer.style.transition = "none";
+  ballOrbit.style.transition = "none";
+  wheelSpinLayer.offsetHeight;
+
+  wheelRotation += 360 * WHEEL_SPINS;
+
+  const targetNet =
+    (((TOP_ANGLE - (WHEEL_OFFSET + index * step)) % 360) + 360) % 360;
+
+  const currentNet = ((wheelRotation % 360) + 360) % 360;
+
+  let wheelAdjust = targetNet - currentNet;
+  if (wheelAdjust < 0) wheelAdjust += 360;
+
+  wheelRotation += wheelAdjust;
+
+  ballRotation -= 360 * BALL_SPINS;
+
+  const currentBall = ((ballRotation % 360) + 360) % 360;
+
+  let ballAdjust = -currentBall;
+  if (ballAdjust > 0) ballAdjust -= 360;
+
+  ballRotation += ballAdjust;
+
+  wheelSpinLayer.style.transition =
+    "transform 5s cubic-bezier(.12,.72,.14,1)";
+  ballOrbit.style.transition =
+    "transform 5s cubic-bezier(.08,.74,.12,1)";
+
+  wheelSpinLayer.style.transform = `rotate(${wheelRotation}deg)`;
+  ballOrbit.style.transform = `rotate(${ballRotation}deg)`;
 }
 
-function numbersForBet(type, value) {
-  const all = Array.from({ length: 36 }, (_, i) => i + 1);
-  if (type === "straight") return [Number(value)];
-  if (type === "color") return value === "red" ? [...RED_NUMBERS] : [...BLACK_NUMBERS];
-  if (type === "parity") return all.filter(n => value === "even" ? n % 2 === 0 : n % 2 === 1);
-  if (type === "range") return value === "low" ? all.filter(n => n <= 18) : all.filter(n => n >= 19);
+/* ============================================================
+   BET DISPLAY
+   ============================================================ */
+
+function showBetChip(zone) {
+  if (!chipMarkerLayer || !zone || !stage) return;
+
+  chipMarkerLayer.innerHTML = "";
+
+  const stageRect = stage.getBoundingClientRect();
+  const zoneRect = zone.getBoundingClientRect();
+
+  const x = zoneRect.left - stageRect.left + zoneRect.width / 2;
+  const y = zoneRect.top - stageRect.top + zoneRect.height / 2;
+
+  const marker = document.createElement("div");
+  marker.className = "bet-chip-marker";
+  marker.textContent = chip >= 1000 ? "1K" : chip;
+  marker.style.left = `${x}px`;
+  marker.style.top = `${y}px`;
+
+  chipMarkerLayer.appendChild(marker);
+}
+
+function highlightChip() {
+  document.querySelectorAll(".chip-zone").forEach((btn) => {
+    btn.classList.toggle("selected", Number(btn.dataset.chip) === chip);
+  });
+}
+
+function setChip(amount) {
+  chip = Number(amount);
+
+  highlightChip();
+  updateMoney();
+
+  const selectedZone = document.querySelector(".zone.bet-selected");
+  if (currentBet && selectedZone) showBetChip(selectedZone);
+
+  showToast(`${money(chip)} chip selected`);
+}
+
+function getBetLabel(type, value) {
+  const parsed =
+    type === "number" || type === "dozen" || type === "column"
+      ? Number(value)
+      : value;
+
+  if (type === "number") return String(parsed);
+  if (type === "color") return String(parsed).toUpperCase();
+  if (type === "oddEven") return String(parsed).toUpperCase();
+  if (type === "range") return parsed === "low" ? "1–18" : "19–36";
   if (type === "dozen") {
-    const dozen = Number(value);
-    const start = (dozen - 1) * 12 + 1;
-    return all.filter(n => n >= start && n <= start + 11);
+    if (parsed === 1) return "1ST 12";
+    if (parsed === 2) return "2ND 12";
+    return "3RD 12";
   }
-  if (type === "column") return all.filter(n => n % 3 === Number(value) % 3);
-  return [];
+  if (type === "column") {
+    if (parsed === 3) return "TOP 2 TO 1";
+    if (parsed === 2) return "MIDDLE 2 TO 1";
+    return "BOTTOM 2 TO 1";
+  }
+
+  return String(parsed).toUpperCase();
 }
 
-function payoutForBet(type) {
-  if (type === "straight") return 35;
-  if (type === "dozen" || type === "column") return 2;
-  return 1;
+/* ============================================================
+   BETTING
+   ============================================================ */
+
+function placeBet(type, value) {
+  if (!type || value === undefined) return;
+
+  const parsed =
+    type === "number" || type === "dozen" || type === "column"
+      ? Number(value)
+      : value;
+
+  currentBet = {
+    type,
+    value: parsed
+  };
+
+  previousBet = {
+    type,
+    value: parsed
+  };
+
+  document.querySelectorAll(".zone").forEach((btn) => {
+    btn.classList.remove("bet-selected");
+  });
+
+  const selectedZone = document.querySelector(
+    `.zone[data-bet="${type}"][data-value="${value}"]`
+  );
+
+  if (selectedZone) {
+    selectedZone.classList.add("bet-selected");
+    showBetChip(selectedZone);
+  }
+
+  resetWinReadout();
+  showToast(`Bet placed: ${getBetLabel(type, value)}`);
 }
 
-function validateBet(raw) {
-  const type = String(raw?.type || "");
-  const value = String(raw?.value ?? "");
-  const amount = Number(raw?.amount);
+function clearBet(message = "Bet cleared") {
+  currentBet = null;
 
-  const allowedTypes = new Set(["straight", "color", "parity", "range", "dozen", "column"]);
-  if (!allowedTypes.has(type)) throw new Error("Invalid bet type.");
-  if (!Number.isInteger(amount) || amount <= 0) throw new Error("Invalid bet amount.");
+  document.querySelectorAll(".zone").forEach((btn) => {
+    btn.classList.remove("bet-selected");
+  });
 
-  const numbers = numbersForBet(type, value);
-  if (!numbers.length && !(type === "straight" && value === "0")) throw new Error("Invalid bet value.");
-  if (type === "straight" && (!Number.isInteger(Number(value)) || Number(value) < 0 || Number(value) > 36)) throw new Error("Invalid straight number.");
-  if (type === "color" && !["red", "black"].includes(value)) throw new Error("Invalid color.");
-  if (type === "parity" && !["even", "odd"].includes(value)) throw new Error("Invalid parity.");
-  if (type === "range" && !["low", "high"].includes(value)) throw new Error("Invalid range.");
-  if (type === "dozen" && !["1", "2", "3"].includes(value)) throw new Error("Invalid dozen.");
-  if (type === "column" && !["1", "2", "3"].includes(value)) throw new Error("Invalid column.");
+  if (chipMarkerLayer) chipMarkerLayer.innerHTML = "";
 
-  return { type, value, amount, numbers, payout: payoutForBet(type) };
+  resetWinReadout();
+  showToast(message);
 }
 
-function secureRandomIndex(maxExclusive) {
-  const bytes = new Uint32Array(1);
-  crypto.getRandomValues(bytes);
-  return bytes[0] % maxExclusive;
+function doubleBet() {
+  chip = Math.min(chip * 2, 1000);
+
+  highlightChip();
+  updateMoney();
+
+  const selectedZone = document.querySelector(".zone.bet-selected");
+  if (currentBet && selectedZone) showBetChip(selectedZone);
+
+  showToast(`Bet doubled to ${money(chip)}`);
 }
 
-export async function onRequestPost({ request, env }) {
+function rebet() {
+  if (!previousBet) {
+    showToast("No previous bet");
+    return;
+  }
+
+  currentBet = {
+    ...previousBet
+  };
+
+  document.querySelectorAll(".zone").forEach((btn) => {
+    btn.classList.remove("bet-selected");
+  });
+
+  const selectedZone = document.querySelector(
+    `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
+  );
+
+  if (selectedZone) {
+    selectedZone.classList.add("bet-selected");
+    showBetChip(selectedZone);
+  }
+
+  resetWinReadout();
+  showToast("Previous bet restored");
+}
+
+/* ============================================================
+   SPIN
+   ============================================================ */
+
+async function spinRoulette() {
+  if (spinning) return;
+
+  if (!currentBet) {
+    showToast("Place a bet first");
+    return;
+  }
+
+  const { playerId, playerSecret } = getPlayerCredentials();
+
+  if (!playerId || !playerSecret) {
+    showToast("Player login missing");
+    return;
+  }
+
+  if (balance < chip) {
+    showToast("Not enough balance");
+    return;
+  }
+
+  spinning = true;
+
+  if (spinButton) spinButton.disabled = true;
+  if (lastWinText) lastWinText.textContent = "...";
+  if (lastColorText) lastColorText.textContent = "SPINNING";
+
   try {
-    if (!env.DB) return json({ ok: false, error: "Missing D1 binding env.DB." }, 500);
+    const response = await fetch("/api/roulette", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        playerId,
+        playerSecret,
+        betType: currentBet.type,
+        betValue: String(currentBet.value),
+        betAmount: chip
+      })
+    });
 
-    const body = await request.json();
-    const playerId = String(body?.playerId || "").trim();
-    if (!playerId) return json({ ok: false, error: "Missing playerId." }, 400);
+    const data = await response.json();
 
-    const bets = Array.isArray(body?.bets) ? body.bets.map(validateBet) : [];
-    if (!bets.length) return json({ ok: false, error: "Place a bet first." }, 400);
+    if (!data.ok) {
+      showToast(data.error || "Roulette failed");
+      hideBall();
 
-    const totalBet = bets.reduce((sum, bet) => sum + bet.amount, 0);
-    if (totalBet < MIN_BET) return json({ ok: false, error: `Minimum bet is ${MIN_BET}.` }, 400);
-    if (totalBet > MAX_TOTAL_BET) return json({ ok: false, error: `Table limit is ${MAX_TOTAL_BET}.` }, 400);
+      spinning = false;
+      if (spinButton) spinButton.disabled = false;
+      if (lastWinText) lastWinText.textContent = "—";
+      if (lastColorText) lastColorText.textContent = "PLACE BET";
 
-    const player = await env.DB.prepare(
-      `SELECT ${BALANCE_COLUMN} AS balance FROM ${PLAYER_TABLE} WHERE ${PLAYER_ID_COLUMN} = ? LIMIT 1`
-    ).bind(playerId).first();
-
-    if (!player) return json({ ok: false, error: "Player not found." }, 404);
-
-    const currentBalance = Number(player.balance || 0);
-    if (currentBalance < totalBet) return json({ ok: false, error: "Not enough chips." }, 400);
-
-    const winningNumber = WHEEL_SEQUENCE[secureRandomIndex(WHEEL_SEQUENCE.length)];
-    let payout = 0;
-
-    for (const bet of bets) {
-      if (bet.numbers.includes(winningNumber)) {
-        payout += bet.amount * (bet.payout + 1);
-      }
+      return;
     }
 
-    const newBalance = currentBalance - totalBet + payout;
+    const resultNumber = Number(data.resultNumber);
+    const resultColor = data.resultColor || numberColor(resultNumber);
 
-    await env.DB.prepare(
-      `UPDATE ${PLAYER_TABLE} SET ${BALANCE_COLUMN} = ? WHERE ${PLAYER_ID_COLUMN} = ?`
-    ).bind(newBalance, playerId).run();
+    animateWheelToNumber(resultNumber);
 
-    // Optional audit table. Uncomment after creating the table.
-    // await env.DB.prepare(
-    //   `INSERT INTO game_audit (player_id, game, wager, payout, result, created_at)
-    //    VALUES (?, 'roulette', ?, ?, ?, datetime('now'))`
-    // ).bind(playerId, totalBet, payout, String(winningNumber)).run();
+    setTimeout(() => {
+      balance = Number(data.balanceAfter ?? balance);
 
-    return json({
-      ok: true,
-      result: { number: winningNumber, color: numberColor(winningNumber) },
-      totalBet,
-      payout,
-      balance: newBalance,
-    });
+      if (lastWinText) {
+        lastWinText.textContent = money(data.payout ?? 0);
+      }
+
+      if (lastColorText) {
+        lastColorText.textContent = String(resultColor).toUpperCase();
+      }
+
+      updateMoney();
+
+      if (data.won) {
+        showToast(
+          `${resultNumber} ${String(resultColor).toUpperCase()} — you won ${money(data.payout)}`
+        );
+      } else {
+        showToast(
+          `Landed on ${resultNumber} ${String(resultColor).toUpperCase()}`
+        );
+      }
+
+      spinning = false;
+      if (spinButton) spinButton.disabled = false;
+    }, 5100);
   } catch (error) {
-    return json({ ok: false, error: error.message || "Roulette failed." }, 500);
+    showToast("Connection error");
+    hideBall();
+
+    spinning = false;
+    if (spinButton) spinButton.disabled = false;
+    if (lastWinText) lastWinText.textContent = "—";
+    if (lastColorText) lastColorText.textContent = "PLACE BET";
   }
 }
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+
+document.querySelectorAll(".zone").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    placeBet(btn.dataset.bet, btn.dataset.value);
+  });
+});
+
+document.querySelectorAll(".chip-zone").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    setChip(btn.dataset.chip);
+  });
+});
+
+if (spinButton) {
+  spinButton.addEventListener("click", spinRoulette);
+}
+
+document.getElementById("clearButton")?.addEventListener("click", () => {
+  clearBet();
+});
+
+document.getElementById("doubleButton")?.addEventListener("click", () => {
+  doubleBet();
+});
+
+document.getElementById("rebetButton")?.addEventListener("click", () => {
+  rebet();
+});
+
+document.getElementById("undoButton")?.addEventListener("click", () => {
+  clearBet("Bet removed");
+});
+
+window.addEventListener("resize", setStageSize);
+window.addEventListener("orientationchange", setStageSize);
+window.addEventListener("load", setStageSize);
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+buildWheelPockets();
+setStageSize();
+highlightChip();
+updateMoney();
+loadWalletBalance();
+showToast("Tap the table to place a bet");

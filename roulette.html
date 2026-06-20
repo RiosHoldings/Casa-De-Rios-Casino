@@ -1,157 +1,142 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
   <title>Casa de Ríos Roulette</title>
-  <link rel="stylesheet" href="./roulette.css" />
+  <link rel="stylesheet" href="roulette.css" />
 </head>
+
 <body>
-  <main class="roulette-app" aria-label="Casa de Ríos Roulette">
-    <div class="backdrop"></div>
+  <!-- Full-screen casino background -->
+  <img class="bg" src="assets/roulette-bg.jpeg" alt="" aria-hidden="true" />
 
-    <header class="topbar">
-      <button class="nav-btn" id="lobbyBtn" type="button" aria-label="Return to lobby">← Lobby</button>
+  <!-- Everything is locked to this portrait stage -->
+  <main class="stage" aria-label="Casa de Ríos Roulette">
 
-      <section class="brand" aria-label="Game title">
-        <div class="crest">R</div>
-        <p>Casa de Ríos</p>
-        <h1>Roulette</h1>
-        <span>Suerte • Honor • Lealtad</span>
-      </section>
+    <!-- Return / lobby hamburger button -->
+    <a class="lobby-hotspot" href="index.html" aria-label="Return to lobby"></a>
 
-      <section class="wallet-card" aria-label="Wallet balance">
-        <span>Balance</span>
-        <strong id="balanceValue">—</strong>
-        <small>chips</small>
-      </section>
-    </header>
-
-    <section class="wheel-stage" aria-label="Roulette wheel">
-      <div class="wheel-wrap">
-        <canvas id="wheelCanvas" width="720" height="720" aria-label="European roulette wheel"></canvas>
-        <div class="wheel-shine" aria-hidden="true"></div>
+    <!-- Roulette wheel -->
+    <section class="wheel-wrap" aria-hidden="true">
+      <div id="wheelSpinLayer" class="wheel-spin-layer">
+        <img class="roulette-wheel" src="assets/wheel.png" alt="" />
+        <svg id="wheelNumberSvg" class="wheel-number-svg" viewBox="0 0 1036 1036"></svg>
       </div>
 
-      <aside class="result-panel" aria-live="polite">
-        <span>Last Winning Number</span>
-        <strong id="lastNumber">—</strong>
-        <small id="lastColor">Place your bets</small>
-        <em id="lastWin">Won 0</em>
-      </aside>
-    </section>
-
-    <section class="status-row" aria-label="Bet summary">
-      <div>
-        <span>Total Bet</span>
-        <strong id="totalBet">0</strong>
-      </div>
-      <div>
-        <span>Max Possible Pay</span>
-        <strong id="potentialWin">0</strong>
-      </div>
-      <div>
-        <span>Selected Chip</span>
-        <strong id="selectedChipLabel">100</strong>
+      <div id="ballOrbit" class="ball-orbit">
+        <div id="rouletteBall" class="roulette-ball"></div>
       </div>
     </section>
 
-    <section class="table-card" aria-label="Betting table">
-      <div class="table-title">Tap the table to place a bet</div>
+    <!-- Betting table image + tap zones -->
+    <section class="table-wrap" aria-label="Betting table">
+      <img class="table" src="assets/table.jpeg" alt="European roulette betting table" />
 
-      <div class="inside-table" id="insideTable">
-        <button class="zero-cell" type="button" data-bet-type="straight" data-value="0">0</button>
+      <div class="zones">
+        <!-- ZERO -->
+        <button class="zone" data-bet="number" data-value="0" style="left:6.97%;top:19.83%;width:7.20%;height:37.07%" aria-label="Bet 0"></button>
 
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="3">3</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="6">6</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="9">9</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="12">12</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="15">15</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="18">18</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="21">21</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="24">24</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="27">27</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="30">30</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="33">33</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="36">36</button>
-        <button class="col-cell" type="button" data-bet-type="column" data-value="3">2 to 1</button>
+        <!-- TOP ROW: 3, 6, 9...36 -->
+        <button class="zone" data-bet="number" data-value="3"  style="left:14.17%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 3"></button>
+        <button class="zone" data-bet="number" data-value="6"  style="left:20.19%;top:19.83%;width:6.08%;height:12.28%" aria-label="Bet 6"></button>
+        <button class="zone" data-bet="number" data-value="9"  style="left:26.27%;top:19.83%;width:5.96%;height:12.28%" aria-label="Bet 9"></button>
+        <button class="zone" data-bet="number" data-value="12" style="left:32.23%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 12"></button>
+        <button class="zone" data-bet="number" data-value="15" style="left:38.25%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 15"></button>
+        <button class="zone" data-bet="number" data-value="18" style="left:44.27%;top:19.83%;width:6.08%;height:12.28%" aria-label="Bet 18"></button>
+        <button class="zone" data-bet="number" data-value="21" style="left:50.35%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 21"></button>
+        <button class="zone" data-bet="number" data-value="24" style="left:56.38%;top:19.83%;width:6.14%;height:12.28%" aria-label="Bet 24"></button>
+        <button class="zone" data-bet="number" data-value="27" style="left:62.51%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 27"></button>
+        <button class="zone" data-bet="number" data-value="30" style="left:68.54%;top:19.83%;width:6.02%;height:12.28%" aria-label="Bet 30"></button>
+        <button class="zone" data-bet="number" data-value="33" style="left:74.56%;top:19.83%;width:6.14%;height:12.28%" aria-label="Bet 33"></button>
+        <button class="zone" data-bet="number" data-value="36" style="left:80.70%;top:19.83%;width:6.20%;height:12.28%" aria-label="Bet 36"></button>
 
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="2">2</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="5">5</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="8">8</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="11">11</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="14">14</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="17">17</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="20">20</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="23">23</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="26">26</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="29">29</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="32">32</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="35">35</button>
-        <button class="col-cell" type="button" data-bet-type="column" data-value="2">2 to 1</button>
+        <!-- MIDDLE ROW: 2, 5, 8...35 -->
+        <button class="zone" data-bet="number" data-value="2"  style="left:14.17%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 2"></button>
+        <button class="zone" data-bet="number" data-value="5"  style="left:20.19%;top:32.11%;width:6.08%;height:12.39%" aria-label="Bet 5"></button>
+        <button class="zone" data-bet="number" data-value="8"  style="left:26.27%;top:32.11%;width:5.96%;height:12.39%" aria-label="Bet 8"></button>
+        <button class="zone" data-bet="number" data-value="11" style="left:32.23%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 11"></button>
+        <button class="zone" data-bet="number" data-value="14" style="left:38.25%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 14"></button>
+        <button class="zone" data-bet="number" data-value="17" style="left:44.27%;top:32.11%;width:6.08%;height:12.39%" aria-label="Bet 17"></button>
+        <button class="zone" data-bet="number" data-value="20" style="left:50.35%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 20"></button>
+        <button class="zone" data-bet="number" data-value="23" style="left:56.38%;top:32.11%;width:6.14%;height:12.39%" aria-label="Bet 23"></button>
+        <button class="zone" data-bet="number" data-value="26" style="left:62.51%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 26"></button>
+        <button class="zone" data-bet="number" data-value="29" style="left:68.54%;top:32.11%;width:6.02%;height:12.39%" aria-label="Bet 29"></button>
+        <button class="zone" data-bet="number" data-value="32" style="left:74.56%;top:32.11%;width:6.14%;height:12.39%" aria-label="Bet 32"></button>
+        <button class="zone" data-bet="number" data-value="35" style="left:80.70%;top:32.11%;width:6.20%;height:12.39%" aria-label="Bet 35"></button>
 
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="1">1</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="4">4</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="7">7</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="10">10</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="13">13</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="16">16</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="19">19</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="22">22</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="25">25</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="28">28</button>
-        <button class="num-cell black" type="button" data-bet-type="straight" data-value="31">31</button>
-        <button class="num-cell red" type="button" data-bet-type="straight" data-value="34">34</button>
-        <button class="col-cell" type="button" data-bet-type="column" data-value="1">2 to 1</button>
+        <!-- BOTTOM ROW: 1, 4, 7...34 -->
+        <button class="zone" data-bet="number" data-value="1"  style="left:14.17%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 1"></button>
+        <button class="zone" data-bet="number" data-value="4"  style="left:20.19%;top:44.50%;width:6.08%;height:12.39%" aria-label="Bet 4"></button>
+        <button class="zone" data-bet="number" data-value="7"  style="left:26.27%;top:44.50%;width:5.96%;height:12.39%" aria-label="Bet 7"></button>
+        <button class="zone" data-bet="number" data-value="10" style="left:32.23%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 10"></button>
+        <button class="zone" data-bet="number" data-value="13" style="left:38.25%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 13"></button>
+        <button class="zone" data-bet="number" data-value="16" style="left:44.27%;top:44.50%;width:6.08%;height:12.39%" aria-label="Bet 16"></button>
+        <button class="zone" data-bet="number" data-value="19" style="left:50.35%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 19"></button>
+        <button class="zone" data-bet="number" data-value="22" style="left:56.38%;top:44.50%;width:6.14%;height:12.39%" aria-label="Bet 22"></button>
+        <button class="zone" data-bet="number" data-value="25" style="left:62.51%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 25"></button>
+        <button class="zone" data-bet="number" data-value="28" style="left:68.54%;top:44.50%;width:6.02%;height:12.39%" aria-label="Bet 28"></button>
+        <button class="zone" data-bet="number" data-value="31" style="left:74.56%;top:44.50%;width:6.14%;height:12.39%" aria-label="Bet 31"></button>
+        <button class="zone" data-bet="number" data-value="34" style="left:80.70%;top:44.50%;width:6.20%;height:12.39%" aria-label="Bet 34"></button>
+
+        <!-- COLUMNS -->
+        <button class="zone" data-bet="column" data-value="3" style="left:86.89%;top:19.83%;width:6.14%;height:12.28%" aria-label="Top column 2 to 1"></button>
+        <button class="zone" data-bet="column" data-value="2" style="left:86.89%;top:32.11%;width:6.14%;height:12.39%" aria-label="Middle column 2 to 1"></button>
+        <button class="zone" data-bet="column" data-value="1" style="left:86.89%;top:44.50%;width:6.14%;height:12.39%" aria-label="Bottom column 2 to 1"></button>
+
+        <!-- DOZENS -->
+        <button class="zone" data-bet="dozen" data-value="1" style="left:14.17%;top:56.90%;width:24.09%;height:10.13%" aria-label="1st 12"></button>
+        <button class="zone" data-bet="dozen" data-value="2" style="left:38.25%;top:56.90%;width:24.26%;height:10.13%" aria-label="2nd 12"></button>
+        <button class="zone" data-bet="dozen" data-value="3" style="left:62.51%;top:56.90%;width:24.38%;height:10.13%" aria-label="3rd 12"></button>
+
+        <!-- OUTSIDE BETS -->
+        <button class="zone" data-bet="range" data-value="low"     style="left:14.17%;top:67.03%;width:12.10%;height:9.91%" aria-label="1 to 18"></button>
+        <button class="zone" data-bet="oddEven" data-value="even" style="left:26.27%;top:67.03%;width:11.98%;height:9.91%" aria-label="Even"></button>
+        <button class="zone" data-bet="color" data-value="red"    style="left:38.25%;top:67.03%;width:12.10%;height:9.91%" aria-label="Red"></button>
+        <button class="zone" data-bet="color" data-value="black"  style="left:50.35%;top:67.03%;width:12.16%;height:9.91%" aria-label="Black"></button>
+        <button class="zone" data-bet="oddEven" data-value="odd"  style="left:62.51%;top:67.03%;width:12.04%;height:9.91%" aria-label="Odd"></button>
+        <button class="zone" data-bet="range" data-value="high"   style="left:74.56%;top:67.03%;width:12.34%;height:9.91%" aria-label="19 to 36"></button>
       </div>
-
-      <div class="dozen-row">
-        <button type="button" data-bet-type="dozen" data-value="1">1st 12</button>
-        <button type="button" data-bet-type="dozen" data-value="2">2nd 12</button>
-        <button type="button" data-bet-type="dozen" data-value="3">3rd 12</button>
-      </div>
-
-      <div class="outside-row">
-        <button type="button" data-bet-type="range" data-value="low">1 to 18</button>
-        <button type="button" data-bet-type="parity" data-value="even">Even</button>
-        <button class="diamond red-diamond" type="button" data-bet-type="color" data-value="red" aria-label="Red">◆</button>
-        <button class="diamond black-diamond" type="button" data-bet-type="color" data-value="black" aria-label="Black">◆</button>
-        <button type="button" data-bet-type="parity" data-value="odd">Odd</button>
-        <button type="button" data-bet-type="range" data-value="high">19 to 36</button>
-      </div>
     </section>
 
-    <section class="chip-rail" aria-label="Chip selection">
-      <button class="chip chip-50" type="button" data-chip="50">50</button>
-      <button class="chip chip-100 active" type="button" data-chip="100">100</button>
-      <button class="chip chip-250" type="button" data-chip="250">250</button>
-      <button class="chip chip-500" type="button" data-chip="500">500</button>
-      <button class="chip chip-1000" type="button" data-chip="1000">1K</button>
-    </section>
+    <!-- UI overlay: logo, balance panels, chips, buttons -->
+    <img class="ui-overlay" src="assets/roulette-ui.png" alt="" aria-hidden="true" />
 
-    <section class="action-row" aria-label="Game actions">
-      <button class="small-action" id="undoBtn" type="button">Undo</button>
-      <button class="small-action" id="clearBtn" type="button">Clear</button>
-      <button class="spin-btn" id="spinBtn" type="button">Spin</button>
-      <button class="small-action" id="doubleBtn" type="button">×2</button>
-      <button class="small-action" id="rebetBtn" type="button">Rebet</button>
-    </section>
+    <!-- Dynamic text values -->
+    <div class="values" aria-live="polite">
+      <strong id="balanceText" class="val val-balance">$5,000.00</strong>
+      <strong id="lastWinText" class="val val-win">—</strong>
+      <em id="lastColorText" class="val-color">PLACE BET</em>
+      <strong id="totalBetText" class="val val-total">$100.00</strong>
+    </div>
 
-    <section class="recent-card" aria-label="Recent results">
-      <span>Recent Results</span>
-      <div id="recentResults" class="recent-results"></div>
-    </section>
+    <!-- Chip hotspots -->
+    <div class="chip-hotspots" aria-label="Chip selection">
+      <button class="chip-zone"          style="left:22%" data-chip="50"   aria-label="50 chip"></button>
+      <button class="chip-zone selected" style="left:38%" data-chip="100"  aria-label="100 chip"></button>
+      <button class="chip-zone"          style="left:52%" data-chip="250"  aria-label="250 chip"></button>
+      <button class="chip-zone"          style="left:66%" data-chip="500"  aria-label="500 chip"></button>
+      <button class="chip-zone"          style="left:79%" data-chip="1000" aria-label="1000 chip"></button>
+    </div>
 
-    <nav class="bottom-nav" aria-label="Casino navigation">
-      <a href="./lobby.html">Lobby</a>
-      <a href="./slots.html">Slots</a>
-      <a class="active" href="./roulette.html">Roulette</a>
-      <a href="./blackjack.html">Blackjack</a>
-    </nav>
+    <!-- Control button hotspots -->
+    <button id="clearButton"  class="ctrl-hotspot" style="left:4.3%;width:13.1%"  aria-label="Clear bet"></button>
+    <button id="rebetButton"  class="ctrl-hotspot" style="left:19.6%;width:13.4%" aria-label="Rebet"></button>
+    <button id="spinButton"   class="spin-hotspot" aria-label="Spin">SPIN</button>
+    <button id="doubleButton" class="ctrl-hotspot" style="left:63.6%;width:13.3%" aria-label="Double bet"></button>
+    <button id="undoButton"   class="ctrl-hotspot" style="left:79%;width:13.3%"   aria-label="Undo last bet"></button>
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <!-- Visual chip marker placed on selected table spot -->
+    <div id="chipMarkerLayer" class="chip-marker-layer" aria-hidden="true"></div>
+
+    <!-- Toast messages -->
+    <div id="toast" class="toast" role="status">Tap the table to place a bet</div>
+
   </main>
 
-  <script src="./roulette.js"></script>
+  <script src="roulette.js"></script>
 </body>
 </html>
