@@ -253,11 +253,12 @@ function showBetChip(zone) {
   const x = zoneRect.left - stageRect.left + zoneRect.width / 2;
   const y = zoneRect.top - stageRect.top + zoneRect.height / 2;
 
-  const marker = document.createElement("div");
+  const marker = document.createElement("img");
   marker.className = "bet-chip-marker";
-  marker.textContent = chip >= 1000 ? "1K" : chip;
-  marker.style.left = `${x}px`;
-  marker.style.top = `${y}px`;
+  marker.src = 'assets/chip-${chip}.png';
+  marker.alt = '${chip} chip';
+  marker.style.left = '${x}px';
+  marker.style.top = '${y}px';
 
   chipMarkerLayer.appendChild(marker);
 }

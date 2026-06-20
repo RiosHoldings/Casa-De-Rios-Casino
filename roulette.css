@@ -311,26 +311,12 @@ body {
 .bet-chip-marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  min-width: calc(var(--ss) * 0.075);
-  height: calc(var(--ss) * 0.075);
-  padding: 0 calc(var(--ss) * 0.012);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: calc(var(--ss) * 0.032);
-  font-weight: 900;
-  color: #1a1206;
-  background: radial-gradient(
-    circle at 32% 30%,
-    #fff0ad,
-    #e9bf57 58%,
-    #b98d2c 100%
-  );
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.65),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.5),
-    inset 0 0 0 4px rgba(95, 53, 9, 0.25);
+  width: calc(var(--ss) * 0.085);
+  height: calc(var(--ss) * 0.085);
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.65));
 }
 
 /* TOAST */
