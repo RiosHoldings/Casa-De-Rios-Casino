@@ -148,7 +148,7 @@ body {
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  pointer-events: auti;
+  pointer-events: auto;
   border-radius: calc(var(--ss) * 0.004);
   transition:
     box-shadow 0.12s ease,

@@ -28,33 +28,15 @@ const EUROPEAN_WHEEL = [
 /* ============================================================
    WHEEL TUNING
 
-   This assumes your wheel image is square-ish and centered.
-   SVG pockets/numbers are drawn over the wheel so the coded
-   result always matches real European roulette order.
+   Since the SVG number ring was removed from HTML, this file now
+   uses only your wheel image. The ball/wheel landing math still
+   works from EUROPEAN_WHEEL and WHEEL_OFFSET.
    ============================================================ */
 
 const WHEEL_OFFSET = -90;
-const WHEEL_CENTER_X = 511;
-const WHEEL_CENTER_Y = 510;
-
-const POCKET_INNER_R = 206;
-const POCKET_OUTER_R = 293;
-const WHEEL_NUMBER_RADIUS = 250;
-
 const BALL_RADIUS_FRACTION = 0.275;
 const WHEEL_SPINS = 6;
 const BALL_SPINS = 10;
-
-const POCKET_RED = "#c0152a";
-const POCKET_BLACK = "#161616";
-const POCKET_GREEN = "#0c7a34";
-const FRET_GOLD = "#d8b25e";
-
-const WHEEL_NUMBER_FONT_SIZE = 34;
-const WHEEL_ZERO_FONT_SIZE = 36;
-const WHEEL_NUMBER_STROKE = 2.5;
-
-const SVGNS = "http://www.w3.org/2000/svg";
 
 /* ============================================================
    STATE
@@ -86,7 +68,6 @@ const lastColorText = document.getElementById("lastColorText");
 const toast = document.getElementById("toast");
 
 const wheelSpinLayer = document.getElementById("wheelSpinLayer");
-const wheelNumberSvg = document.getElementById("wheelNumberSvg");
 const ballOrbit = document.getElementById("ballOrbit");
 const rouletteBall = document.getElementById("rouletteBall");
 
@@ -95,7 +76,7 @@ const rouletteBall = document.getElementById("rouletteBall");
    ============================================================ */
 
 function money(value) {
-  return `$${Number(value || 0).toLocaleString()}`;
+  return `$${Math.floor(Number(value || 0)).toLocaleString()}`;
 }
 
 function getPlayerCredentials() {
@@ -135,6 +116,12 @@ function resetWinReadout() {
 
 function hideBall() {
   if (rouletteBall) rouletteBall.style.opacity = "0";
+}
+
+/* Kept on purpose so the old init call stays safe.
+   The SVG ring is gone, so this does nothing now. */
+function buildWheelPockets() {
+  return;
 }
 
 /* ============================================================
@@ -197,129 +184,6 @@ function setStageSize() {
 }
 
 /* ============================================================
-   SVG WHEEL POCKETS / NUMBERS
-   ============================================================ */
-
-function polar(cx, cy, r, deg) {
-  const a = deg * Math.PI / 180;
-  return [
-    cx + Math.cos(a) * r,
-    cy + Math.sin(a) * r
-  ];
-}
-
-function annularWedge(cx, cy, rIn, rOut, a0, a1) {
-  const [x0o, y0o] = polar(cx, cy, rOut, a0);
-  const [x1o, y1o] = polar(cx, cy, rOut, a1);
-  const [x1i, y1i] = polar(cx, cy, rIn, a1);
-  const [x0i, y0i] = polar(cx, cy, rIn, a0);
-
-  const large = (a1 - a0) > 180 ? 1 : 0;
-
-  return `
-    M ${x0o} ${y0o}
-    A ${rOut} ${rOut} 0 ${large} 1 ${x1o} ${y1o}
-    L ${x1i} ${y1i}
-    A ${rIn} ${rIn} 0 ${large} 0 ${x0i} ${y0i}
-    Z
-  `;
-}
-
-// function buildWheelPockets() {
-  if (!wheelNumberSvg) return;
-
-  wheelNumberSvg.innerHTML = "";
-
-  const cx = WHEEL_CENTER_X;
-  const cy = WHEEL_CENTER_Y;
-  const step = 360 / EUROPEAN_WHEEL.length;
-
-  EUROPEAN_WHEEL.forEach((num, i) => {
-    const aMid = WHEEL_OFFSET + i * step;
-
-    const path = document.createElementNS(SVGNS, "path");
-    path.setAttribute(
-      "d",
-      annularWedge(
-        cx,
-        cy,
-        POCKET_INNER_R,
-        POCKET_OUTER_R,
-        aMid - step / 2,
-        aMid + step / 2
-      )
-    );
-
-    path.setAttribute(
-      "fill",
-      num === 0
-        ? POCKET_GREEN
-        : redNumbers.has(num)
-          ? POCKET_RED
-          : POCKET_BLACK
-    );
-
-    wheelNumberSvg.appendChild(path);
-  });
-
-  for (let i = 0; i < EUROPEAN_WHEEL.length; i++) {
-    const aEdge = WHEEL_OFFSET + (i + 0.5) * step;
-
-    const [xi, yi] = polar(cx, cy, POCKET_INNER_R, aEdge);
-    const [xo, yo] = polar(cx, cy, POCKET_OUTER_R, aEdge);
-
-    const line = document.createElementNS(SVGNS, "line");
-    line.setAttribute("x1", xi);
-    line.setAttribute("y1", yi);
-    line.setAttribute("x2", xo);
-    line.setAttribute("y2", yo);
-    line.setAttribute("stroke", FRET_GOLD);
-    line.setAttribute("stroke-width", "1.5");
-    line.setAttribute("opacity", "0.85");
-
-    wheelNumberSvg.appendChild(line);
-  }
-
-  [POCKET_INNER_R, POCKET_OUTER_R].forEach((r) => {
-    const circle = document.createElementNS(SVGNS, "circle");
-    circle.setAttribute("cx", cx);
-    circle.setAttribute("cy", cy);
-    circle.setAttribute("r", r);
-    circle.setAttribute("fill", "none");
-    circle.setAttribute("stroke", FRET_GOLD);
-    circle.setAttribute("stroke-width", "2");
-    circle.setAttribute("opacity", "0.9");
-
-    wheelNumberSvg.appendChild(circle);
-  });
-
-  EUROPEAN_WHEEL.forEach((num, i) => {
-    const aMid = WHEEL_OFFSET + i * step;
-    const [x, y] = polar(cx, cy, WHEEL_NUMBER_RADIUS, aMid);
-
-    const text = document.createElementNS(SVGNS, "text");
-    text.setAttribute("x", x);
-    text.setAttribute("y", y);
-    text.setAttribute("fill", "#ffffff");
-    text.setAttribute(
-      "font-size",
-      String(num === 0 ? WHEEL_ZERO_FONT_SIZE : WHEEL_NUMBER_FONT_SIZE)
-    );
-    text.setAttribute("font-weight", "900");
-    text.setAttribute("font-family", 'Georgia, "Times New Roman", serif');
-    text.setAttribute("text-anchor", "middle");
-    text.setAttribute("dominant-baseline", "middle");
-    text.setAttribute("paint-order", "stroke");
-    text.setAttribute("stroke", "#000000");
-    text.setAttribute("stroke-width", String(WHEEL_NUMBER_STROKE));
-    text.setAttribute("transform", `rotate(${aMid + 90} ${x} ${y})`);
-    text.textContent = num;
-
-    wheelNumberSvg.appendChild(text);
-  });
-
-
-/* ============================================================
    WHEEL / BALL ANIMATION
    ============================================================ */
 
@@ -338,8 +202,11 @@ function animateWheelToNumber(resultNumber) {
 
   wheelSpinLayer.style.transition = "none";
   ballOrbit.style.transition = "none";
+
+  // Force repaint before applying new transition
   wheelSpinLayer.offsetHeight;
 
+  // Wheel rotates forward and stops with result number at 12 o'clock.
   wheelRotation += 360 * WHEEL_SPINS;
 
   const targetNet =
@@ -352,6 +219,7 @@ function animateWheelToNumber(resultNumber) {
 
   wheelRotation += wheelAdjust;
 
+  // Ball rotates opposite direction and rests at top pocket.
   ballRotation -= 360 * BALL_SPINS;
 
   const currentBall = ((ballRotation % 360) + 360) % 360;
@@ -422,11 +290,13 @@ function getBetLabel(type, value) {
   if (type === "color") return String(parsed).toUpperCase();
   if (type === "oddEven") return String(parsed).toUpperCase();
   if (type === "range") return parsed === "low" ? "1–18" : "19–36";
+
   if (type === "dozen") {
     if (parsed === 1) return "1ST 12";
     if (parsed === 2) return "2ND 12";
     return "3RD 12";
   }
+
   if (type === "column") {
     if (parsed === 3) return "TOP 2 TO 1";
     if (parsed === 2) return "MIDDLE 2 TO 1";
