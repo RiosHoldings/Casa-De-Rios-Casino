@@ -419,7 +419,7 @@ body.debug .wheel-wrap {
   .toast {
     transition: none !important;
   }
-
+}
 .wheel-number-svg {
   display: none;
 }
@@ -443,5 +443,4 @@ body.debug .wheel-wrap {
 .val-total {
   left: 78.4%;
   font-size: calc(var(--ss) * 0.031);
-}
 }
