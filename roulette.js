@@ -95,10 +95,7 @@ const rouletteBall = document.getElementById("rouletteBall");
    ============================================================ */
 
 function money(value) {
-  return `$${Number(value || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  return `$${Number(value || 0).toLocaleString()}`;
 }
 
 function getPlayerCredentials() {
