@@ -255,10 +255,10 @@ function showBetChip(zone) {
 
   const marker = document.createElement("img");
   marker.className = "bet-chip-marker";
-  marker.src = 'assets/chip-${chip}.png';
-  marker.alt = '${chip} chip';
-  marker.style.left = '${x}px';
-  marker.style.top = '${y}px';
+  marker.src = `assets/chip-${chip}.png`;
+  marker.alt = `${chip} chip`;
+  marker.style.left = `${x}px`;
+  marker.style.top = `${y}px`;
 
   chipMarkerLayer.appendChild(marker);
 }
