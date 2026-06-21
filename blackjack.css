@@ -541,3 +541,74 @@ body.debug .bj-message {
     transition: none !important;
   }
 }
+
+/* ===============================
+   BLACKJACK LAYOUT FIX PATCH
+   =============================== */
+
+/* Hide the "--" badge until we place hand values cleaner later */
+.bj-hand-total {
+  display: none;
+}
+
+/* Move the message banner slightly higher and make it thinner */
+.bj-message {
+  top: 72.1%;
+  width: 72%;
+  min-height: calc(var(--ss) * 0.055);
+  padding: calc(var(--ss) * 0.01) calc(var(--ss) * 0.02);
+  font-size: calc(var(--ss) * 0.027);
+}
+
+/* Move money values down into the black panel boxes */
+.bj-value {
+  top: 85.9%;
+  font-size: calc(var(--ss) * 0.029);
+}
+
+.bj-balance {
+  left: 20%;
+}
+
+.bj-current-bet {
+  left: 50%;
+}
+
+.bj-last-win {
+  left: 80%;
+}
+
+/* Move coded buttons ABOVE the chip tray instead of on top of it */
+.bj-controls {
+  left: 8%;
+  right: 8%;
+  bottom: 8.4%;
+  gap: calc(var(--ss) * 0.01);
+}
+
+/* Make betting buttons shorter so they fit between panels and chips */
+.bj-btn {
+  height: calc(var(--ss) * 0.062);
+  border-radius: calc(var(--ss) * 0.02);
+  font-size: calc(var(--ss) * 0.032);
+}
+
+/* Make secondary playing buttons smaller */
+.bj-btn-small {
+  height: calc(var(--ss) * 0.052);
+  font-size: calc(var(--ss) * 0.024);
+}
+
+/* Keep chip hotspots locked to the chip images */
+.bj-chip-zone {
+  top: 91.7%;
+  width: 11.5%;
+  height: 5.4%;
+}
+
+/* Main bet chip should sit inside the MAIN BET circle */
+.main-bet-chip-layer {
+  top: 69.7%;
+  width: calc(var(--ss) * 0.095);
+  height: calc(var(--ss) * 0.095);
+}
