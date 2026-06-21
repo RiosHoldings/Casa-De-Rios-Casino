@@ -1,7 +1,7 @@
 /* ============================================================
    CASA DE RÍOS ROULETTE — multi-bet game logic
 
-   New roulette backend body:
+   Backend body:
      POST /api/roulette
      {
        playerId,
@@ -110,7 +110,9 @@ function cloneBets(bets) {
 }
 
 function getTotalBetAmount() {
-  return currentBets.reduce((sum, bet) => sum + Number(bet.amount || 0), 0);
+  return currentBets.reduce((sum, bet) => {
+    return sum + Number(bet.amount || 0);
+  }, 0);
 }
 
 function updateMoney() {
@@ -146,6 +148,7 @@ async function loadWalletBalance() {
   const { playerId, playerSecret } = getPlayerCredentials();
 
   if (!playerId || !playerSecret) {
+    balance = 0;
     showToast("Player login missing");
     updateMoney();
     return;
@@ -165,15 +168,26 @@ async function loadWalletBalance() {
 
     const data = await response.json();
 
-    if (!data.ok) {
-      showToast(data.error || "Wallet unavailable");
+    const walletAmount =
+      data.chips ??
+      data.balance ??
+      data.balanceAfter ??
+      data.wallet?.chips ??
+      data.wallet?.balance ??
+      data.player?.chips ??
+      data.player?.balance;
+
+    if (walletAmount === undefined || walletAmount === null) {
+      balance = 0;
+      showToast(data.error || "Wallet balance missing");
       updateMoney();
       return;
     }
 
-    balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance ?? 0);
+    balance = Number(walletAmount);
     updateMoney();
   } catch (error) {
+    balance = 0;
     showToast("Wallet connection error");
     updateMoney();
   }
@@ -273,7 +287,7 @@ function renderBetChips() {
     const stackIndex = stackedCounts.get(key) || 0;
     stackedCounts.set(key, stackIndex + 1);
 
-    const offset = stage.clientWidth * 0.009;
+    const offset = stage.clientWidth * 0.007;
     const offsetX = ((stackIndex % 3) - 1) * offset;
     const offsetY = -Math.floor(stackIndex / 3) * offset * 0.75;
 
@@ -476,8 +490,12 @@ async function spinRoulette() {
   }
 
   if (balance === null) {
-    showToast("Wallet still loading");
-    return;
+    await loadWalletBalance();
+
+    if (balance === null) {
+      showToast("Wallet unavailable");
+      return;
+    }
   }
 
   if (balance < totalBet) {
