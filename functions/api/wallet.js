@@ -65,3 +65,41 @@ export async function onRequestGet(context) {
     }, 500);
   }
 }
+export async function onRequestPost(context) {
+  try {
+    const body = await context.request.json();
+
+    const url = new URL(context.request.url);
+    url.searchParams.set("playerId", body.playerId || "");
+    url.searchParams.set("playerSecret", body.playerSecret || "");
+
+    const fakeRequest = new Request(url.toString(), {
+      method: "GET",
+      headers: context.request.headers
+    });
+
+    const response = await onRequestGet({
+      ...context,
+      request: fakeRequest
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      return json(data, response.status);
+    }
+
+    const chips = Number(data.player?.chips || 0);
+
+    return json({
+      ...data,
+      chips,
+      balance: chips
+    }, response.status);
+  } catch (error) {
+    return json({
+      ok: false,
+      error: error.message || "Wallet lookup failed."
+    }, 500);
+  }
+}
