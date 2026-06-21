@@ -458,3 +458,16 @@ body.debug .wheel-wrap {
   visibility: hidden !important;
   opacity: 0 !important;
 }
+
+/* Smaller chips placed on table */
+.bet-chip-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: calc(var(--ss) * 0.052);
+  height: calc(var(--ss) * 0.052);
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  z-index: 20;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65));
+}

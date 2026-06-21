@@ -1,12 +1,15 @@
 /* ============================================================
-   CASA DE RÍOS ROULETTE — game logic
+   CASA DE RÍOS ROULETTE — multi-bet game logic
 
-   Backend contract:
-     POST /api/wallet
-       { playerId, playerSecret }
-
+   New roulette backend body:
      POST /api/roulette
-       { playerId, playerSecret, betType, betValue, betAmount }
+     {
+       playerId,
+       playerSecret,
+       bets: [
+         { betType, betValue, betAmount }
+       ]
+     }
 
    Required localStorage:
      casa_rios_player_id
@@ -27,10 +30,6 @@ const EUROPEAN_WHEEL = [
 
 /* ============================================================
    WHEEL TUNING
-
-   Since the SVG number ring was removed from HTML, this file now
-   uses only your wheel image. The ball/wheel landing math still
-   works from EUROPEAN_WHEEL and WHEEL_OFFSET.
    ============================================================ */
 
 const WHEEL_OFFSET = -90;
@@ -42,15 +41,17 @@ const BALL_SPINS = 10;
    STATE
    ============================================================ */
 
-let balance = 5000;
+let balance = null;
 let chip = 100;
-let currentBet = null;
-let previousBet = null;
-let spinning = false;
 
+let currentBets = [];
+let previousBets = [];
+
+let spinning = false;
 let wheelRotation = 0;
 let ballRotation = 0;
 let ballRadiusPx = 0;
+let betIdCounter = 1;
 
 /* ============================================================
    DOM
@@ -104,9 +105,22 @@ function showToast(message) {
   }, 1700);
 }
 
+function cloneBets(bets) {
+  return bets.map((bet) => ({ ...bet }));
+}
+
+function getTotalBetAmount() {
+  return currentBets.reduce((sum, bet) => sum + Number(bet.amount || 0), 0);
+}
+
 function updateMoney() {
-  if (balanceText) balanceText.textContent = money(balance);
-  if (totalBetText) totalBetText.textContent = money(chip);
+  if (balanceText) {
+    balanceText.textContent = balance === null ? "..." : money(balance);
+  }
+
+  if (totalBetText) {
+    totalBetText.textContent = money(getTotalBetAmount());
+  }
 }
 
 function resetWinReadout() {
@@ -118,10 +132,10 @@ function hideBall() {
   if (rouletteBall) rouletteBall.style.opacity = "0";
 }
 
-/* Kept on purpose so the old init call stays safe.
-   The SVG ring is gone, so this does nothing now. */
-function buildWheelPockets() {
-  return;
+function getZoneForBet(bet) {
+  return document.querySelector(
+    `.zone[data-bet="${bet.type}"][data-value="${String(bet.value)}"]`
+  );
 }
 
 /* ============================================================
@@ -157,7 +171,7 @@ async function loadWalletBalance() {
       return;
     }
 
-    balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance);
+    balance = Number(data.chips ?? data.balance ?? data.balanceAfter ?? balance ?? 0);
     updateMoney();
   } catch (error) {
     showToast("Wallet connection error");
@@ -181,6 +195,7 @@ function setStageSize() {
 
   stage.style.setProperty("--ss", `${stage.clientWidth}px`);
   setBallRadius();
+  renderBetChips();
 }
 
 /* ============================================================
@@ -202,11 +217,8 @@ function animateWheelToNumber(resultNumber) {
 
   wheelSpinLayer.style.transition = "none";
   ballOrbit.style.transition = "none";
-
-  // Force repaint before applying new transition
   wheelSpinLayer.offsetHeight;
 
-  // Wheel rotates forward and stops with result number at 12 o'clock.
   wheelRotation += 360 * WHEEL_SPINS;
 
   const targetNet =
@@ -219,7 +231,6 @@ function animateWheelToNumber(resultNumber) {
 
   wheelRotation += wheelAdjust;
 
-  // Ball rotates opposite direction and rests at top pocket.
   ballRotation -= 360 * BALL_SPINS;
 
   const currentBall = ((ballRotation % 360) + 360) % 360;
@@ -239,28 +250,56 @@ function animateWheelToNumber(resultNumber) {
 }
 
 /* ============================================================
-   BET DISPLAY
+   BET CHIP RENDERING
    ============================================================ */
 
-function showBetChip(zone) {
-  if (!chipMarkerLayer || !zone || !stage) return;
+function renderBetChips() {
+  if (!chipMarkerLayer || !stage) return;
 
   chipMarkerLayer.innerHTML = "";
 
+  if (!currentBets.length) return;
+
   const stageRect = stage.getBoundingClientRect();
-  const zoneRect = zone.getBoundingClientRect();
+  const stackedCounts = new Map();
 
-  const x = zoneRect.left - stageRect.left + zoneRect.width / 2;
-  const y = zoneRect.top - stageRect.top + zoneRect.height / 2;
+  currentBets.forEach((bet) => {
+    const zone = getZoneForBet(bet);
+    if (!zone) return;
 
-  const marker = document.createElement("img");
-  marker.className = "bet-chip-marker";
-  marker.src = `assets/chip-${chip}.png`;
-  marker.alt = `${chip} chip`;
-  marker.style.left = `${x}px`;
-  marker.style.top = `${y}px`;
+    const zoneRect = zone.getBoundingClientRect();
 
-  chipMarkerLayer.appendChild(marker);
+    const key = `${bet.type}:${bet.value}`;
+    const stackIndex = stackedCounts.get(key) || 0;
+    stackedCounts.set(key, stackIndex + 1);
+
+    const offset = stage.clientWidth * 0.009;
+    const offsetX = ((stackIndex % 3) - 1) * offset;
+    const offsetY = -Math.floor(stackIndex / 3) * offset * 0.75;
+
+    const x = zoneRect.left - stageRect.left + zoneRect.width / 2 + offsetX;
+    const y = zoneRect.top - stageRect.top + zoneRect.height / 2 + offsetY;
+
+    const marker = document.createElement("img");
+    marker.className = "bet-chip-marker";
+    marker.src = `assets/chip-${bet.amount}.png`;
+    marker.alt = `${bet.amount} chip`;
+    marker.style.left = `${x}px`;
+    marker.style.top = `${y}px`;
+
+    marker.onerror = () => {
+      marker.remove();
+
+      const fallback = document.createElement("div");
+      fallback.className = "bet-chip-marker bet-chip-fallback";
+      fallback.textContent = bet.amount >= 1000 ? "1K" : String(bet.amount);
+      fallback.style.left = `${x}px`;
+      fallback.style.top = `${y}px`;
+      chipMarkerLayer.appendChild(fallback);
+    };
+
+    chipMarkerLayer.appendChild(marker);
+  });
 }
 
 function highlightChip() {
@@ -274,9 +313,6 @@ function setChip(amount) {
 
   highlightChip();
   updateMoney();
-
-  const selectedZone = document.querySelector(".zone.bet-selected");
-  if (currentBet && selectedZone) showBetChip(selectedZone);
 
   showToast(`${money(chip)} chip selected`);
 }
@@ -312,6 +348,7 @@ function getBetLabel(type, value) {
    ============================================================ */
 
 function placeBet(type, value) {
+  if (spinning) return;
   if (!type || value === undefined) return;
 
   const parsed =
@@ -319,83 +356,102 @@ function placeBet(type, value) {
       ? Number(value)
       : value;
 
-  currentBet = {
+  currentBets.push({
+    id: betIdCounter++,
     type,
-    value: parsed
-  };
-
-  previousBet = {
-    type,
-    value: parsed
-  };
-
-  document.querySelectorAll(".zone").forEach((btn) => {
-    btn.classList.remove("bet-selected");
+    value: parsed,
+    amount: chip
   });
-
-  const selectedZone = document.querySelector(
-    `.zone[data-bet="${type}"][data-value="${value}"]`
-  );
-
-  if (selectedZone) {
-    selectedZone.classList.add("bet-selected");
-    showBetChip(selectedZone);
-  }
 
   resetWinReadout();
-  showToast(`Bet placed: ${getBetLabel(type, value)}`);
+  renderBetChips();
+  updateMoney();
+
+  showToast(`${money(chip)} on ${getBetLabel(type, value)}`);
 }
 
-function clearBet(message = "Bet cleared") {
-  currentBet = null;
+function clearBet(message = "Bets cleared") {
+  if (spinning) return;
 
-  document.querySelectorAll(".zone").forEach((btn) => {
-    btn.classList.remove("bet-selected");
-  });
+  if (currentBets.length) {
+    previousBets = cloneBets(currentBets);
+  }
+
+  currentBets = [];
 
   if (chipMarkerLayer) chipMarkerLayer.innerHTML = "";
 
   resetWinReadout();
+  updateMoney();
   showToast(message);
 }
 
-function doubleBet() {
-  chip = Math.min(chip * 2, 1000);
+function undoBet() {
+  if (spinning) return;
 
-  highlightChip();
-  updateMoney();
-
-  const selectedZone = document.querySelector(".zone.bet-selected");
-  if (currentBet && selectedZone) showBetChip(selectedZone);
-
-  showToast(`Bet doubled to ${money(chip)}`);
-}
-
-function rebet() {
-  if (!previousBet) {
-    showToast("No previous bet");
+  if (!currentBets.length) {
+    showToast("No bet to undo");
     return;
   }
 
-  currentBet = {
-    ...previousBet
-  };
+  currentBets.pop();
 
-  document.querySelectorAll(".zone").forEach((btn) => {
-    btn.classList.remove("bet-selected");
-  });
+  renderBetChips();
+  updateMoney();
+  resetWinReadout();
 
-  const selectedZone = document.querySelector(
-    `.zone[data-bet="${currentBet.type}"][data-value="${currentBet.value}"]`
-  );
+  showToast("Last bet removed");
+}
 
-  if (selectedZone) {
-    selectedZone.classList.add("bet-selected");
-    showBetChip(selectedZone);
+function doubleBet() {
+  if (spinning) return;
+
+  if (!currentBets.length) {
+    showToast("Place a bet first");
+    return;
   }
 
+  const total = getTotalBetAmount();
+
+  if (balance !== null && total * 2 > balance) {
+    showToast("Not enough balance to double");
+    return;
+  }
+
+  const duplicated = currentBets.map((bet) => ({
+    id: betIdCounter++,
+    type: bet.type,
+    value: bet.value,
+    amount: bet.amount
+  }));
+
+  currentBets = currentBets.concat(duplicated);
+
+  renderBetChips();
+  updateMoney();
   resetWinReadout();
-  showToast("Previous bet restored");
+
+  showToast(`Total bet doubled to ${money(getTotalBetAmount())}`);
+}
+
+function rebet() {
+  if (spinning) return;
+
+  if (!previousBets.length) {
+    showToast("No previous bets");
+    return;
+  }
+
+  currentBets = cloneBets(previousBets).map((bet) => ({
+    ...bet,
+    id: betIdCounter++
+  }));
+
+  renderBetChips();
+  updateMoney();
+  resetWinReadout();
+
+  showToast("Previous bets restored");
 }
 
 /* ============================================================
@@ -405,10 +461,12 @@ function rebet() {
 async function spinRoulette() {
   if (spinning) return;
 
-  if (!currentBet) {
+  if (!currentBets.length) {
     showToast("Place a bet first");
     return;
   }
+
+  const totalBet = getTotalBetAmount();
 
   const { playerId, playerSecret } = getPlayerCredentials();
 
@@ -417,16 +475,28 @@ async function spinRoulette() {
     return;
   }
 
-  if (balance < chip) {
+  if (balance === null) {
+    showToast("Wallet still loading");
+    return;
+  }
+
+  if (balance < totalBet) {
     showToast("Not enough balance");
     return;
   }
 
   spinning = true;
+  previousBets = cloneBets(currentBets);
 
   if (spinButton) spinButton.disabled = true;
   if (lastWinText) lastWinText.textContent = "...";
   if (lastColorText) lastColorText.textContent = "SPINNING";
+
+  const payloadBets = currentBets.map((bet) => ({
+    betType: bet.type,
+    betValue: String(bet.value),
+    betAmount: Number(bet.amount)
+  }));
 
   try {
     const response = await fetch("/api/roulette", {
@@ -437,9 +507,7 @@ async function spinRoulette() {
       body: JSON.stringify({
         playerId,
         playerSecret,
-        betType: currentBet.type,
-        betValue: String(currentBet.value),
-        betAmount: chip
+        bets: payloadBets
       })
     });
 
@@ -457,16 +525,22 @@ async function spinRoulette() {
       return;
     }
 
-    const resultNumber = Number(data.resultNumber);
-    const resultColor = data.resultColor || numberColor(resultNumber);
+    const resultNumber = Number(
+      data.resultNumber ?? data.winningNumber ?? data.number
+    );
+
+    const resultColor =
+      data.resultColor ?? data.winningColor ?? numberColor(resultNumber);
+
+    const payout = Number(data.totalPayout ?? data.payout ?? 0);
 
     animateWheelToNumber(resultNumber);
 
     setTimeout(() => {
-      balance = Number(data.balanceAfter ?? balance);
+      balance = Number(data.balanceAfter ?? data.chips ?? data.balance ?? balance);
 
       if (lastWinText) {
-        lastWinText.textContent = money(data.payout ?? 0);
+        lastWinText.textContent = money(payout);
       }
 
       if (lastColorText) {
@@ -475,9 +549,9 @@ async function spinRoulette() {
 
       updateMoney();
 
-      if (data.won) {
+      if (payout > 0) {
         showToast(
-          `${resultNumber} ${String(resultColor).toUpperCase()} — you won ${money(data.payout)}`
+          `${resultNumber} ${String(resultColor).toUpperCase()} — won ${money(payout)}`
         );
       } else {
         showToast(
@@ -532,7 +606,7 @@ document.getElementById("rebetButton")?.addEventListener("click", () => {
 });
 
 document.getElementById("undoButton")?.addEventListener("click", () => {
-  clearBet("Bet removed");
+  undoBet();
 });
 
 window.addEventListener("resize", setStageSize);
@@ -543,9 +617,8 @@ window.addEventListener("load", setStageSize);
    INIT
    ============================================================ */
 
-buildWheelPockets();
 setStageSize();
 highlightChip();
 updateMoney();
 loadWalletBalance();
-showToast("Tap the table to place a bet");
+showToast("Tap the table to place bets");

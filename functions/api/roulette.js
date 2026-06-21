@@ -2,9 +2,14 @@ function json(data, status = 200) {
   return Response.json(data, { status });
 }
 
+/* Correct European roulette red numbers */
 const RED_NUMBERS = new Set([
-  1, 3, 5, 7, 9, 12, 14, 16, 18, 21, 23, 25, 27, 28, 30, 32, 34, 36
+  1, 3, 5, 7, 9, 12, 14, 16, 18,
+  19, 21, 23, 25, 27, 30, 32, 34, 36
 ]);
+
+const MAX_TOTAL_ROULETTE_BET = 50000;
+const MAX_BETS_PER_SPIN = 100;
 
 function rouletteColor(number) {
   if (number === 0) return "green";
@@ -105,6 +110,48 @@ function validateBet(betType, betValue) {
   return null;
 }
 
+function normalizeBet(rawBet) {
+  const betType = String(rawBet.betType ?? rawBet.type ?? "").trim();
+
+  let betValue = String(rawBet.betValue ?? rawBet.value ?? "").trim();
+
+  if (["color", "oddEven", "range"].includes(betType)) {
+    betValue = betValue.toLowerCase();
+  }
+
+  const betAmount = Math.floor(Number(rawBet.betAmount ?? rawBet.amount ?? 0));
+
+  const betError = validateBet(betType, betValue);
+  if (betError) {
+    return { ok: false, error: betError };
+  }
+
+  if (!Number.isFinite(betAmount) || betAmount <= 0) {
+    return { ok: false, error: "Invalid bet amount." };
+  }
+
+  return {
+    ok: true,
+    bet: {
+      betType,
+      betValue,
+      betAmount
+    }
+  };
+}
+
+function getVipTier(currentTier, lifetimeWagered) {
+  if (String(currentTier || "").toLowerCase() === "la_leyenda") {
+    return "la_leyenda";
+  }
+
+  if (lifetimeWagered >= 1000000) return "el_jefe";
+  if (lifetimeWagered >= 500000) return "magnate";
+  if (lifetimeWagered >= 100000) return "caballero";
+
+  return "patron";
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -117,9 +164,6 @@ export async function onRequestPost(context) {
 
     const playerId = String(body.playerId || "").trim();
     const playerSecret = String(body.playerSecret || "").trim();
-    const betType = String(body.betType || "").trim();
-    const betValue = String(body.betValue || "").trim();
-    const betAmount = Math.floor(Number(body.betAmount || 0));
 
     if (!playerId || !playerId.startsWith("CDR-")) {
       return json({ ok: false, error: "Invalid Player ID." }, 400);
@@ -129,17 +173,55 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Invalid Player Secret." }, 400);
     }
 
-    const betError = validateBet(betType, betValue);
-    if (betError) {
-      return json({ ok: false, error: betError }, 400);
+    /*
+      Supports BOTH:
+      New frontend:
+        { bets: [{ betType, betValue, betAmount }] }
+
+      Old frontend:
+        { betType, betValue, betAmount }
+    */
+    const rawBets = Array.isArray(body.bets)
+      ? body.bets
+      : [{
+          betType: body.betType,
+          betValue: body.betValue,
+          betAmount: body.betAmount
+        }];
+
+    if (!rawBets.length) {
+      return json({ ok: false, error: "No bets provided." }, 400);
     }
 
-    if (!Number.isFinite(betAmount) || betAmount <= 0) {
-      return json({ ok: false, error: "Invalid bet amount." }, 400);
+    if (rawBets.length > MAX_BETS_PER_SPIN) {
+      return json({ ok: false, error: `Max ${MAX_BETS_PER_SPIN} bets per spin.` }, 400);
     }
 
-    if (betAmount > 50000) {
-      return json({ ok: false, error: "Max roulette bet is 50,000." }, 400);
+    const bets = [];
+
+    for (const rawBet of rawBets) {
+      const normalized = normalizeBet(rawBet);
+
+      if (!normalized.ok) {
+        return json({ ok: false, error: normalized.error }, 400);
+      }
+
+      bets.push(normalized.bet);
+    }
+
+    const totalBetAmount = bets.reduce((sum, bet) => {
+      return sum + bet.betAmount;
+    }, 0);
+
+    if (!Number.isFinite(totalBetAmount) || totalBetAmount <= 0) {
+      return json({ ok: false, error: "Invalid total bet amount." }, 400);
+    }
+
+    if (totalBetAmount > MAX_TOTAL_ROULETTE_BET) {
+      return json({
+        ok: false,
+        error: `Max roulette bet per spin is ${MAX_TOTAL_ROULETTE_BET}.`
+      }, 400);
     }
 
     const player = await db.prepare(`
@@ -174,7 +256,7 @@ export async function onRequestPost(context) {
       return json({ ok: false, error: "Wallet is locked." }, 403);
     }
 
-    if (wallet.chips < betAmount) {
+    if (wallet.chips < totalBetAmount) {
       return json({ ok: false, error: "Not enough chips." }, 400);
     }
 
@@ -184,7 +266,7 @@ export async function onRequestPost(context) {
           updated_at = CURRENT_TIMESTAMP
       WHERE player_id = ?
         AND chips >= ?
-    `).bind(betAmount, playerId, betAmount).run();
+    `).bind(totalBetAmount, playerId, totalBetAmount).run();
 
     if (!spend.meta || spend.meta.changes < 1) {
       return json({ ok: false, error: "Bet could not be placed." }, 400);
@@ -192,16 +274,38 @@ export async function onRequestPost(context) {
 
     const resultNumber = spinNumber();
     const resultColor = rouletteColor(resultNumber);
-    const won = checkWin(betType, betValue, resultNumber, resultColor);
-    const payout = payoutTotal(betType, betAmount, won);
 
-    if (payout > 0) {
+    const settlements = bets.map((bet) => {
+      const won = checkWin(
+        bet.betType,
+        bet.betValue,
+        resultNumber,
+        resultColor
+      );
+
+      const payout = payoutTotal(bet.betType, bet.betAmount, won);
+
+      return {
+        betType: bet.betType,
+        betValue: bet.betValue,
+        betAmount: bet.betAmount,
+        won,
+        payout,
+        netChange: payout - bet.betAmount
+      };
+    });
+
+    const totalPayout = settlements.reduce((sum, bet) => {
+      return sum + bet.payout;
+    }, 0);
+
+    if (totalPayout > 0) {
       await db.prepare(`
         UPDATE wallets
         SET chips = chips + ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE player_id = ?
-      `).bind(payout, playerId).run();
+      `).bind(totalPayout, playerId).run();
     }
 
     const finalWallet = await db.prepare(`
@@ -212,46 +316,40 @@ export async function onRequestPost(context) {
 
     const roundId = crypto.randomUUID();
 
-    await db.prepare(`
-      INSERT INTO roulette_rounds (
-        id,
-        player_id,
-        bet_type,
-        bet_value,
-        bet_amount,
-        result_number,
-        result_color,
-        payout,
-        status,
-        created_at
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'settled', CURRENT_TIMESTAMP)
-    `).bind(
-      roundId,
-      playerId,
-      betType,
-      betValue,
-      betAmount,
-      resultNumber,
-      resultColor,
-      payout
-    ).run();
+    for (const settlement of settlements) {
+      await db.prepare(`
+        INSERT INTO roulette_rounds (
+          id,
+          player_id,
+          bet_type,
+          bet_value,
+          bet_amount,
+          result_number,
+          result_color,
+          payout,
+          status,
+          created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'settled', CURRENT_TIMESTAMP)
+      `).bind(
+        crypto.randomUUID(),
+        playerId,
+        settlement.betType,
+        settlement.betValue,
+        settlement.betAmount,
+        resultNumber,
+        resultColor,
+        settlement.payout
+      ).run();
+    }
 
     const transactionId = crypto.randomUUID();
-    const netChange = payout - betAmount;
-    const newLifetimeWagered = Number(player.lifetime_wagered || 0) + betAmount;
-let newVipTier = "patron";
+    const netChange = totalPayout - totalBetAmount;
 
-if (String(player.vip_tier || "").toLowerCase() === "la_leyenda") {
-  newVipTier = "la_leyenda";
-} else if (newLifetimeWagered >= 1000000) {
-  newVipTier = "el_jefe";
-} else if (newLifetimeWagered >= 500000) {
-  newVipTier = "magnate";
-} else if (newLifetimeWagered >= 100000) {
-  newVipTier = "caballero";
-}
-
+    const betSummary = settlements
+      .map((bet) => `${bet.betAmount} on ${bet.betType} ${bet.betValue}`)
+      .join("; ")
+      .slice(0, 700);
 
     await db.prepare(`
       INSERT INTO transactions (
@@ -270,28 +368,34 @@ if (String(player.vip_tier || "").toLowerCase() === "la_leyenda") {
       playerId,
       netChange,
       finalWallet.chips,
-      `Bet ${betAmount} on ${betType} ${betValue}. Result ${resultNumber} ${resultColor}.`
+      `Round ${roundId}. Bets: ${betSummary}. Result ${resultNumber} ${resultColor}.`
     ).run();
 
+    const newLifetimeWagered = Number(player.lifetime_wagered || 0) + totalBetAmount;
+    const newVipTier = getVipTier(player.vip_tier, newLifetimeWagered);
 
-await db.prepare(`
-  UPDATE players
-  SET lifetime_wagered = ?,
-      vip_tier = ?,
-      updated_at = CURRENT_TIMESTAMP
-  WHERE id = ?
-`).bind(newLifetimeWagered, newVipTier, playerId).run();
+    await db.prepare(`
+      UPDATE players
+      SET lifetime_wagered = ?,
+          vip_tier = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(newLifetimeWagered, newVipTier, playerId).run();
 
     return json({
       ok: true,
       roundId,
       resultNumber,
       resultColor,
-      won,
-      betType,
-      betValue,
-      betAmount,
-      payout,
+
+      bets: settlements,
+      totalBetAmount,
+      totalPayout,
+
+      /* Kept for frontend compatibility */
+      payout: totalPayout,
+      won: totalPayout > 0,
+
       netChange,
       balanceAfter: finalWallet.chips
     });
