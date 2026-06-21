@@ -612,3 +612,102 @@ body.debug .bj-message {
   width: calc(var(--ss) * 0.095);
   height: calc(var(--ss) * 0.095);
 }
+
+/* ===============================
+   BLACKJACK POSITION FIX V2
+   =============================== */
+
+/* Keep hand total badges hidden for now */
+.bj-hand-total {
+  display: none !important;
+}
+
+/* Smaller coded cards so they fit the baked card spaces better */
+.bj-card {
+  width: calc(var(--ss) * 0.118);
+}
+
+/* Dealer cards higher and tighter */
+.bj-dealer-area {
+  top: 18.1%;
+  width: 32%;
+  height: 9.5%;
+}
+
+/* Player cards lower so they sit over the baked player card art */
+.bj-player-area {
+  top: 53.8%;
+  width: 38%;
+  height: 11.5%;
+}
+
+/* Main bet chip centered in the MAIN BET circle */
+.main-bet-chip-layer {
+  top: 68.85%;
+  width: calc(var(--ss) * 0.082);
+  height: calc(var(--ss) * 0.082);
+}
+
+/* Message banner sits above the control/panel area */
+.bj-message {
+  top: 73.2%;
+  width: 72%;
+  min-height: calc(var(--ss) * 0.052);
+  padding: calc(var(--ss) * 0.008) calc(var(--ss) * 0.02);
+  font-size: calc(var(--ss) * 0.026);
+}
+
+/* Put money values inside the black panels */
+.bj-value {
+  top: 84.55%;
+  font-size: calc(var(--ss) * 0.027);
+}
+
+.bj-balance {
+  left: 19.5%;
+}
+
+.bj-current-bet {
+  left: 50%;
+}
+
+.bj-last-win {
+  left: 80.5%;
+}
+
+/* Move buttons down into the chip-tray area instead of over the panels */
+.bj-controls {
+  left: 7%;
+  right: 7%;
+  bottom: 2.8%;
+  gap: calc(var(--ss) * 0.009);
+}
+
+/* Make the button rows compact */
+.bj-control-row {
+  gap: calc(var(--ss) * 0.022);
+}
+
+.bj-btn {
+  height: calc(var(--ss) * 0.052);
+  border-radius: calc(var(--ss) * 0.017);
+  font-size: calc(var(--ss) * 0.028);
+  letter-spacing: 0.09em;
+}
+
+/* Secondary row much smaller */
+.bj-small-row {
+  padding: 0 10%;
+}
+
+.bj-btn-small {
+  height: calc(var(--ss) * 0.042);
+  font-size: calc(var(--ss) * 0.021);
+}
+
+/* Chip hotspots stay on the baked chips */
+.bj-chip-zone {
+  top: 91.7%;
+  width: 11.5%;
+  height: 5.4%;
+}
