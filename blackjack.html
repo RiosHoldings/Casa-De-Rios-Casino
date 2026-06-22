@@ -15,7 +15,7 @@
 <body>
   <main class="bj-stage" aria-label="Casino Casa de Ríos Blackjack">
 
-    <!-- Full portrait background/UI image -->
+    <!-- BACKGROUND / TABLE ONLY -->
     <img
       class="bj-bg"
       src="assets/blackjack-bg.jpeg"
@@ -23,105 +23,139 @@
       aria-hidden="true"
     />
 
-    <!-- Invisible lobby/menu button over the baked hamburger -->
+    <!-- Invisible lobby/menu hotspot over the baked menu button -->
     <a class="bj-lobby-hotspot" href="index.html" aria-label="Return to lobby"></a>
 
-    <!-- DEALER AREA -->
+    <!-- DEALER CARDS -->
     <section class="bj-dealer-area" aria-label="Dealer hand">
-      <div id="dealerCards" class="bj-card-row dealer-cards">
-        <!-- JS renders dealer cards here -->
-      </div>
-
+      <div id="dealerCards" class="bj-card-row dealer-cards"></div>
       <div id="dealerTotal" class="bj-hand-total dealer-total">--</div>
     </section>
 
-    <!-- PLAYER AREA -->
+    <!-- PLAYER CARDS -->
     <section class="bj-player-area" aria-label="Player hand">
-      <div id="playerCards" class="bj-card-row player-cards">
-        <!-- JS renders player cards here -->
-      </div>
-
+      <div id="playerCards" class="bj-card-row player-cards"></div>
       <div id="playerTotal" class="bj-hand-total player-total">--</div>
     </section>
 
-    <!-- MAIN BET CHIP MARKER -->
+    <!-- MAIN BET CHIP ON TABLE -->
     <div id="mainBetChipLayer" class="main-bet-chip-layer" aria-hidden="true"></div>
 
-    <!-- RESULT / STATUS BANNER -->
+    <!-- MESSAGE / RESULT BANNER -->
     <div id="gameMessage" class="bj-message" role="status">
       Place your bet.
     </div>
 
-    <!-- MONEY VALUES OVER BAKED PANELS -->
-    <section class="bj-values" aria-live="polite">
-      <strong id="walletBalance" class="bj-value bj-balance">...</strong>
-      <strong id="currentBet" class="bj-value bj-current-bet">$0</strong>
-      <strong id="lastPayout" class="bj-value bj-last-win">$0</strong>
-    </section>
+    <!-- BOTTOM CODED UI -->
+    <section class="bj-bottom-ui" aria-label="Blackjack controls and wallet">
 
-    <!-- CHIP HOTSPOTS OVER BAKED CHIPS -->
-    <section class="bj-chip-hotspots" aria-label="Chip selection">
-      <button class="bj-chip-zone" style="left:21.5%" data-chip="50" aria-label="50 chip"></button>
-      <button class="bj-chip-zone" style="left:35.5%" data-chip="100" aria-label="100 chip"></button>
-      <button class="bj-chip-zone" style="left:50%" data-chip="250" aria-label="250 chip"></button>
-      <button class="bj-chip-zone" style="left:64.5%" data-chip="500" aria-label="500 chip"></button>
-      <button class="bj-chip-zone" style="left:78.5%" data-chip="1000" aria-label="1000 chip"></button>
-    </section>
-
-    <!-- CODED BUTTONS: STATE-BASED CONTROLS -->
-    <section id="bjControls" class="bj-controls" aria-label="Blackjack controls">
-
-      <!-- BETTING PHASE -->
-      <div id="bettingControls" class="bj-control-row">
-        <button id="clearBetBtn" class="bj-btn bj-btn-secondary">
-          Clear
-        </button>
-
-        <button id="dealBtn" class="bj-btn bj-btn-primary">
-          Deal
-        </button>
-      </div>
-
-      <!-- PLAYING PHASE -->
-      <div id="playingControls" class="bj-control-stack hidden">
-        <div class="bj-control-row">
-          <button id="hitBtn" class="bj-btn bj-btn-primary">
-            Hit
-          </button>
-
-          <button id="standBtn" class="bj-btn bj-btn-primary">
-            Stand
-          </button>
+      <!-- INFO PANELS -->
+      <div class="bj-info-panels">
+        <div class="bj-info-panel bj-balance-panel">
+          <img src="assets/bj-panel-balance.png" alt="" aria-hidden="true" />
+          <strong id="walletBalance" class="bj-panel-value">...</strong>
         </div>
 
-        <div class="bj-control-row bj-small-row">
-          <button id="doubleBtn" class="bj-btn bj-btn-small">
-            ×2 Double
-          </button>
+        <div class="bj-info-panel bj-bet-panel">
+          <img src="assets/bj-panel-bet.png" alt="" aria-hidden="true" />
+          <strong id="currentBet" class="bj-panel-value">$0</strong>
+        </div>
 
-          <button id="splitBtn" class="bj-btn bj-btn-small" disabled>
-            Split
-          </button>
+        <div class="bj-info-panel bj-win-panel">
+          <img src="assets/bj-panel-win.png" alt="" aria-hidden="true" />
+          <strong id="lastPayout" class="bj-panel-value">$0</strong>
         </div>
       </div>
 
-      <!-- RESULT PHASE -->
-      <div id="resultControls" class="bj-control-row hidden">
-        <button id="rebetBtn" class="bj-btn bj-btn-secondary">
-          Rebet
+      <!-- CHIP RACK -->
+      <div class="bj-chip-rack-wrap">
+        <div class="bj-chip-rack-bg"></div>
+
+        <button class="bj-chip-btn" data-chip="50" aria-label="50 chip">
+          <img src="assets/chip-50.png" alt="50" />
         </button>
 
-        <button id="newHandBtn" class="bj-btn bj-btn-primary">
-          New Hand
+        <button class="bj-chip-btn" data-chip="100" aria-label="100 chip">
+          <img src="assets/chip-100.png" alt="100" />
+        </button>
+
+        <button class="bj-chip-btn" data-chip="250" aria-label="250 chip">
+          <img src="assets/chip-250.png" alt="250" />
+        </button>
+
+        <button class="bj-chip-btn" data-chip="500" aria-label="500 chip">
+          <img src="assets/chip-500.png" alt="500" />
+        </button>
+
+        <button class="bj-chip-btn" data-chip="1000" aria-label="1000 chip">
+          <img src="assets/chip-1000.png" alt="1K" />
         </button>
       </div>
 
+      <!-- STATE-BASED BUTTONS -->
+      <section id="bjControls" class="bj-controls" aria-label="Blackjack action buttons">
+
+        <!-- BETTING PHASE -->
+        <div id="bettingControls" class="bj-control-row">
+          <button id="clearBetBtn" class="bj-action-btn bj-btn-secondary bj-btn-left">
+            <span>Clear</span>
+          </button>
+
+          <button id="dealBtn" class="bj-action-btn bj-btn-primary bj-btn-right">
+            <span>Deal</span>
+          </button>
+        </div>
+
+        <!-- PLAYING PHASE -->
+        <div id="playingControls" class="bj-control-stack hidden">
+          <div class="bj-control-row">
+            <button id="hitBtn" class="bj-action-btn bj-btn-primary bj-btn-left">
+              <span>Hit</span>
+            </button>
+
+            <button id="standBtn" class="bj-action-btn bj-btn-primary bj-btn-right">
+              <span>Stand</span>
+            </button>
+          </div>
+
+          <div class="bj-control-row bj-small-row">
+            <button id="doubleBtn" class="bj-action-btn bj-btn-secondary bj-btn-left">
+              <span>×2 Double</span>
+            </button>
+
+            <button id="splitBtn" class="bj-action-btn bj-btn-secondary bj-btn-right" disabled>
+              <span>Split</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RESULT PHASE -->
+        <div id="resultControls" class="bj-control-row hidden">
+          <button id="rebetBtn" class="bj-action-btn bj-btn-secondary bj-btn-left">
+            <span>Rebet</span>
+          </button>
+
+          <button id="newHandBtn" class="bj-action-btn bj-btn-primary bj-btn-right">
+            <span>New Hand</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- FOOTER ORNAMENT -->
+      <img
+        class="bj-footer"
+        src="assets/footer.png"
+        alt=""
+        aria-hidden="true"
+      />
+
     </section>
 
-    <!-- Hidden input keeps JS/simple validation easy without showing ugly input UI -->
+    <!-- Hidden input keeps JS simple -->
     <input id="betAmount" type="hidden" value="0" />
 
-    <!-- Extra values for compatibility/debug, hidden visually -->
+    <!-- Hidden compatibility/debug values -->
     <div class="bj-hidden-data" aria-hidden="true">
       <span id="playerStatus">Loading</span>
       <span id="vipTier">None</span>
@@ -130,6 +164,7 @@
       <div id="recentList"></div>
     </div>
 
+    <!-- TOAST -->
     <div id="toast" class="bj-toast" role="status"></div>
 
   </main>

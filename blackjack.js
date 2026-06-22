@@ -224,6 +224,7 @@ function setControls(phase, options = {}) {
   const doubleBtn = document.getElementById("doubleBtn");
   const splitBtn = document.getElementById("splitBtn");
   const rebetBtn = document.getElementById("rebetBtn");
+  const newHandBtn = document.getElementById("newHandBtn");
 
   if (dealBtn) dealBtn.disabled = phase !== "betting" || currentBet <= 0;
   if (clearBtn) clearBtn.disabled = phase !== "betting" || currentBet <= 0;
@@ -241,14 +242,15 @@ function setControls(phase, options = {}) {
 
   if (doubleBtn) doubleBtn.disabled = !canDouble;
 
-  /* Backend does not support split yet, so keep disabled. */
+  /* Backend split is not built yet. Keep disabled for now. */
   if (splitBtn) splitBtn.disabled = true;
 
   if (rebetBtn) rebetBtn.disabled = previousBet <= 0;
+  if (newHandBtn) newHandBtn.disabled = false;
 }
 
 function updateChipHighlight(lastChip = null) {
-  document.querySelectorAll(".bj-chip-zone").forEach((btn) => {
+  document.querySelectorAll(".bj-chip-btn").forEach((btn) => {
     const value = Number(btn.dataset.chip);
     btn.classList.toggle("selected", value === lastChip);
     btn.classList.toggle("active", value === lastChip);
@@ -335,9 +337,9 @@ async function loadWallet() {
   try {
     const response = await fetch(
       "/api/wallet?playerId=" +
-      encodeURIComponent(playerId) +
-      "&playerSecret=" +
-      encodeURIComponent(playerSecret)
+        encodeURIComponent(playerId) +
+        "&playerSecret=" +
+        encodeURIComponent(playerSecret)
     );
 
     const data = await response.json();
@@ -383,8 +385,11 @@ function renderHand(data) {
   renderCards("playerCards", playerHand);
   renderCards("dealerCards", dealerHand);
 
-  const playerTotal = data.playerTotal ?? data.player_total ?? data.hand?.playerTotal ?? "--";
-  const dealerTotal = data.dealerTotal ?? data.dealer_total ?? data.hand?.dealerTotal ?? "--";
+  const playerTotal =
+    data.playerTotal ?? data.player_total ?? data.hand?.playerTotal ?? "--";
+
+  const dealerTotal =
+    data.dealerTotal ?? data.dealer_total ?? data.hand?.dealerTotal ?? "--";
 
   const status = getStatus(data);
   const result = getResult(data);
@@ -678,6 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setStageSize();
 
   setText("playerId", shortId(getPlayerId()));
+  setText("walletBalance", "...");
   setText("currentBet", money(currentBet));
   setText("lastPayout", "$0");
   setText("playerTotal", "--");
@@ -690,7 +696,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setMessage("Place your bet.", "warn");
   setControls("betting");
 
-  document.querySelectorAll(".bj-chip-zone").forEach((btn) => {
+  document.querySelectorAll(".bj-chip-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       addChipToBet(btn.dataset.chip);
     });

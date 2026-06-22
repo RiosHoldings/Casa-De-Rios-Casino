@@ -36,7 +36,7 @@ body {
   isolation: isolate;
 }
 
-/* BACKGROUND IMAGE */
+/* BACKGROUND / TABLE IMAGE */
 .bj-bg {
   position: absolute;
   inset: 0;
@@ -48,15 +48,15 @@ body {
   z-index: 0;
 }
 
-/* LOBBY / MENU BUTTON */
+/* LOBBY HOTSPOT */
 .bj-lobby-hotspot {
   position: absolute;
   left: 3.2%;
-  top: 2.2%;
+  top: 2.1%;
   width: 10%;
-  height: 5.8%;
+  height: 5.7%;
   border-radius: 50%;
-  z-index: 20;
+  z-index: 50;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -71,15 +71,15 @@ body {
 }
 
 .bj-dealer-area {
-  top: 20.9%;
-  width: 38%;
-  height: 10.5%;
+  top: 24.6%;
+  width: 34%;
+  height: 10.8%;
 }
 
 .bj-player-area {
-  top: 49.6%;
-  width: 46%;
-  height: 13.5%;
+  top: 56.7%;
+  width: 38%;
+  height: 12.2%;
 }
 
 .bj-card-row {
@@ -88,42 +88,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--ss) * 0.018);
+  gap: calc(var(--ss) * 0.016);
 }
 
-/* HAND TOTAL BADGES */
+/* HIDE TOTAL BADGES FOR NOW */
 .bj-hand-total {
-  position: absolute;
-  left: 50%;
-  bottom: -14%;
-  transform: translateX(-50%);
-  min-width: calc(var(--ss) * 0.12);
-  padding: calc(var(--ss) * 0.006) calc(var(--ss) * 0.018);
-  border: 1px solid rgba(216, 178, 94, 0.75);
-  border-radius: calc(var(--ss) * 0.012);
-  background: rgba(5, 3, 8, 0.85);
-  color: #f0d483;
-  font-size: calc(var(--ss) * 0.031);
-  font-weight: 900;
-  text-align: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-  box-shadow:
-    0 0 10px rgba(216, 178, 94, 0.22),
-    inset 0 0 0 1px rgba(255, 240, 180, 0.16);
-}
-
-.dealer-total {
-  display: none;
-}
-
-.player-total {
-  bottom: -10%;
+  display: none !important;
 }
 
 /* CARDS */
 .bj-card {
   position: relative;
-  width: calc(var(--ss) * 0.135);
+  width: calc(var(--ss) * 0.122);
   aspect-ratio: 2.5 / 3.5;
   border-radius: calc(var(--ss) * 0.014);
   overflow: hidden;
@@ -145,7 +121,7 @@ body {
   }
 }
 
-/* CARD BACK WITH CUTOUT LOGO */
+/* CARD BACK */
 .card-back {
   background:
     radial-gradient(circle at center, rgba(96, 28, 113, 0.78), transparent 58%),
@@ -240,9 +216,9 @@ body {
 .main-bet-chip-layer {
   position: absolute;
   left: 50%;
-  top: 68.7%;
-  width: calc(var(--ss) * 0.11);
-  height: calc(var(--ss) * 0.11);
+  top: 72.8%;
+  width: calc(var(--ss) * 0.086);
+  height: calc(var(--ss) * 0.086);
   transform: translate(-50%, -50%);
   z-index: 12;
   pointer-events: none;
@@ -256,27 +232,42 @@ body {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
 }
 
-/* RESULT / STATUS MESSAGE */
-.bj-message {
-  position: absolute;
-  left: 50%;
-  top: 72.3%;
-  transform: translateX(-50%);
-  width: 72%;
-  min-height: calc(var(--ss) * 0.075);
-  padding: calc(var(--ss) * 0.015) calc(var(--ss) * 0.025);
-  z-index: 11;
+.main-bet-chip-custom {
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(216, 178, 94, 0.62);
-  border-radius: calc(var(--ss) * 0.025);
   background:
-    radial-gradient(circle at 50% 0%, rgba(122, 35, 122, 0.52), transparent 60%),
-    rgba(10, 4, 13, 0.86);
+    radial-gradient(circle at 35% 28%, #fff0ad, #e1b94e 56%, #7a5213);
+  color: #160e05;
+  font-size: calc(var(--ss) * 0.024);
+  font-weight: 900;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+
+/* MESSAGE BANNER */
+.bj-message {
+  position: absolute;
+  left: 50%;
+  top: 76.3%;
+  transform: translateX(-50%);
+  width: 74%;
+  min-height: calc(var(--ss) * 0.058);
+  padding: calc(var(--ss) * 0.01) calc(var(--ss) * 0.024);
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(216, 178, 94, 0.68);
+  border-radius: calc(var(--ss) * 0.021);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(122, 35, 122, 0.62), transparent 60%),
+    rgba(10, 4, 13, 0.88);
   color: #f2d881;
   text-align: center;
-  font-size: calc(var(--ss) * 0.031);
+  font-size: calc(var(--ss) * 0.028);
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -302,160 +293,229 @@ body {
   color: #f2d881;
 }
 
-/* MONEY VALUES */
-.bj-values {
+/* BOTTOM UI */
+.bj-bottom-ui {
   position: absolute;
-  inset: 0;
-  z-index: 10;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 24.8%;
+  z-index: 20;
   pointer-events: none;
 }
 
-.bj-value {
+/* INFO PANELS */
+.bj-info-panels {
   position: absolute;
-  top: 81.6%;
+  left: 4.2%;
+  right: 4.2%;
+  top: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.8%;
+  pointer-events: none;
+}
+
+.bj-info-panel {
+  position: relative;
+  height: calc(var(--ss) * 0.138);
+}
+
+.bj-info-panel img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  user-select: none;
+  pointer-events: none;
+}
+
+.bj-panel-value {
+  position: absolute;
+  left: 50%;
+  top: 68%;
   transform: translate(-50%, -50%);
+  z-index: 2;
   color: #f5ead4;
-  font-size: calc(var(--ss) * 0.032);
+  font-size: calc(var(--ss) * 0.028);
   font-weight: 900;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.35px;
   white-space: nowrap;
   text-shadow:
     0 2px 4px rgba(0, 0, 0, 0.95),
     0 0 7px rgba(216, 178, 94, 0.25);
 }
 
-.bj-balance {
-  left: 19.4%;
+/* CHIP RACK */
+.bj-chip-rack-wrap {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  top: 31.2%;
+  height: calc(var(--ss) * 0.128);
+  pointer-events: auto;
 }
 
-.bj-current-bet {
-  left: 50%;
-}
-
-.bj-last-win {
-  left: 80.2%;
-}
-
-/* CHIP HOTSPOTS */
-.bj-chip-hotspots {
+.bj-chip-rack-bg {
   position: absolute;
   inset: 0;
-  z-index: 21;
-  pointer-events: none;
+  border-radius: calc(var(--ss) * 0.026);
+  background:
+    linear-gradient(180deg, #181114, #050406),
+    radial-gradient(circle at 50% 0%, rgba(122, 35, 122, 0.55), transparent 68%);
+  border: 2px solid rgba(216, 178, 94, 0.62);
+  box-shadow:
+    0 0 12px rgba(216, 178, 94, 0.22),
+    inset 0 0 0 2px rgba(255, 240, 180, 0.08),
+    inset 0 0 18px rgba(0, 0, 0, 0.85);
 }
 
-.bj-chip-zone {
+.bj-chip-btn {
   position: absolute;
-  top: 87.8%;
-  width: 12.5%;
-  height: 6.5%;
-  transform: translateX(-50%);
-  border: 0;
+  top: 50%;
+  width: 15%;
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
   padding: 0;
+  border: 0;
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
-  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
 
-.bj-chip-zone.selected,
-.bj-chip-zone.active {
-  box-shadow:
-    0 0 0 2px rgba(255, 220, 98, 0.92),
-    0 0 17px rgba(255, 220, 98, 0.65);
+.bj-chip-btn:nth-of-type(1) { left: 14.7%; }
+.bj-chip-btn:nth-of-type(2) { left: 32.3%; }
+.bj-chip-btn:nth-of-type(3) { left: 50%; }
+.bj-chip-btn:nth-of-type(4) { left: 67.7%; }
+.bj-chip-btn:nth-of-type(5) { left: 85.3%; }
+
+.bj-chip-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.7));
 }
 
-/* CODED CONTROLS */
+.bj-chip-btn.selected,
+.bj-chip-btn.active {
+  box-shadow:
+    0 0 0 2px rgba(255, 220, 98, 0.95),
+    0 0 16px rgba(255, 220, 98, 0.7);
+}
+
+/* CODED ACTION BUTTONS */
 .bj-controls {
   position: absolute;
-  left: 6%;
-  right: 6%;
-  bottom: 1.15%;
+  left: 5.8%;
+  right: 5.8%;
+  top: 61.2%;
   z-index: 30;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--ss) * 0.015);
+  gap: calc(var(--ss) * 0.01);
+  pointer-events: auto;
 }
 
 .bj-control-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: calc(var(--ss) * 0.028);
+  gap: calc(var(--ss) * 0.02);
 }
 
 .bj-control-stack {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--ss) * 0.015);
+  gap: calc(var(--ss) * 0.01);
 }
 
 .bj-small-row {
-  padding: 0 8%;
+  padding: 0 7%;
 }
 
-.bj-btn {
-  height: calc(var(--ss) * 0.088);
-  border: 2px solid #d8b25e;
-  border-radius: calc(var(--ss) * 0.025);
-  background:
-    radial-gradient(circle at 50% 12%, rgba(122, 35, 122, 0.72), transparent 58%),
-    linear-gradient(180deg, #241027, #070409);
-  color: #f4d883;
+.bj-action-btn {
+  position: relative;
+  height: calc(var(--ss) * 0.07);
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  color: #f3d681;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: calc(var(--ss) * 0.042);
+  font-size: calc(var(--ss) * 0.033);
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   text-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.85),
-    0 0 8px rgba(216, 178, 94, 0.28);
-  box-shadow:
-    0 0 13px rgba(216, 178, 94, 0.28),
-    inset 0 0 0 1px rgba(255, 240, 180, 0.17),
-    inset 0 -7px 15px rgba(0, 0, 0, 0.5);
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 8px rgba(216, 178, 94, 0.35);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.bj-btn-primary {
-  background:
-    radial-gradient(circle at 50% 12%, rgba(137, 43, 146, 0.82), transparent 58%),
-    linear-gradient(180deg, #2e1035, #09040d);
+.bj-action-btn span {
+  position: relative;
+  z-index: 2;
 }
 
-.bj-btn-secondary {
-  opacity: 0.94;
+.bj-btn-primary.bj-btn-left {
+  background-image: url("assets/bj-btn-primary-left.png");
 }
 
-.bj-btn-small {
-  height: calc(var(--ss) * 0.066);
-  border-radius: calc(var(--ss) * 0.022);
-  font-size: calc(var(--ss) * 0.029);
-  color: #e8c874;
+.bj-btn-primary.bj-btn-right {
+  background-image: url("assets/bj-btn-primary-right.png");
 }
 
-.bj-btn:active {
+.bj-btn-secondary.bj-btn-left {
+  background-image: url("assets/bj-btn-secondary-left.png");
+}
+
+.bj-btn-secondary.bj-btn-right {
+  background-image: url("assets/bj-btn-secondary-right.png");
+}
+
+.bj-small-row .bj-action-btn {
+  height: calc(var(--ss) * 0.05);
+  font-size: calc(var(--ss) * 0.023);
+}
+
+.bj-action-btn:active {
   transform: scale(0.98);
-  box-shadow:
-    0 0 20px rgba(255, 220, 98, 0.58),
-    inset 0 0 0 2px rgba(255, 235, 158, 0.7);
+  filter:
+    drop-shadow(0 0 8px rgba(255, 220, 98, 0.6))
+    brightness(1.08);
 }
 
-.bj-btn:disabled {
-  opacity: 0.35;
-  filter: grayscale(0.7);
+.bj-action-btn:disabled {
+  opacity: 0.36;
+  filter: grayscale(0.75);
   cursor: default;
+}
+
+/* FOOTER */
+.bj-footer {
+  position: absolute;
+  left: 50%;
+  bottom: 0.5%;
+  width: 52%;
+  transform: translateX(-50%);
+  user-select: none;
+  pointer-events: none;
 }
 
 /* TOAST */
 .bj-toast {
   position: absolute;
   left: 50%;
-  bottom: 8.5%;
+  bottom: 26%;
   transform: translate(-50%, 8px);
   max-width: 86%;
-  z-index: 40;
+  z-index: 60;
   padding: calc(var(--ss) * 0.016) calc(var(--ss) * 0.038);
   border-radius: 999px;
   background: rgba(14, 7, 20, 0.9);
@@ -489,10 +549,10 @@ body {
 }
 
 /* DEBUG MODE:
-   Add class="debug" to body if you need to line up hotspots.
+   Add class="debug" to body to line things up.
 */
 body.debug .bj-lobby-hotspot,
-body.debug .bj-chip-zone {
+body.debug .bj-chip-btn {
   background: rgba(255, 0, 120, 0.28);
   outline: 1px solid #ff2d8e;
 }
@@ -500,34 +560,39 @@ body.debug .bj-chip-zone {
 body.debug .bj-dealer-area,
 body.debug .bj-player-area,
 body.debug .main-bet-chip-layer,
-body.debug .bj-message {
+body.debug .bj-message,
+body.debug .bj-bottom-ui {
   outline: 1px dashed #00e5ff;
 }
 
 /* ACCESSIBILITY */
 .bj-lobby-hotspot:focus-visible,
-.bj-chip-zone:focus-visible,
-.bj-btn:focus-visible {
+.bj-chip-btn:focus-visible,
+.bj-action-btn:focus-visible {
   outline: 2px solid #ffd24a;
   outline-offset: -2px;
 }
 
 /* SMALL PHONE TUNING */
 @media (max-height: 720px) {
+  .bj-card {
+    width: calc(var(--ss) * 0.112);
+  }
+
   .bj-message {
-    top: 72%;
-    min-height: calc(var(--ss) * 0.065);
-    font-size: calc(var(--ss) * 0.027);
+    top: 76%;
+    min-height: calc(var(--ss) * 0.052);
+    font-size: calc(var(--ss) * 0.025);
   }
 
-  .bj-btn {
-    height: calc(var(--ss) * 0.078);
-    font-size: calc(var(--ss) * 0.036);
+  .bj-action-btn {
+    height: calc(var(--ss) * 0.062);
+    font-size: calc(var(--ss) * 0.03);
   }
 
-  .bj-btn-small {
-    height: calc(var(--ss) * 0.058);
-    font-size: calc(var(--ss) * 0.026);
+  .bj-small-row .bj-action-btn {
+    height: calc(var(--ss) * 0.044);
+    font-size: calc(var(--ss) * 0.021);
   }
 }
 
@@ -540,174 +605,4 @@ body.debug .bj-message {
   .bj-toast {
     transition: none !important;
   }
-}
-
-/* ===============================
-   BLACKJACK LAYOUT FIX PATCH
-   =============================== */
-
-/* Hide the "--" badge until we place hand values cleaner later */
-.bj-hand-total {
-  display: none;
-}
-
-/* Move the message banner slightly higher and make it thinner */
-.bj-message {
-  top: 72.1%;
-  width: 72%;
-  min-height: calc(var(--ss) * 0.055);
-  padding: calc(var(--ss) * 0.01) calc(var(--ss) * 0.02);
-  font-size: calc(var(--ss) * 0.027);
-}
-
-/* Move money values down into the black panel boxes */
-.bj-value {
-  top: 85.9%;
-  font-size: calc(var(--ss) * 0.029);
-}
-
-.bj-balance {
-  left: 20%;
-}
-
-.bj-current-bet {
-  left: 50%;
-}
-
-.bj-last-win {
-  left: 80%;
-}
-
-/* Move coded buttons ABOVE the chip tray instead of on top of it */
-.bj-controls {
-  left: 8%;
-  right: 8%;
-  bottom: 8.4%;
-  gap: calc(var(--ss) * 0.01);
-}
-
-/* Make betting buttons shorter so they fit between panels and chips */
-.bj-btn {
-  height: calc(var(--ss) * 0.062);
-  border-radius: calc(var(--ss) * 0.02);
-  font-size: calc(var(--ss) * 0.032);
-}
-
-/* Make secondary playing buttons smaller */
-.bj-btn-small {
-  height: calc(var(--ss) * 0.052);
-  font-size: calc(var(--ss) * 0.024);
-}
-
-/* Keep chip hotspots locked to the chip images */
-.bj-chip-zone {
-  top: 91.7%;
-  width: 11.5%;
-  height: 5.4%;
-}
-
-/* Main bet chip should sit inside the MAIN BET circle */
-.main-bet-chip-layer {
-  top: 69.7%;
-  width: calc(var(--ss) * 0.095);
-  height: calc(var(--ss) * 0.095);
-}
-
-/* ===============================
-   BLACKJACK POSITION FIX V2
-   =============================== */
-
-/* Keep hand total badges hidden for now */
-.bj-hand-total {
-  display: none !important;
-}
-
-/* Smaller coded cards so they fit the baked card spaces better */
-.bj-card {
-  width: calc(var(--ss) * 0.118);
-}
-
-/* Dealer cards higher and tighter */
-.bj-dealer-area {
-  top: 18.1%;
-  width: 32%;
-  height: 9.5%;
-}
-
-/* Player cards lower so they sit over the baked player card art */
-.bj-player-area {
-  top: 53.8%;
-  width: 38%;
-  height: 11.5%;
-}
-
-/* Main bet chip centered in the MAIN BET circle */
-.main-bet-chip-layer {
-  top: 68.85%;
-  width: calc(var(--ss) * 0.082);
-  height: calc(var(--ss) * 0.082);
-}
-
-/* Message banner sits above the control/panel area */
-.bj-message {
-  top: 73.2%;
-  width: 72%;
-  min-height: calc(var(--ss) * 0.052);
-  padding: calc(var(--ss) * 0.008) calc(var(--ss) * 0.02);
-  font-size: calc(var(--ss) * 0.026);
-}
-
-/* Put money values inside the black panels */
-.bj-value {
-  top: 84.55%;
-  font-size: calc(var(--ss) * 0.027);
-}
-
-.bj-balance {
-  left: 19.5%;
-}
-
-.bj-current-bet {
-  left: 50%;
-}
-
-.bj-last-win {
-  left: 80.5%;
-}
-
-/* Move buttons down into the chip-tray area instead of over the panels */
-.bj-controls {
-  left: 7%;
-  right: 7%;
-  bottom: 2.8%;
-  gap: calc(var(--ss) * 0.009);
-}
-
-/* Make the button rows compact */
-.bj-control-row {
-  gap: calc(var(--ss) * 0.022);
-}
-
-.bj-btn {
-  height: calc(var(--ss) * 0.052);
-  border-radius: calc(var(--ss) * 0.017);
-  font-size: calc(var(--ss) * 0.028);
-  letter-spacing: 0.09em;
-}
-
-/* Secondary row much smaller */
-.bj-small-row {
-  padding: 0 10%;
-}
-
-.bj-btn-small {
-  height: calc(var(--ss) * 0.042);
-  font-size: calc(var(--ss) * 0.021);
-}
-
-/* Chip hotspots stay on the baked chips */
-.bj-chip-zone {
-  top: 91.7%;
-  width: 11.5%;
-  height: 5.4%;
 }
