@@ -606,3 +606,87 @@ body.debug .bj-bottom-ui {
     transition: none !important;
   }
 }
+
+/* =========================================
+   POSITION + STACKED BET CHIP PATCH
+   ========================================= */
+
+/* move dealer cards up */
+.bj-dealer-area {
+  top: 22.2%;
+  width: 34%;
+  height: 10.8%;
+}
+
+/* move player cards up */
+.bj-player-area {
+  top: 52.8%;
+  width: 38%;
+  height: 12.2%;
+}
+
+/* make the bet chip area larger and move it up into the MAIN BET circle */
+.main-bet-chip-layer {
+  position: absolute;
+  left: 50%;
+  top: 69.7%;
+  width: calc(var(--ss) * 0.19);
+  height: calc(var(--ss) * 0.14);
+  transform: translate(-50%, -50%);
+  z-index: 12;
+  pointer-events: none;
+}
+
+/* stacked chip layout */
+.bet-chip-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.bet-stack-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--ss) * 0.09);
+  height: calc(var(--ss) * 0.09);
+  transform: translate(
+    calc(-50% + var(--x, 0px)),
+    calc(-50% + var(--y, 0px))
+  );
+  z-index: var(--z, 1);
+}
+
+.bet-stack-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7));
+}
+
+.bet-stack-count {
+  position: absolute;
+  right: -8%;
+  bottom: -6%;
+  min-width: calc(var(--ss) * 0.04);
+  height: calc(var(--ss) * 0.04);
+  padding: 0 calc(var(--ss) * 0.01);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(12, 8, 16, 0.92);
+  border: 1px solid rgba(255, 220, 98, 0.8);
+  color: #f4d883;
+  font-size: calc(var(--ss) * 0.018);
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px rgba(255, 240, 180, 0.15);
+}
+
+/* optional: tighten message bar so it doesn't fight the circle */
+.bj-message {
+  top: 76%;
+}

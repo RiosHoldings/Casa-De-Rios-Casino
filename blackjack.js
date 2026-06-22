@@ -266,6 +266,39 @@ function updateBetDisplay() {
   setControls(currentPhase);
 }
 
+function getChipBreakdown(total) {
+  const values = [1000, 500, 250, 100, 50];
+  const groups = [];
+  let remaining = Number(total || 0);
+
+  for (const value of values) {
+    const count = Math.floor(remaining / value);
+    if (count > 0) {
+      groups.push({ value, count });
+      remaining -= value * count;
+    }
+  }
+
+  return groups;
+}
+
+function getVisualChipStack(total) {
+  const groups = getChipBreakdown(total);
+  const visual = [];
+
+  for (const group of groups) {
+    if (group.count <= 3) {
+      for (let i = 0; i < group.count; i++) {
+        visual.push({ value: group.value, count: 1 });
+      }
+    } else {
+      visual.push({ value: group.value, count: group.count });
+    }
+  }
+
+  return visual.slice(0, 8);
+}
+
 function renderMainBetChip() {
   const layer = document.getElementById("mainBetChipLayer");
   if (!layer) return;
@@ -274,18 +307,34 @@ function renderMainBetChip() {
 
   if (currentBet <= 0) return;
 
-  if (CHIP_VALUES.includes(currentBet)) {
-    layer.innerHTML = `
-      <img class="main-bet-chip" src="assets/chip-${currentBet}.png" alt="${currentBet} chip">
-    `;
-    return;
-  }
+  const stack = getVisualChipStack(currentBet);
 
-  layer.innerHTML = `
-    <div class="main-bet-chip main-bet-chip-custom">
-      ${currentBet >= 1000 ? Math.floor(currentBet / 1000) + "K" : currentBet}
-    </div>
-  `;
+  if (!stack.length) return;
+
+  const total = stack.length;
+  const spread = Math.min(14, total * 3.5);
+
+  const html = stack.map((chip, index) => {
+    const x = (index - (total - 1) / 2) * spread;
+    const y = (total - 1 - index) * 3.5;
+    const z = index + 1;
+
+    return `
+      <div
+        class="bet-stack-item"
+        style="--x:${x}px; --y:${y}px; --z:${z};"
+      >
+        <img
+          class="bet-stack-img"
+          src="assets/chip-${chip.value}.png"
+          alt="${chip.value} chip"
+        >
+        ${chip.count > 1 ? `<span class="bet-stack-count">×${chip.count}</span>` : ""}
+      </div>
+    `;
+  }).join("");
+
+  layer.innerHTML = `<div class="bet-chip-stack">${html}</div>`;
 }
 
 /* ============================================================
