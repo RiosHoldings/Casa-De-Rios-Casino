@@ -2,6 +2,82 @@ function json(data, status = 200) {
   return Response.json(data, { status });
 }
 
+async function sendCashoutWebhook(env, data) {
+  try {
+    if (!env.CASHOUT_WEBHOOK_URL) {
+      console.log("CASHOUT_WEBHOOK_URL missing");
+      return;
+    }
+
+    const amount = Number(data.amount || 0).toLocaleString("en-US");
+
+    const payload = {
+      username: "Casa de Ríos Cashier Cage",
+      embeds: [
+        {
+          title: "🏦 New Cash-Out Request",
+          color: 0xd4af37,
+          fields: [
+            {
+              name: "Ticket ID",
+              value: data.ticketId || "Not provided",
+              inline: false
+            },
+            {
+              name: "Player ID",
+              value: data.playerId || "Not provided",
+              inline: false
+            },
+            {
+              name: "Discord",
+              value: data.discordName || "Not provided",
+              inline: true
+            },
+            {
+              name: "Character Name",
+              value: data.characterName || "Not provided",
+              inline: true
+            },
+            {
+              name: "Amount",
+              value: `${amount} chips`,
+              inline: true
+            },
+            {
+              name: "Note",
+              value: data.note || "Player requested cash-out",
+              inline: false
+            },
+            {
+              name: "Status",
+              value: "Pending cashier review",
+              inline: true
+            }
+          ],
+          footer: {
+            text: "Casino Casa de Ríos • Cash-Out"
+          },
+          timestamp: new Date().toISOString()
+        }
+      ]
+    };
+
+    const res = await fetch(env.CASHOUT_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      console.log("Cashout webhook failed:", res.status, await res.text());
+    }
+  } catch (err) {
+    console.log("Cashout webhook error:", err);
+  }
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -124,6 +200,15 @@ export async function onRequestPost(context) {
       chips,
       "Payout ticket created and wallet locked."
     ).run();
+
+    await sendCashoutWebhook(context.env, {
+      ticketId,
+      playerId,
+      characterName: player.character_name,
+      discordName: player.discord_name,
+      amount: chips,
+      note
+    });
 
     return json({
       ok: true,

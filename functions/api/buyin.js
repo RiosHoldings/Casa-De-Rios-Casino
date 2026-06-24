@@ -10,6 +10,77 @@ function makeSecret() {
   return crypto.randomUUID() + "-" + crypto.randomUUID();
 }
 
+async function sendBuyInWebhook(env, data) {
+  try {
+    if (!env.BUYIN_WEBHOOK_URL) {
+      console.log("BUYIN_WEBHOOK_URL missing");
+      return;
+    }
+
+    const amount = Number(data.amount || 0).toLocaleString("en-US");
+
+    const payload = {
+      username: "Casa de Ríos Cashier Cage",
+      embeds: [
+        {
+          title: "💵 New Buy-In Request",
+          color: 0x7b2cff,
+          fields: [
+            {
+              name: "Player ID",
+              value: data.playerId || "Not provided",
+              inline: false
+            },
+            {
+              name: "Discord",
+              value: data.discordName || "Not provided",
+              inline: true
+            },
+            {
+              name: "Character Name",
+              value: data.characterName || "Not provided",
+              inline: true
+            },
+            {
+              name: "Amount",
+              value: `${amount} chips`,
+              inline: true
+            },
+            {
+              name: "Notes",
+              value: data.notes || "None",
+              inline: false
+            },
+            {
+              name: "Status",
+              value: "Pending approval",
+              inline: true
+            }
+          ],
+          footer: {
+            text: "Casino Casa de Ríos • Buy-In"
+          },
+          timestamp: new Date().toISOString()
+        }
+      ]
+    };
+
+    const res = await fetch(env.BUYIN_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      console.log("Buy-in webhook failed:", res.status, await res.text());
+    }
+  } catch (err) {
+    console.log("Buy-in webhook error:", err);
+  }
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -108,6 +179,14 @@ export async function onRequestPost(context) {
       amount,
       notes
     ).run();
+
+    await sendBuyInWebhook(context.env, {
+      playerId,
+      characterName,
+      discordName,
+      amount,
+      notes
+    });
 
     return json({
       ok: true,
