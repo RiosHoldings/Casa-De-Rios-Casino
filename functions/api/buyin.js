@@ -237,3 +237,14 @@ async function logBuyInToGoogleForm(payload) {
   }
 }
 
+await logBuyInToGoogleForm({
+  event_type: "BUYIN_REQUESTED",
+  ticket_id: ticketId,
+  player_id: playerId,
+  discord: discord,
+  rp_name: name,
+  amount: amount,
+  status: "Pending",
+  source: "functions/api/buyin.js",
+  notes: "Buy-in request submitted"
+});
