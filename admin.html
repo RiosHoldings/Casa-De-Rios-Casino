@@ -583,11 +583,14 @@
 
             <div class="actions">
               ${
-                pending
-                  ? `<button class="good" data-buyin-approve="${escapeHtml(b.id)}">Approve</button>`
-                  : ""
-              }
-              <button data-load-player="${escapeHtml(b.player_id)}">Load Player</button>
+  pending
+    ? `
+      <button class="good" data-buyin-approve="${escapeHtml(b.id)}">Approve</button>
+      <button class="bad" data-buyin-deny="${escapeHtml(b.id)}">Deny</button>
+    `
+    : ""
+}
+<button data-load-player="${escapeHtml(b.player_id)}">Load Player</button>
             </div>
           </article>
         `;
@@ -630,6 +633,47 @@
         alert("Approve request failed.");
       }
     }
+
+    async function denyBuyin(buyinId) {
+  const adminKey = getAdminKey();
+  const deniedBy = getAdminName();
+
+  if (!adminKey) {
+    alert("Enter admin key first.");
+    return;
+  }
+
+  if (!confirm("Deny this buy-in? No chips will be added.")) return;
+
+  try {
+    const res = await fetch("/api/admin-deny-buyin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-admin-key": adminKey
+      },
+      body: JSON.stringify({
+        buyinId,
+        deniedBy,
+        notes: "Denied from admin panel."
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert("Failed: " + (data.error || "Deny failed."));
+      return;
+    }
+
+    alert("Buy-in denied.");
+    loadBuyins();
+    syncPlayerId(data.playerId);
+    searchPlayer();
+  } catch {
+    alert("Deny request failed.");
+  }
+}
 
     async function loadPayouts() {
       const adminKey = getAdminKey();
@@ -846,11 +890,13 @@
 
       document.body.addEventListener("click", event => {
         const approveBuyinId = event.target.dataset.buyinApprove;
+        const denyBuyinId = event.target.dataset.buyinDeny;
         const paidId = event.target.dataset.ticketPaid;
         const denyId = event.target.dataset.ticketDeny;
         const loadPlayerId = event.target.dataset.loadPlayer;
 
         if (approveBuyinId) approveBuyin(approveBuyinId);
+        if (denyBuyinId) denyBuyin(denyBuyinId);
         if (paidId) completePayout(paidId);
         if (denyId) denyPayout(denyId);
 
