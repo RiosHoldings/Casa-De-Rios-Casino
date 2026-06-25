@@ -205,3 +205,35 @@ export async function onRequestPost(context) {
     }, 500);
   }
 }
+
+async function logBuyInToGoogleForm(payload) {
+  const formUrl =
+    "https://docs.google.com/forms/d/e/1FAIpQLSdByVRJLMHDkBmUBQIDTxQ6RWFGyp1agQHZHScuZjnzg3Gj0g/formResponse";
+
+  const formData = new URLSearchParams();
+
+  formData.append("entry.1332387906", payload.event_type || "");
+  formData.append("entry.1864789056", payload.ticket_id || "");
+  formData.append("entry.573482956", payload.player_id || "");
+  formData.append("entry.1264617835", payload.discord || "");
+  formData.append("entry.816054358", payload.rp_name || "");
+  formData.append("entry.1501721170", String(payload.amount || 0));
+  formData.append("entry.1678760499", payload.status || "");
+  formData.append("entry.654683935", payload.source || "");
+  formData.append("entry.1352898245", payload.notes || "");
+
+  try {
+    await fetch(formUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: formData.toString()
+    });
+
+    console.log("Buy-in audit sent to Google Form");
+  } catch (err) {
+    console.log("Google Form audit failed:", err.message);
+  }
+}
+
