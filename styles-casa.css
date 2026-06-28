@@ -1569,3 +1569,118 @@ body {
   margin-bottom: 12px;
   padding: 10px;
 }
+
+/* ================================
+   FEATURED PARTNER POP-UP AD
+================================ */
+
+.partner-ad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(3px);
+}
+
+.partner-ad-overlay.show {
+  display: flex;
+}
+
+.partner-ad-modal {
+  position: relative;
+  width: min(92vw, 430px);
+  max-height: 88vh;
+  border: 1px solid rgba(255, 32, 64, 0.95);
+  border-radius: 18px;
+  background: #050005;
+  box-shadow:
+    0 0 22px rgba(255, 0, 50, 0.65),
+    0 0 55px rgba(255, 0, 90, 0.35),
+    inset 0 0 24px rgba(255, 0, 50, 0.18);
+  overflow: hidden;
+  animation: partnerAdPop 0.28s ease-out;
+}
+
+.partner-ad-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
+  background: #000;
+}
+
+.partner-ad-close {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 45, 75, 0.95);
+  border-radius: 50%;
+  background: rgba(10, 0, 0, 0.88);
+  color: #ffd27a;
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 0, 50, 0.7);
+}
+
+.partner-ad-actions {
+  padding: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 0, 8, 0.98),
+    rgba(0, 0, 0, 1)
+  );
+  border-top: 1px solid rgba(255, 32, 64, 0.45);
+}
+
+.partner-ad-main-btn,
+.partner-ad-secondary-btn {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 10px;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.partner-ad-main-btn {
+  border: 1px solid rgba(255, 42, 75, 0.95);
+  background: linear-gradient(180deg, #39000f, #120006);
+  color: #ffe0a0;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow:
+    0 0 12px rgba(255, 0, 60, 0.55),
+    inset 0 0 12px rgba(255, 0, 60, 0.18);
+}
+
+.partner-ad-secondary-btn {
+  margin-top: 8px;
+  border: 1px solid rgba(212, 170, 87, 0.55);
+  background: rgba(0, 0, 0, 0.45);
+  color: #d6b46d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+@keyframes partnerAdPop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

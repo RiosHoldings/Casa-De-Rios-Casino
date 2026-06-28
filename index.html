@@ -242,5 +242,86 @@
       });
     });
   </script>
+
+<!-- Featured Partner Pop-Up Ad -->
+<div id="partnerAdOverlay" class="partner-ad-overlay">
+  <div class="partner-ad-modal">
+
+    <button id="partnerAdClose" class="partner-ad-close" aria-label="Close ad">
+      ×
+    </button>
+
+    <img
+      src="/assets/malevolent-shrine-ad.png"
+      alt="Malevolent Shrine Featured Partner Advertisement"
+      class="partner-ad-image"
+    />
+
+    <div class="partner-ad-actions">
+      <button id="partnerAdVisit" class="partner-ad-main-btn">
+        Visit Malevolent Shrine
+      </button>
+
+      <button id="partnerAdEnter" class="partner-ad-secondary-btn">
+        Close & Return to Casino
+      </button>
+    </div>
+
+  </div>
+</div>
+<script>
+  const PARTNER_AD_SESSION_KEY = "casa_partner_ad_seen";
+
+  function showPartnerAd() {
+    const overlay = document.getElementById("partnerAdOverlay");
+    if (!overlay) return;
+
+    overlay.classList.add("show");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closePartnerAd() {
+    const overlay = document.getElementById("partnerAdOverlay");
+    if (!overlay) return;
+
+    overlay.classList.remove("show");
+    document.body.style.overflow = "";
+    sessionStorage.setItem(PARTNER_AD_SESSION_KEY, "yes");
+  }
+
+  function visitPartnerAd() {
+    sessionStorage.setItem(PARTNER_AD_SESSION_KEY, "yes");
+
+    closePartnerAd();
+
+    // Later, replace this with a Shrine page or Discord channel.
+    // window.location.href = "/partners/malevolent-shrine.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const overlay = document.getElementById("partnerAdOverlay");
+    const closeBtn = document.getElementById("partnerAdClose");
+    const enterBtn = document.getElementById("partnerAdEnter");
+    const visitBtn = document.getElementById("partnerAdVisit");
+
+    if (!overlay) return;
+
+    closeBtn?.addEventListener("click", closePartnerAd);
+    enterBtn?.addEventListener("click", closePartnerAd);
+    visitBtn?.addEventListener("click", visitPartnerAd);
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        closePartnerAd();
+      }
+    });
+
+    const hasSeenAd = sessionStorage.getItem(PARTNER_AD_SESSION_KEY);
+
+    if (hasSeenAd !== "yes") {
+      setTimeout(showPartnerAd, 700);
+    }
+  });
+</script>
 </body>
 </html>
