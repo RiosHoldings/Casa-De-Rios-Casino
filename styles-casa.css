@@ -1684,3 +1684,12 @@ body {
     transform: scale(1) translateY(0);
   }
 }
+/* Hide Shrine ad visit button and yellow X */
+#partnerAdClose,
+#partnerAdVisit {
+  display: none !important;
+}
+
+.partner-ad-secondary-btn {
+  margin-top: 0;
+}
