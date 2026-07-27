@@ -1416,16 +1416,9 @@ body {
 
 .lobby-shell {
   position: relative;
-
-  width: min(100vw,
-  calc(100dvh * 768 / 1365),
-  700px
-  );
-
-  aspect-ratio: 768 / 1365; 
-
+  width: min(100vw, calc(100dvh * 2 / 3), 900px);
+  aspect-ratio: 2 / 3; 
   margin: 0 auto;
-  min-height: 0;
   overflow: hidden;
   isolation: isolate;
 }
@@ -1433,13 +1426,10 @@ body {
 .lobby-art {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   display: block;
   object-fit: fill;
-
   user-select: none;
   pointer-events: none;
 }
@@ -1527,15 +1517,61 @@ body {
     pointer-events: none;
 }
 
-.hs-blackjack { left: 3%; top: 32.5%; width: 22%; height: 16%; }
-.hs-roulette { left: 27%; top: 32.5%; width: 22%; height: 16%; }
-.hs-slots { left: 51%; top: 32.5%; width: 22%; height: 16%; }
-.hs-texas { left: 75%; top: 32.5%; width: 22%; height: 16%; }
+.hs-blackjack { 
+  left: 4%;
+  top: 57.4;
+  width: 19.5%;
+  height: 4%;
+ }
 
-.hs-cashout { left: 3%; top: 51.5%; width: 22%; height: 7.5%; }
-.hs-ledger { left: 27%; top: 51.5%; width: 22%; height: 7.5%; }
-.hs-vip { left: 51%; top: 51.5%; width: 22%; height: 7.5%; }
-.hs-rules { left: 75%; top: 51.5%; width: 22%; height: 7.5%; }
+.hs-roulette { 
+  left: 27.8%; 
+  top: 57.4%; 
+  width: 19.5%; 
+  height: 4%; 
+}
+
+.hs-slots { 
+  left: 51.3%; 
+  top: 57.4%; 
+  width: 19.5%; 
+  height: 4%; 
+}
+
+.hs-texas { 
+  left: 75.4%; 
+  top: 57.4%; 
+  width: 19.5%; 
+  height: 4%; 
+}
+
+.hs-cashout { 
+  left: 2.7%; 
+  top: 65.4%; 
+  width: 23.4%; 
+  height: 10.5%; 
+}
+
+.hs-ledger { 
+  left: 26.6%; 
+  top: 65.4%; 
+  width: 23.4%; 
+  height: 10.5%; 
+}
+
+.hs-vip { 
+  left: 50.2%; 
+  top: 65.4%; 
+  width: 23.4%; 
+  height: 10.5%; 
+}
+
+.hs-rules { 
+  left: 73.2%; 
+  top: 65.4%; 
+  width: 23.4%; 
+  height: 10.5%; 
+}
 
 .profile-open-btn {
   position: absolute;
@@ -1710,81 +1746,3 @@ body {
   margin-top: 0;
 }
 
-/* =========================================
-   LOBBY — DESKTOP ALIGNMENT
-   Mobile/iPhone rules above remain unchanged.
-   The actual lobby artwork is 1024 × 1536 (2:3).
-========================================= */
-@media (min-width: 900px) {
-  .lobby-shell {
-    width: min(68vw, 900px);
-    aspect-ratio: 2 / 3;
-    min-height: 0;
-  }
-
-  .lobby-art {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-  }
-
-  /* Visible game buttons */
-  .hs-blackjack {
-    left: 4.1%;
-    top: 57.5%;
-    width: 19.3%;
-    height: 3.8%;
-  }
-
-  .hs-roulette {
-    left: 27.7%;
-    top: 57.5%;
-    width: 19.1%;
-    height: 3.8%;
-  }
-
-  .hs-slots {
-    left: 51.5%;
-    top: 57.5%;
-    width: 19.2%;
-    height: 3.8%;
-  }
-
-  .hs-texas {
-    left: 75.4%;
-    top: 57.5%;
-    width: 20.2%;
-    height: 3.8%;
-  }
-
-  /* Quick Actions sections */
-  .hs-cashout {
-    left: 2.7%;
-    top: 65.4%;
-    width: 23.9%;
-    height: 10.3%;
-  }
-
-  .hs-ledger {
-    left: 26.6%;
-    top: 65.4%;
-    width: 23.6%;
-    height: 10.3%;
-  }
-
-  .hs-vip {
-    left: 50.2%;
-    top: 65.4%;
-    width: 22.9%;
-    height: 10.3%;
-  }
-
-  .hs-rules {
-    left: 73.1%;
-    top: 65.4%;
-    width: 24.4%;
-    height: 10.3%;
-  }
-}
