@@ -43,8 +43,30 @@ body {
   position: relative;
   width: min(100vw, calc(100dvh * 840 / 1456));
   aspect-ratio: 840 / 1456;
+  flex-shrink: 0;
   z-index: 1;
   overflow: visible;
+}
+
+@media (min-width: 900px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body{
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .stage {
+    width: min(65vw, 760px);
+    margin: 0 auto;
+  }
 }
 
 /* WHEEL */
