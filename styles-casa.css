@@ -1709,3 +1709,67 @@ body {
 .partner-ad-secondary-btn {
   margin-top: 0;
 }
+
+/* =========================================
+   LOBBY — LAPTOP HOTSPOT CORRECTION ONLY
+========================================= */
+
+@media (min-width: 900px) {
+  /* Quick actions row */
+  .hs-cashout {
+    left: 3%;
+    top: 32.5%;
+    width: 22%;
+    height: 7.5%;
+  }
+
+  .hs-ledger {
+    left: 27%;
+    top: 32.5%;
+    width: 22%;
+    height: 7.5%;
+  }
+
+  .hs-vip {
+    left: 51%;
+    top: 32.5%;
+    width: 22%;
+    height: 7.5%;
+  }
+
+  .hs-rules {
+    left: 75%;
+    top: 32.5%;
+    width: 22%;
+    height: 7.5%;
+  }
+
+  /* Game buttons row */
+  .hs-blackjack {
+    left: 3%;
+    top: 51.5%;
+    width: 22%;
+    height: 16%;
+  }
+
+  .hs-roulette {
+    left: 27%;
+    top: 51.5%;
+    width: 22%;
+    height: 16%;
+  }
+
+  .hs-slots {
+    left: 51%;
+    top: 51.5%;
+    width: 22%;
+    height: 16%;
+  }
+
+  .hs-texas {
+    left: 75%;
+    top: 51.5%;
+    width: 22%;
+    height: 16%;
+  }
+}

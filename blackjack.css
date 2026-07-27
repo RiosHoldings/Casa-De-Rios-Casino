@@ -1709,3 +1709,31 @@ body {
 .partner-ad-secondary-btn {
   margin-top: 0;
 }
+
+/* =========================================
+   BLACKJACK — LAPTOP SIZE
+========================================= */
+
+@media (min-width: 900px) {
+  html,
+  body {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .bj-stage {
+    width: min(62vw, 720px);
+    max-width: none;
+    flex: 0 0 auto;
+    margin: 0 auto;
+  }
+}
