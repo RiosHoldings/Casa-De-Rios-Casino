@@ -7,44 +7,43 @@ function checkAdmin(context) {
   const givenKey = context.request.headers.get("x-admin-key");
 
   if (!expectedKey) {
-    return { ok: false, response: json({ ok: false, error: "ADMIN_KEY secret is missing." }, 500) };
+    return {
+      ok: false,
+      response: json({ ok: false, error: "ADMIN_KEY secret is missing." }, 500)
+    };
   }
 
   if (!givenKey || givenKey !== expectedKey) {
-    return { ok: false, response: json({ ok: false, error: "Unauthorized admin request." }, 401) };
+    return {
+      ok: false,
+      response: json({ ok: false, error: "Unauthorized admin request." }, 401)
+    };
   }
 
   return { ok: true };
 }
 
-async function logBuyInToGoogleForm(payload) {
-  const formUrl =
-    "https://docs.google.com/forms/d/e/1FAIpQLSdByVRJLMHDkBmUBQIDTxQ6RWFGyp1agQHZHScuZjnzg3Gj0g/formResponse";
-
-  const formData = new URLSearchParams();
-
-  formData.append("entry.1332387906", payload.event_type || "");
-  formData.append("entry.1864789056", payload.ticket_id || "");
-  formData.append("entry.573482956", payload.player_id || "");
-  formData.append("entry.1264617835", payload.discord || "");
-  formData.append("entry.816054358", payload.rp_name || "");
-  formData.append("entry.1501721170", String(payload.amount || 0));
-  formData.append("entry.1678760499", payload.status || "");
-  formData.append("entry.654683935", payload.source || "");
-  formData.append("entry.1352898245", payload.notes || "");
+async function sendAuditEvent(env, payload) {
+  if (!env.CASA_AUDIT_WEBHOOK_URL || !env.CASA_AUDIT_SECRET) {
+    console.log("Audit sync skipped: missing CASA_AUDIT_WEBHOOK_URL or CASA_AUDIT_SECRET");
+    return;
+  }
 
   try {
-    const res = await fetch(formUrl, {
+    const res = await fetch(env.CASA_AUDIT_WEBHOOK_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json"
       },
-      body: formData.toString()
+      body: JSON.stringify({
+        ...payload,
+        secret: env.CASA_AUDIT_SECRET
+      })
     });
 
-    console.log("Buy-in deny audit sent to Google Form:", res.status);
+    console.log("Audit sync response:", res.status);
   } catch (err) {
-    console.log("Google Form deny audit failed:", err.message);
+    console.log("Audit sync error:", err.message);
   }
 }
 
@@ -71,15 +70,18 @@ export async function onRequestPost(context) {
 
     const buyin = await db.prepare(`
       SELECT
-        id,
-        player_id,
-        character_name,
-        discord_name,
-        amount,
-        notes,
-        status
+        buyins.id,
+        buyins.player_id,
+        buyins.character_name,
+        buyins.discord_name,
+        buyins.amount,
+        buyins.notes,
+        buyins.status,
+        players.character_name AS player_character_name,
+        players.discord_name AS player_discord_name
       FROM buyins
-      WHERE id = ?
+      LEFT JOIN players ON players.id = buyins.player_id
+      WHERE buyins.id = ?
     `).bind(buyinId).first();
 
     if (!buyin) {
@@ -98,6 +100,8 @@ export async function onRequestPost(context) {
       FROM wallets
       WHERE player_id = ?
     `).bind(buyin.player_id).first();
+
+    const balanceBefore = Number(wallet ? wallet.chips : 0);
 
     await db.prepare(`
       UPDATE buyins
@@ -131,20 +135,22 @@ export async function onRequestPost(context) {
     `).bind(
       transactionId,
       buyin.player_id,
-      wallet ? wallet.chips : 0,
+      balanceBefore,
       `Buy-in denied by ${deniedBy}. ${denyNotes}`
     ).run();
 
-    await logBuyInToGoogleForm({
+    await sendAuditEvent(context.env, {
       event_type: "BUYIN_DENIED",
       ticket_id: `BI-${buyinId}`,
       player_id: buyin.player_id,
-      discord: buyin.discord_name,
-      rp_name: buyin.character_name,
+      discord: buyin.discord_name || buyin.player_discord_name || "",
+      rp_name: buyin.character_name || buyin.player_character_name || "",
       amount: buyin.amount,
       status: "Denied",
+      balance_before: balanceBefore,
+      balance_after: balanceBefore,
       source: "functions/api/admin-deny-buyin.js",
-      notes: `${denyNotes} Denied by ${deniedBy}.`
+      notes: `Buy-in denied by ${deniedBy}. ${denyNotes}`
     });
 
     return json({
@@ -153,7 +159,10 @@ export async function onRequestPost(context) {
       buyinId,
       playerId: buyin.player_id,
       amount: buyin.amount,
-      status: "denied"
+      status: "denied",
+      balanceBefore,
+      balanceAfter: balanceBefore,
+      transactionId
     });
   } catch (error) {
     return json({

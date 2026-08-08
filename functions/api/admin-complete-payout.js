@@ -17,6 +17,30 @@ function checkAdmin(context) {
   return { ok: true };
 }
 
+async function sendAuditEvent(env, payload) {
+  if (!env.CASA_AUDIT_WEBHOOK_URL || !env.CASA_AUDIT_SECRET) {
+    console.log("Audit sync skipped: missing CASA_AUDIT_WEBHOOK_URL or CASA_AUDIT_SECRET");
+    return;
+  }
+
+  try {
+    const res = await fetch(env.CASA_AUDIT_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        ...payload,
+        secret: env.CASA_AUDIT_SECRET
+      })
+    });
+
+    console.log("Audit sync response:", res.status);
+  } catch (err) {
+    console.log("Audit sync error:", err.message);
+  }
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -38,9 +62,17 @@ export async function onRequestPost(context) {
     }
 
     const ticket = await db.prepare(`
-      SELECT id, player_id, amount, status
+      SELECT
+        payout_tickets.id,
+        payout_tickets.player_id,
+        payout_tickets.amount,
+        payout_tickets.status,
+        payout_tickets.note,
+        players.character_name,
+        players.discord_name
       FROM payout_tickets
-      WHERE id = ?
+      LEFT JOIN players ON players.id = payout_tickets.player_id
+      WHERE payout_tickets.id = ?
     `).bind(ticketId).first();
 
     if (!ticket) {
@@ -60,6 +92,8 @@ export async function onRequestPost(context) {
     if (!wallet) {
       return json({ ok: false, error: "Wallet not found." }, 404);
     }
+
+    const balanceBefore = Number(wallet.chips || 0);
 
     await db.prepare(`
       UPDATE payout_tickets
@@ -104,6 +138,20 @@ export async function onRequestPost(context) {
       -Math.abs(Number(ticket.amount || 0)),
       "Payout marked paid by admin. Wallet reset to 0 and unlocked."
     ).run();
+
+    await sendAuditEvent(context.env, {
+      event_type: "CASHOUT_PAID",
+      ticket_id: ticketId,
+      player_id: ticket.player_id,
+      discord: ticket.discord_name || "",
+      rp_name: ticket.character_name || "",
+      amount: ticket.amount,
+      status: "Paid",
+      balance_before: balanceBefore,
+      balance_after: 0,
+      source: "functions/api/admin-complete-payout.js",
+      notes: `Cashout paid by ${fulfilledBy}. Wallet reset to 0.`
+    });
 
     return json({
       ok: true,

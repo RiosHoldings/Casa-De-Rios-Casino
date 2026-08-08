@@ -17,6 +17,30 @@ function checkAdmin(context) {
   return { ok: true };
 }
 
+async function sendAuditEvent(env, payload) {
+  if (!env.CASA_AUDIT_WEBHOOK_URL || !env.CASA_AUDIT_SECRET) {
+    console.log("Audit sync skipped: missing CASA_AUDIT_WEBHOOK_URL or CASA_AUDIT_SECRET");
+    return;
+  }
+
+  try {
+    const res = await fetch(env.CASA_AUDIT_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        ...payload,
+        secret: env.CASA_AUDIT_SECRET
+      })
+    });
+
+    console.log("Audit sync response:", res.status);
+  } catch (err) {
+    console.log("Audit sync error:", err.message);
+  }
+}
+
 export async function onRequestPost(context) {
   try {
     const db = context.env.DB;
@@ -38,9 +62,17 @@ export async function onRequestPost(context) {
     }
 
     const ticket = await db.prepare(`
-      SELECT id, player_id, amount, status
+      SELECT
+        payout_tickets.id,
+        payout_tickets.player_id,
+        payout_tickets.amount,
+        payout_tickets.status,
+        payout_tickets.note,
+        players.character_name,
+        players.discord_name
       FROM payout_tickets
-      WHERE id = ?
+      LEFT JOIN players ON players.id = payout_tickets.player_id
+      WHERE payout_tickets.id = ?
     `).bind(ticketId).first();
 
     if (!ticket) {
@@ -50,6 +82,14 @@ export async function onRequestPost(context) {
     if (ticket.status !== "pending") {
       return json({ ok: false, error: "Ticket is not pending." }, 400);
     }
+
+    const wallet = await db.prepare(`
+      SELECT chips
+      FROM wallets
+      WHERE player_id = ?
+    `).bind(ticket.player_id).first();
+
+    const balanceBefore = Number(wallet ? wallet.chips : 0);
 
     await db.prepare(`
       UPDATE payout_tickets
@@ -73,12 +113,6 @@ export async function onRequestPost(context) {
       WHERE id = ?
     `).bind(ticket.player_id).run();
 
-    const wallet = await db.prepare(`
-      SELECT chips
-      FROM wallets
-      WHERE player_id = ?
-    `).bind(ticket.player_id).first();
-
     const transactionId = crypto.randomUUID();
 
     await db.prepare(`
@@ -96,9 +130,23 @@ export async function onRequestPost(context) {
     `).bind(
       transactionId,
       ticket.player_id,
-      wallet ? wallet.chips : 0,
+      balanceBefore,
       "Payout denied by admin. Wallet unlocked."
     ).run();
+
+    await sendAuditEvent(context.env, {
+      event_type: "CASHOUT_DENIED",
+      ticket_id: ticketId,
+      player_id: ticket.player_id,
+      discord: ticket.discord_name || "",
+      rp_name: ticket.character_name || "",
+      amount: ticket.amount,
+      status: "Denied",
+      balance_before: balanceBefore,
+      balance_after: balanceBefore,
+      source: "functions/api/admin-deny-payout.js",
+      notes: `Cashout denied by ${deniedBy}. Wallet unlocked.`
+    });
 
     return json({
       ok: true,

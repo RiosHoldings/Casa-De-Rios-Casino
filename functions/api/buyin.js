@@ -3,112 +3,103 @@ function json(data, status = 200) {
 }
 
 function makePlayerId() {
-  return "CDR-" + crypto.randomUUID().slice(0, 8).toUpperCase();
+  if (crypto.randomUUID) {
+    return "CDR-" + crypto.randomUUID().slice(0, 8).toUpperCase();
+  }
+
+  return "CDR-" + Date.now().toString(36).toUpperCase();
 }
 
 function makeSecret() {
-  return crypto.randomUUID() + "-" + crypto.randomUUID();
+  if (crypto.randomUUID) {
+    return crypto.randomUUID() + "-" + crypto.randomUUID();
+  }
+
+  return String(Date.now()) + "-" + Math.random().toString(16).slice(2);
 }
 
 async function sendBuyInWebhook(env, data) {
+  if (!env.BUYIN_WEBHOOK_URL) {
+    console.log("Buy-in Discord webhook skipped: BUYIN_WEBHOOK_URL missing.");
+    return;
+  }
+
+  const amount = Number(data.amount || 0).toLocaleString();
+
+  const embed = {
+    title: "Casa de Ríos Buy-In Request",
+    color: 0x7b2db4,
+    fields: [
+      {
+        name: "Player ID",
+        value: String(data.playerId || "Unknown"),
+        inline: false
+      },
+      {
+        name: "Character",
+        value: String(data.characterName || "Unknown"),
+        inline: true
+      },
+      {
+        name: "Discord",
+        value: String(data.discordName || "Unknown"),
+        inline: true
+      },
+      {
+        name: "Amount",
+        value: `${amount} chips`,
+        inline: true
+      },
+      {
+        name: "Notes",
+        value: String(data.notes || "No notes."),
+        inline: false
+      }
+    ],
+    footer: {
+      text: "Suerte. Honor. Lealtad."
+    },
+    timestamp: new Date().toISOString()
+  };
+
   try {
-    if (!env.BUYIN_WEBHOOK_URL) {
-      console.log("BUYIN_WEBHOOK_URL missing");
-      return;
-    }
-
-    const amount = Number(data.amount || 0).toLocaleString("en-US");
-
-    const payload = {
-      username: "Casa de Ríos Cashier Cage",
-      embeds: [
-        {
-          title: "💵 New Buy-In Request",
-          color: 0x7b2cff,
-          fields: [
-            {
-              name: "Player ID",
-              value: data.playerId || "Not provided",
-              inline: false
-            },
-            {
-              name: "Discord",
-              value: data.discordName || "Not provided",
-              inline: true
-            },
-            {
-              name: "Character Name",
-              value: data.characterName || "Not provided",
-              inline: true
-            },
-            {
-              name: "Amount",
-              value: `${amount} chips`,
-              inline: true
-            },
-            {
-              name: "Notes",
-              value: data.notes || "None",
-              inline: false
-            },
-            {
-              name: "Status",
-              value: "Pending approval",
-              inline: true
-            }
-          ],
-          footer: {
-            text: "Casino Casa de Ríos • Buy-In"
-          },
-          timestamp: new Date().toISOString()
-        }
-      ]
-    };
-
     const res = await fetch(env.BUYIN_WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        embeds: [embed]
+      })
     });
 
-    if (!res.ok) {
-      console.log("Buy-in webhook failed:", res.status, await res.text());
-    }
+    console.log("Buy-in Discord webhook response:", res.status);
   } catch (err) {
-    console.log("Buy-in webhook error:", err);
+    console.log("Buy-in Discord webhook failed:", err.message);
   }
 }
 
-async function logBuyInToGoogleForm(payload) {
-  const formUrl =
-    "https://docs.google.com/forms/d/e/1FAIpQLSdByVRJLMHDkBmUBQIDTxQ6RWFGyp1agQHZHScuZjnzg3Gj0g/formResponse";
-
-  const formData = new URLSearchParams();
-
-  formData.append("entry.1332387906", payload.event_type || "");
-  formData.append("entry.1864789056", payload.ticket_id || "");
-  formData.append("entry.573482956", payload.player_id || "");
-  formData.append("entry.1264617835", payload.discord || "");
-  formData.append("entry.816054358", payload.rp_name || "");
-  formData.append("entry.1501721170", String(payload.amount || 0));
-  formData.append("entry.1678760499", payload.status || "");
-  formData.append("entry.654683935", payload.source || "");
-  formData.append("entry.1352898245", payload.notes || "");
+async function sendAuditEvent(env, payload) {
+  if (!env.CASA_AUDIT_WEBHOOK_URL || !env.CASA_AUDIT_SECRET) {
+    console.log("Audit sync skipped: missing CASA_AUDIT_WEBHOOK_URL or CASA_AUDIT_SECRET");
+    return;
+  }
 
   try {
-    const res = await fetch(formUrl, {
+    const res = await fetch(env.CASA_AUDIT_WEBHOOK_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
+        "Content-Type": "application/json"
       },
-      body: formData.toString()
+      body: JSON.stringify({
+        ...payload,
+        secret: env.CASA_AUDIT_SECRET
+      })
     });
 
-    console.log("Buy-in audit sent to Google Form:", res.status);
+    console.log("Audit sync response:", res.status);
   } catch (err) {
-    console.log("Google Form audit failed:", err.message);
+    console.log("Audit sync error:", err.message);
   }
 }
 
@@ -122,34 +113,48 @@ export async function onRequestPost(context) {
 
     const body = await context.request.json();
 
-    const existingPlayerId = String(body.playerId || "").trim();
-    const existingPlayerSecret = String(body.playerSecret || "").trim();
+    let playerId = String(body.playerId || "").trim();
+    let playerSecret = String(body.playerSecret || "").trim();
 
-    const playerId = existingPlayerId || makePlayerId();
-    const playerSecret = existingPlayerSecret || makeSecret();
-
-    const characterName = String(body.characterName || "").trim();
-    const discordName = String(body.discordName || "").trim();
+    const characterName = String(body.characterName || body.character || "").trim();
+    const discordName = String(body.discordName || body.discord || "").trim();
     const amount = Math.floor(Number(body.amount || 0));
     const notes = String(body.notes || "").trim();
 
     if (!characterName || !discordName) {
-      return json({ ok: false, error: "Character name and Discord name are required." }, 400);
+      return json({
+        ok: false,
+        error: "Character name and Discord name are required."
+      }, 400);
     }
 
     if (!Number.isFinite(amount) || amount <= 0) {
-      return json({ ok: false, error: "Enter a valid buy-in amount." }, 400);
+      return json({
+        ok: false,
+        error: "Enter a valid buy-in amount."
+      }, 400);
+    }
+
+    if (!playerId || !playerId.startsWith("CDR-")) {
+      playerId = makePlayerId();
+    }
+
+    if (!playerSecret) {
+      playerSecret = makeSecret();
     }
 
     const existingPlayer = await db.prepare(`
-      SELECT id, player_secret
+      SELECT id, secret, character_name, discord_name, status
       FROM players
       WHERE id = ?
     `).bind(playerId).first();
 
     if (existingPlayer) {
-      if (existingPlayer.player_secret !== playerSecret) {
-        return json({ ok: false, error: "Player Secret mismatch." }, 401);
+      if (existingPlayer.secret && existingPlayer.secret !== playerSecret) {
+        return json({
+          ok: false,
+          error: "Player secret does not match this Player ID."
+        }, 401);
       }
 
       await db.prepare(`
@@ -164,7 +169,7 @@ export async function onRequestPost(context) {
       await db.prepare(`
         INSERT INTO players (
           id,
-          player_secret,
+          secret,
           character_name,
           discord_name,
           status,
@@ -182,17 +187,28 @@ export async function onRequestPost(context) {
       ).run();
     }
 
-    await db.prepare(`
-      INSERT OR IGNORE INTO wallets (
-        player_id,
-        chips,
-        locked,
-        updated_at
-      )
-      VALUES (?, 0, 0, CURRENT_TIMESTAMP)
-    `).bind(playerId).run();
+    const wallet = await db.prepare(`
+      SELECT player_id, chips
+      FROM wallets
+      WHERE player_id = ?
+    `).bind(playerId).first();
 
-    const buyinResult = await db.prepare(`
+    if (!wallet) {
+      await db.prepare(`
+        INSERT INTO wallets (
+          player_id,
+          chips,
+          locked,
+          created_at,
+          updated_at
+        )
+        VALUES (?, 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `).bind(playerId).run();
+    }
+
+    const balanceBefore = wallet ? Number(wallet.chips || 0) : 0;
+
+    const buyinInsert = await db.prepare(`
       INSERT INTO buyins (
         player_id,
         character_name,
@@ -202,7 +218,7 @@ export async function onRequestPost(context) {
         status,
         created_at
       )
-      VALUES (?, ?, ?, ?, ?, 'pending', strftime('%s','now'))
+      VALUES (?, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
     `).bind(
       playerId,
       characterName,
@@ -211,39 +227,42 @@ export async function onRequestPost(context) {
       notes
     ).run();
 
-    const buyinId = buyinResult?.meta?.last_row_id || "";
-    const ticketId = buyinId ? `BI-${buyinId}` : `BI-${Date.now()}`;
+    const buyinId =
+      buyinInsert?.meta?.last_row_id ||
+      buyinInsert?.meta?.lastRowId ||
+      Date.now();
 
     await sendBuyInWebhook(context.env, {
       playerId,
       characterName,
       discordName,
       amount,
-      notes
+      notes,
+      buyinId
     });
 
-    await logBuyInToGoogleForm({
+    await sendAuditEvent(context.env, {
       event_type: "BUYIN_REQUESTED",
-      ticket_id: ticketId,
+      ticket_id: `BI-${buyinId}`,
       player_id: playerId,
       discord: discordName,
       rp_name: characterName,
       amount,
       status: "Pending",
+      balance_before: balanceBefore,
+      balance_after: balanceBefore,
       source: "functions/api/buyin.js",
       notes: notes
         ? `Buy-in request submitted. Player notes: ${notes}`
-        : "Buy-in request submitted"
+        : "Buy-in request submitted."
     });
 
     return json({
       ok: true,
       message: "Buy-in request submitted.",
-      ticketId,
       playerId,
       playerSecret,
-      characterName,
-      discordName,
+      buyinId,
       amount,
       status: "pending"
     });
