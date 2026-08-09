@@ -144,7 +144,7 @@ export async function onRequestPost(context) {
     }
 
     const existingPlayer = await db.prepare(`
-      SELECT id, secret, character_name, discord_name, status
+      SELECT id, player_secret, character_name, discord_name, status
       FROM players
       WHERE id = ?
     `).bind(playerId).first();
@@ -159,17 +159,18 @@ export async function onRequestPost(context) {
 
       await db.prepare(`
         UPDATE players
-        SET character_name = ?,
+        SET player_secret = COALESCE(player_secret, ?),
+            character_name = ?,
             discord_name = ?,
             status = 'waiting_buyin',
             updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
-      `).bind(characterName, discordName, playerId).run();
+      `).bind(playerSecret, characterName, discordName, playerId).run();
     } else {
       await db.prepare(`
         INSERT INTO players (
           id,
-          secret,
+          player_secret,
           character_name,
           discord_name,
           status,
