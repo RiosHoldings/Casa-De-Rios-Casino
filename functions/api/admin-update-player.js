@@ -136,11 +136,11 @@ export async function onRequestPost(context) {
 
       const allowedTiers = [
         "none",
-        "bronze",
-        "silver",
-        "gold",
-        "platinum",
-        "lealtad"
+        "patron",
+        "caballero",
+        "magnate",
+        "el jefe",
+        "la leyenda"
       ];
 
       if (!allowedTiers.includes(vipTier)) {
