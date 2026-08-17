@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+
+  <title>Texas Hold'em | Casino Casa de Ríos</title>
+
+  <link rel="stylesheet" href="./poker.css" />
+</head>
+
+<body>
+
+  <main class="poker-stage">
+
+    <!-- ======================================================
+         HEADER
+         ====================================================== -->
+
+    <header class="poker-header">
+
+      <a
+        href="./index.html"
+        class="poker-lobby-btn"
+        aria-label="Return to Lobby"
+      >
+        ← Lobby
+      </a>
+
+      <div class="poker-brand">
+        <div class="poker-kicker">
+          CASINO CASA DE RÍOS
+        </div>
+
+        <h1>
+          TEXAS HOLD'EM
+        </h1>
+
+        <div class="poker-motto">
+          Suerte. Honor. Lealtad.
+        </div>
+      </div>
+
+    </header>
+
+
+    <!-- ======================================================
+         PLAYER WALLET
+         ====================================================== -->
+
+    <section class="poker-wallet-panel">
+
+      <div class="poker-stat">
+        <span>Wallet</span>
+        <strong id="walletBalance">
+          ...
+        </strong>
+      </div>
+
+      <div class="poker-stat">
+        <span>Poker Stack</span>
+        <strong id="pokerStack">
+          0
+        </strong>
+      </div>
+
+      <div class="poker-stat">
+        <span>Status</span>
+        <strong id="playerPokerStatus">
+          Not Seated
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         TABLE INFORMATION
+         ====================================================== -->
+
+    <section class="poker-room-info">
+
+      <div class="poker-room-title">
+        <span>♠</span>
+
+        <div>
+          <h2 id="tableName">
+            Poker Room 1
+          </h2>
+
+          <p>
+            No-Limit Texas Hold'em
+          </p>
+        </div>
+
+        <span>♠</span>
+      </div>
+
+
+      <div class="poker-room-stats">
+
+        <div>
+          <small>Players</small>
+          <strong>6 Max</strong>
+        </div>
+
+        <div>
+          <small>Blinds</small>
+          <strong>100 / 200</strong>
+        </div>
+
+        <div>
+          <small>Rake</small>
+          <strong>10%</strong>
+        </div>
+
+        <div>
+          <small>Rake Cap</small>
+          <strong>1,000</strong>
+        </div>
+
+        <div>
+          <small>Timer</small>
+          <strong>30 Sec</strong>
+        </div>
+
+        <div>
+          <small>Rule</small>
+          <strong>No Flop, No Drop</strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         TABLE / SEATS
+         ====================================================== -->
+
+    <section class="poker-table-area">
+
+      <div class="poker-table">
+
+        <div class="poker-table-logo">
+
+          <span class="poker-logo-small">
+            CDR
+          </span>
+
+          <strong>
+            CASA DE RÍOS
+          </strong>
+
+          <small>
+            TEXAS HOLD'EM
+          </small>
+
+        </div>
+
+
+        <!-- SEAT 1 -->
+        <button
+          class="poker-seat seat-1"
+          type="button"
+          data-seat="1"
+        >
+          <span class="seat-number">
+            Seat 1
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+
+        <!-- SEAT 2 -->
+        <button
+          class="poker-seat seat-2"
+          type="button"
+          data-seat="2"
+        >
+          <span class="seat-number">
+            Seat 2
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+
+        <!-- SEAT 3 -->
+        <button
+          class="poker-seat seat-3"
+          type="button"
+          data-seat="3"
+        >
+          <span class="seat-number">
+            Seat 3
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+
+        <!-- SEAT 4 -->
+        <button
+          class="poker-seat seat-4"
+          type="button"
+          data-seat="4"
+        >
+          <span class="seat-number">
+            Seat 4
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+
+        <!-- SEAT 5 -->
+        <button
+          class="poker-seat seat-5"
+          type="button"
+          data-seat="5"
+        >
+          <span class="seat-number">
+            Seat 5
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+
+        <!-- SEAT 6 -->
+        <button
+          class="poker-seat seat-6"
+          type="button"
+          data-seat="6"
+        >
+          <span class="seat-number">
+            Seat 6
+          </span>
+
+          <span class="seat-player">
+            Open
+          </span>
+
+          <span class="seat-stack"></span>
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         SEAT SELECTION
+         ====================================================== -->
+
+    <section class="poker-selection">
+
+      <div class="poker-selection-heading">
+        SELECT A SEAT
+      </div>
+
+      <div class="selected-seat-display">
+
+        Selected Seat:
+
+        <strong id="selectedSeatText">
+          None
+        </strong>
+
+      </div>
+
+
+      <!-- ====================================================
+           BUY-IN SELECTION
+           ==================================================== -->
+
+      <div class="poker-selection-heading">
+        SELECT BUY-IN
+      </div>
+
+      <div
+        class="poker-buyins"
+        id="buyinOptions"
+      >
+
+        <button
+          type="button"
+          class="poker-buyin"
+          data-buyin="10000"
+        >
+          10K
+        </button>
+
+        <button
+          type="button"
+          class="poker-buyin"
+          data-buyin="25000"
+        >
+          25K
+        </button>
+
+        <button
+          type="button"
+          class="poker-buyin"
+          data-buyin="50000"
+        >
+          50K
+        </button>
+
+        <button
+          type="button"
+          class="poker-buyin"
+          data-buyin="100000"
+        >
+          100K
+        </button>
+
+      </div>
+
+
+      <div class="selected-buyin-display">
+
+        Buy-In:
+
+        <strong id="selectedBuyinText">
+          None
+        </strong>
+
+      </div>
+
+
+      <!-- ====================================================
+           ACTION BUTTON
+           ==================================================== -->
+
+      <button
+        id="sitDownBtn"
+        class="poker-main-btn"
+        type="button"
+        disabled
+      >
+        SIT DOWN
+      </button>
+
+
+      <button
+        id="leaveTableBtn"
+        class="poker-secondary-btn"
+        type="button"
+        hidden
+      >
+        LEAVE TABLE
+      </button>
+
+
+      <!-- ====================================================
+           MESSAGE
+           ==================================================== -->
+
+      <div
+        id="pokerMessage"
+        class="poker-message"
+        role="status"
+      >
+        Select an open seat and buy-in.
+      </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         HOUSE RULE REMINDER
+         ====================================================== -->
+
+    <section class="poker-rule-strip">
+
+      <div>
+        <strong>10% RAKE</strong>
+        <span>Maximum 1,000 per hand</span>
+      </div>
+
+      <div>
+        <strong>NO FLOP, NO DROP</strong>
+        <span>No rake if the hand ends preflop</span>
+      </div>
+
+      <div>
+        <strong>TABLE STAKES</strong>
+        <span>Only chips already on the table may be wagered</span>
+      </div>
+
+    </section>
+
+
+    <!-- ======================================================
+         FOOTER
+         ====================================================== -->
+
+    <footer class="poker-footer">
+
+      Built on Loyalty. Backed by Honor. Driven by Respect.
+
+    </footer>
+
+  </main>
+
+
+  <!-- ========================================================
+       JAVASCRIPT
+       ======================================================== -->
+
+  <script src="./poker.js"></script>
+
+</body>
+</html>
