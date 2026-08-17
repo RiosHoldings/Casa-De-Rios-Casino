@@ -861,14 +861,7 @@ async function sitDown() {
     }
 
     if (!data.ok) {
-      /*
-        A definite server rejection means this request did NOT
-        leave us in an unknown network state.
-
-        Clear the pending key so a corrected request gets a
-        fresh idempotency key.
-      */
-
+     
       if (
         response.status !== 500
       ) {
@@ -876,16 +869,12 @@ async function sitDown() {
       }
 
       setMessage(
-        data.error ||
-          "Could not sit at the poker table.",
+        data.denug
+            ? `${data.error} - ${data.debug}`
+            : data.error ||
+                "Could not sit at the poker table.",
         "bad"
       );
-
-      /*
-        Server may tell us we're already sitting there.
-        We do not fake a local session from that yet because the
-        next endpoint will be /api/poker-table-state.
-      */
 
       submittingSit = false;
 
