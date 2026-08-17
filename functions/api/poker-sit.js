@@ -741,8 +741,9 @@ export async function onRequestPost(context) {
 }
 
 export async function onRequest(context) {
-  if (context.request.method === "POST") {
-    return onRequestPost(context);
+    try {
+        if (context.request.method === "POST") {
+            return onRequestPost(context);
   }
 
   return json(
@@ -752,4 +753,20 @@ export async function onRequest(context) {
     },
     405
   );
+} 
+catch (error) {
+    console.error("POKER SIT UNHANDLED ERROR:", error);
+
+    return json(
+        {
+            ok: "Poker sit backend error.",
+            debug: String(
+                error?.message ||
+                error ||
+                "Unknown backend error"
+            )
+        },
+        500
+        );
+    }
 }

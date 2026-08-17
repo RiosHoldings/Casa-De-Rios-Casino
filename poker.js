@@ -846,8 +846,19 @@ async function sitDown() {
         }
       );
 
-    const data =
-      await response.json();
+    const rawResponse = 
+      await response.text();
+
+    let data;
+
+    try {
+        data = JSON.parse(rawResponse);
+    } catch {
+        throw new Error(
+            `HTTP ${response.status} returned non-JSON` +
+            rawResponse.slice(0, 250)
+        );
+    }
 
     if (!data.ok) {
       /*
@@ -996,7 +1007,8 @@ async function sitDown() {
     submittingSit = false;
 
     setMessage(
-      "Connection interrupted. Tap Sit Down again to safely retry the same request.",
+        error?.message ||    
+      "Poker sit request failed.",
       "bad"
     );
 
