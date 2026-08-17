@@ -16,7 +16,7 @@ function makeId(prefix) {
     return `${prefix}-${crypto.randomUUID()}`;
 }
 
-export async function onRequestPost(context) {
+async function handlePost(context) {
     const DB = context.env.DB;
 
     if (!DB) {
@@ -75,7 +75,7 @@ export async function onRequestPost(context) {
     }
 
     if (
-        !Number.isInterger(seatNumber) ||
+        !Number.isInteger(seatNumber) ||
         seatNumber < 1 ||
         seatNumber > 10
     ) {
@@ -88,7 +88,7 @@ export async function onRequestPost(context) {
         );
     }
 
-    if (!Number.isInterger(buyIn) || buyIn <= 0) {
+    if (!Number.isInteger(buyIn) || buyIn <= 0) {
         return json(
             {
                 ok:false,
@@ -107,6 +107,7 @@ export async function onRequestPost(context) {
             pt.id AS transfer_id,
             pt.session_id,
             pt.table_id,
+            pt.player_id,
             pt.amount,
             pt.wallet_balance_after,
             pt.table_stack_after,
@@ -225,7 +226,7 @@ export async function onRequestPost(context) {
             p.id,
             p.status,
             w.chips,
-            w.locked,
+            w.locked
         FROM players p
         JOIN wallets w
             ON w.player_id = p.id
@@ -743,7 +744,7 @@ export async function onRequestPost(context) {
 export async function onRequest(context) {
     try {
         if (context.request.method === "POST") {
-            return await onRequestPost(context);
+            return await handlePost(context);
   }
 
   return json(
@@ -753,6 +754,7 @@ export async function onRequest(context) {
     },
     405
   );
+
 } catch (error) {
     console.error("POKER SIT UNHANDLED ERROR:", error);
 
@@ -767,6 +769,6 @@ export async function onRequest(context) {
             )
         },
         500
-        );
-    }
+    );
+}
 }

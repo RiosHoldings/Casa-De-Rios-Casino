@@ -869,7 +869,7 @@ async function sitDown() {
       }
 
       setMessage(
-        data.denug
+        data.debug
             ? `${data.error} - ${data.debug}`
             : data.error ||
                 "Could not sit at the poker table.",
