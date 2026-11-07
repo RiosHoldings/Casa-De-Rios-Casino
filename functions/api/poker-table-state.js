@@ -498,8 +498,6 @@ async function handlePost(context) {
         rake_amount,
         pot_after_rake,
 
-        created_at
-
       FROM poker_hands
 
       WHERE table_id = ?
@@ -594,9 +592,6 @@ async function handlePost(context) {
           currentHand.pot_after_rake ||
           0
         ),
-
-      createdAt:
-        currentHand.created_at
     };
   }
 

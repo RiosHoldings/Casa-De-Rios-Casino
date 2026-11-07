@@ -59,10 +59,11 @@ let submittingSit = false;
 
 let loadingTableState = false;
 
+let tableStateFailures = 0;
 let tableStateTimer = null;
 
 const TABLE_STATE_POLL_MS = 2000;
-
+const TABLE_STATE_MAX_FAILURES = 3;
 
 /* ============================================================
    DOM
@@ -1139,15 +1140,34 @@ async function loadTableState() {
     }
 
 
-    if (!data.ok) {
-      console.warn(
-        "Poker table state:",
-        data.error,
-        data.debug || ""
-      );
+   if (!data.ok) {
+  tableStateFailures++;
 
-      return;
-    }
+  console.error(
+    "Poker table state:",
+    data.error,
+    data.debug || ""
+  );
+
+  if (
+    response.status >= 500 &&
+    tableStateFailures >=
+      TABLE_STATE_MAX_FAILURES
+  ) {
+    stopTableStatePolling();
+
+    setMessage(
+      "Live poker updates are temporarily unavailable. Refresh after the backend is corrected.",
+      "bad"
+    );
+
+    return;
+  }
+
+  return;
+}
+
+    tableStateFailures = 0;
 
 
     renderTableState(
@@ -1155,24 +1175,30 @@ async function loadTableState() {
     );
 
 
-  } catch (error) {
+} catch (error) {
 
-    /*
-      Do not destroy the visible table because one poll failed.
-      The next poll will try again.
-    */
+  tableStateFailures++;
 
-    console.error(
-      "Poker table state failed:",
-      error
+  console.error(
+    "Poker table state failed:",
+    error
+  );
+
+  if (
+    tableStateFailures >=
+      TABLE_STATE_MAX_FAILURES
+  ) {
+    stopTableStatePolling();
+
+    setMessage(
+      "Live poker updates are temporarily unavailable.",
+      "bad"
     );
-
-
-  } finally {
-
-    loadingTableState =
-      false;
   }
+
+} finally {
+  loadingTableState = false;
+}
 }
 
 
@@ -1180,29 +1206,73 @@ async function loadTableState() {
    TABLE POLLING
    ============================================================ */
 
-function startTableStatePolling() {
+function scheduleTableStatePoll(
+  delay = TABLE_STATE_POLL_MS
+) {
+  if (
+    !tableStatePollingEnabled
+  ) {
+    return;
+  }
 
   if (tableStateTimer) {
-    clearInterval(
+    clearTimeout(
       tableStateTimer
     );
   }
 
-
   tableStateTimer =
-    setInterval(
-      () => {
+    setTimeout(
+      async () => {
+
+        if (
+          !tableStatePollingEnabled
+        ){
+          return;
+        }
 
         if (
           document.visibilityState ===
           "visible"
         ) {
-          loadTableState();
+          await loadTableState();
+        }
+
+        if (
+          tableStatePollingEnabled
+        ) {
+          scheduleTableStatePoll(
+            TABLE_STATE_POLL_MS
+          );
         }
 
       },
-      TABLE_STATE_POLL_MS
+      delay
     );
+}
+
+
+function startTableStatePolling() {
+  tableStateFailures = 0;
+
+  tableStatePollingEnabled = 
+    true;
+
+  scheduleTableStatePoll();
+}
+
+
+function stopTableStatePolling() {
+  tableStatePollingEnabled =
+    false;
+    
+  if (tableStateTimer) {
+    clearTimeout(
+      tableStateTimer
+    );
+
+    tableStateTimer = null;
+  }
 }
 
 
