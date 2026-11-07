@@ -496,7 +496,7 @@ async function handlePost(context) {
 
         pot_before_rake,
         rake_amount,
-        pot_after_rake,
+        pot_after_rake
 
       FROM poker_hands
 
