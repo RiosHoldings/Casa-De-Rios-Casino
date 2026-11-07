@@ -57,6 +57,12 @@ let pokerSession = null;
 
 let submittingSit = false;
 
+let loadingTableState = false;
+
+let tableStateTimer = null;
+
+const TABLE_STATE_POLL_MS = 2000;
+
 
 /* ============================================================
    DOM
@@ -686,6 +692,536 @@ function renderSavedSession() {
   updateControls();
 }
 
+/* ============================================================
+  LIVE TABLE STATE
+  ============================================================= */
+
+  function resetLiveSeats() {
+    document.querySelectorAll(
+      ".poker-seat"
+    )
+    .forEach((seat) => {
+
+      seat.classList.remove(
+        "occupied",
+        "my-seat"
+      );
+
+      const playerEl = seat.querySelector(
+        ".seat-player"
+      );
+
+      if (playerEl) {
+        playerEl.textContent = 
+        "Open";
+      }
+      
+      if (stackEl) {
+        stackEl.textContent = 
+        "";
+      }
+    });
+  }
+
+/* ============================================================
+   RENDER SERVER TABLE STATE
+   ============================================================ */
+
+   function renderTableState(data) {
+    const seats = 
+      Array.isArray(data.seats)
+        ? data.seats
+        : [];
+    
+    const yourSession = 
+      data.yourSession ||
+      null;
+
+    const hadLocalSessions =
+      Boolean(
+        pokerSession?.sessionId
+      );
+
+/* ------------------------------------------------------------
+   RESET LIVE OCCUPANCY
+   ------------------------------------------------------------ */
+
+resetLiveSeats();
+
+/* ------------------------------------------------------------
+   PAINT OCCUPIED SEATS
+   ------------------------------------------------------------ */
+
+seats.forEach(
+  (player) => {
+
+    const seatNumber = 
+      Number(
+        player.seatNumber
+      );
+
+    const seat = 
+      document.querySelector(
+        `.poker-seat[data-seat="${seatNumber}"]`
+      );
+
+    if (!seat) return;
+
+    seat.classList.add(
+      "occupied"
+    );
+
+    /*
+        If a seat became occupied while this player
+        had it selected, remove the selection.
+      */
+
+      if (
+        !player.isYou &&
+        selectedSeat === seatNumber
+      ) {
+        selectedSeat = null;
+
+        seat.classList.remove(
+          "selected"
+        );
+
+        setText(
+          selectedSeatText,
+          "None"
+        );
+      }
+
+
+      if (player.isYou) {
+        seat.classList.add(
+          "my-seat"
+        );
+
+        seat.classList.remove(
+          "selected"
+        );
+      }
+
+
+      const playerEl =
+        seat.querySelector(
+          ".seat-player"
+        );
+
+
+      const stackEl =
+        seat.querySelector(
+          ".seat-stack"
+        );
+
+
+      /* ----------------------------------------
+         PLAYER NAME
+         ---------------------------------------- */
+
+      let displayName =
+        player.characterName ||
+        "Player";
+
+
+      if (
+        player.status ===
+        "sitting_out"
+      ) {
+        displayName +=
+          " • Sitting Out";
+      }
+
+
+      if (
+        player.status ===
+        "disconnected"
+      ) {
+        displayName +=
+          " • Disconnected";
+      }
+
+
+      if (
+        player.status ===
+        "leaving"
+      ) {
+        displayName +=
+          " • Leaving";
+      }
+
+
+      if (playerEl) {
+        playerEl.textContent =
+          player.isYou
+            ? `${displayName} • You`
+            : displayName;
+      }
+
+
+      if (stackEl) {
+        stackEl.textContent =
+          `${money(player.stack)} chips`;
+      }
+    }
+  );
+
+
+  /* ==========================================================
+     OUR SERVER SESSION EXISTS
+     ========================================================== */
+
+  if (yourSession) {
+
+    const previousSession =
+      pokerSession;
+
+
+    const restoredSession = {
+      tableId:
+        data.table?.id ||
+        TABLE_ID,
+
+      tableName:
+        data.table?.name ||
+        "Poker Room 1",
+
+      sessionId:
+        yourSession.id,
+
+      seatNumber:
+        Number(
+          yourSession.seatNumber
+        ),
+
+      buyIn:
+        Number(
+          yourSession.buyIn ||
+          0
+        ),
+
+      pokerStack:
+        Number(
+          yourSession.pokerStack ||
+          0
+        ),
+
+      status:
+        yourSession.status ||
+        "seated",
+
+      transferId:
+        previousSession?.transferId ||
+        null,
+
+      idempotencyKey:
+        previousSession?.idempotencyKey ||
+        null
+    };
+
+
+    savePokerSession(
+      restoredSession
+    );
+
+
+    /*
+      If the server has our seat, any pending sit request
+      has already succeeded.
+    */
+
+    clearPendingSit();
+
+
+    setText(
+      pokerStackEl,
+      money(
+        restoredSession.pokerStack
+      )
+    );
+
+
+    let statusText =
+      "Seated";
+
+
+    if (
+      restoredSession.status ===
+      "sitting_out"
+    ) {
+      statusText =
+        "Sitting Out";
+    }
+
+
+    if (
+      restoredSession.status ===
+      "disconnected"
+    ) {
+      statusText =
+        "Disconnected";
+    }
+
+
+    if (
+      restoredSession.status ===
+      "leaving"
+    ) {
+      statusText =
+        "Leaving";
+    }
+
+
+    setText(
+      pokerStatusEl,
+      statusText
+    );
+
+
+    setText(
+      selectedSeatText,
+      `Seat ${restoredSession.seatNumber}`
+    );
+
+
+    setText(
+      selectedBuyinText,
+      money(
+        restoredSession.buyIn
+      )
+    );
+
+
+    if (
+      !hadLocalSession
+    ) {
+      setMessage(
+        `Poker session restored — Seat ${restoredSession.seatNumber}, ${money(restoredSession.pokerStack)} chips.`,
+        "good"
+      );
+    }
+
+
+    updateControls();
+
+    return;
+  }
+
+
+  /* ==========================================================
+     SERVER SAYS WE ARE NOT SEATED
+
+     If localStorage still thinks we are seated, the local
+     record is stale and should be removed.
+     ========================================================== */
+
+  if (hadLocalSession) {
+
+    clearPokerSession();
+
+
+    setText(
+      pokerStackEl,
+      "0"
+    );
+
+
+    setText(
+      pokerStatusEl,
+      "Not Seated"
+    );
+
+
+    setText(
+      selectedSeatText,
+      "None"
+    );
+
+
+    setText(
+      selectedBuyinText,
+      "None"
+    );
+
+
+    selectedSeat = null;
+    selectedBuyin = null;
+
+
+    clearSeatHighlights();
+    clearBuyinHighlights();
+
+
+    setMessage(
+      "Your previous poker session is no longer active.",
+      "warn"
+    );
+  }
+
+
+  updateControls();
+}
+
+
+/* ============================================================
+   LOAD TABLE STATE
+   ============================================================ */
+
+async function loadTableState() {
+  if (loadingTableState) {
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } = getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    return;
+  }
+
+
+  loadingTableState = true;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-table-state",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID
+            })
+        }
+      );
+
+
+    const rawResponse =
+      await response.text();
+
+
+    let data;
+
+
+    try {
+      data =
+        JSON.parse(
+          rawResponse
+        );
+
+    } catch {
+      throw new Error(
+        `Table state returned HTTP ${response.status} with invalid JSON.`
+      );
+    }
+
+
+    if (!data.ok) {
+      console.warn(
+        "Poker table state:",
+        data.error,
+        data.debug || ""
+      );
+
+      return;
+    }
+
+
+    renderTableState(
+      data
+    );
+
+
+  } catch (error) {
+
+    /*
+      Do not destroy the visible table because one poll failed.
+      The next poll will try again.
+    */
+
+    console.error(
+      "Poker table state failed:",
+      error
+    );
+
+
+  } finally {
+
+    loadingTableState =
+      false;
+  }
+}
+
+
+/* ============================================================
+   TABLE POLLING
+   ============================================================ */
+
+function startTableStatePolling() {
+
+  if (tableStateTimer) {
+    clearInterval(
+      tableStateTimer
+    );
+  }
+
+
+  tableStateTimer =
+    setInterval(
+      () => {
+
+        if (
+          document.visibilityState ===
+          "visible"
+        ) {
+          loadTableState();
+        }
+
+      },
+      TABLE_STATE_POLL_MS
+    );
+}
+
+
+/* ============================================================
+   REFRESH IMMEDIATELY WHEN PLAYER RETURNS TO TAB
+   ============================================================ */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if (
+      document.visibilityState ===
+      "visible"
+    ) {
+      loadTableState();
+    }
+  }
+);
 
 /* ============================================================
    SIT DOWN
@@ -971,6 +1507,8 @@ async function sitDown() {
     clearBuyinHighlights();
 
     renderSavedSession();
+
+    await loadTableState();
 
     setMessage(
       `Seated with ${money(savedSession.pokerStack)} chips. Wallet balance: ${money(walletBalance)}.`,
@@ -1342,6 +1880,8 @@ async function leaveTable() {
       "good"
     );
 
+    await loadTableState();
+
 
   } catch (error) {
 
@@ -1470,6 +2010,14 @@ document.addEventListener(
        ---------------------------------------- */
 
     await loadWallet();
+
+    /* ----------------------------------------
+       Load Live poker table
+       ---------------------------------------- */
+
+    await loadTableState();
+
+    startTableStatePolling();
 
 
     /* ----------------------------------------
