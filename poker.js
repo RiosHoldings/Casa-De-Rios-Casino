@@ -28,7 +28,7 @@ const PLAYER_SECRET_KEY = "casa_rios_player_secret";
 
 const POKER_SESSION_KEY = "casa_rios_poker_session";
 const POKER_PENDING_SIT_KEY = "casa_rios_poker_pending_sit";
-
+const POKER_PENDING_LEAVE_KEY = "casa_rios_poker_pending_leave";
 
 /* ============================================================
    TABLE CONFIG
@@ -1017,14 +1017,364 @@ async function sitDown() {
 
    That endpoint will return the poker stack to the wallet.
    ============================================================ */
+function getPendingLeave() {
+  const raw = sessionStorage.getItem(POKER_PENDING_LEAVE_KEY);
+  if (!raw) return null;
+  try {return JSON.parse(raw);
+  } catch {sessionStorage.removeItem(POKER_PENDING_LEAVE_KEY); 
+  } 
+}
 
-function leaveTable() {
-  if (!pokerSession) return;
+function savePendingLeave(data) {
+  sessionStorage.setItem(POKER_PENDING_LEAVE_KEY , JSON.stringify(data)
+);
+}
+
+function clearPendingLeave() {
+  sessionStorage.removeItem(
+    POKER_PENDING_LEAVE_KEY
+  )
+}
+
+async function leaveTable() {
+  if (!pokerSession) {
+    setMessage(
+      "You are not seated at a poker table.",
+      "warn"
+    );
+    return;
+  }
+
+  const {
+    playerId,
+    playerSecret
+  } = getPlayerCredentials();
+
+  if (!playerId || !playerSecret) {
+    setMessage(
+      "Player login is missing.",
+      "bad"
+    );
+    return;
+  }
+
+  const sessionId = pokerSession.sessionId;
+  const seatNumber = Number(
+    pokerSession.seatNumber
+  );
+
+  const stackBefore = Number(
+    pokerSession.pokerStack || 0
+  );
+
+  if (!sessionId) {
+    setMessage(
+      "Poker session is missing. Refresh the page.",
+      "bad"
+    );
+
+    return;
+  }
+
+  if (leaveTableBtn) {
+    leaveTableBtn.disabled = true;
+
+    leaveTableBtn.textContent = "LEAVING...";
+  }
 
   setMessage(
-    "Leave-table cashout is not active yet. Your poker stack remains reserved at the table.",
+    "Returning your poker stack to your wallet...",
     "warn"
   );
+
+
+/* ============================================================
+  IDEMPOTENCY
+
+  If the network fails after the server processed the leave,
+  the next attempt reuses this exact request key,
+  ============================================================= */
+
+  let pending =
+    getPendingLeave();
+
+
+  if (
+    !pending ||
+    pending.sessionId !== sessionId ||
+    pending.tableId !== TABLE_ID
+  ) {
+    pending = {
+      tableId:
+        TABLE_ID,
+
+      sessionId,
+
+      idempotencyKey:
+        "poker-leave-" +
+        crypto.randomUUID()
+    };
+
+
+    savePendingLeave(
+      pending
+    );
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-leave",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID,
+
+              sessionId,
+
+              idempotencyKey:
+                pending.idempotencyKey
+            })
+        }
+      );
+
+
+    const rawResponse =
+      await response.text();
+
+
+    let data;
+
+
+    try {
+      data =
+        JSON.parse(
+          rawResponse
+        );
+
+    } catch {
+      throw new Error(
+        `HTTP ${response.status} returned non-JSON: ` +
+        rawResponse.slice(
+          0,
+          250
+        )
+      );
+    }
+
+
+    if (!data.ok) {
+
+      if (
+        response.status !== 500
+      ) {
+        clearPendingLeave();
+      }
+
+
+      setMessage(
+        data.debug
+          ? `${data.error} - ${data.debug}`
+          : data.error ||
+            "Could not leave the poker table.",
+        "bad"
+      );
+
+
+      if (leaveTableBtn) {
+        leaveTableBtn.disabled =
+          false;
+
+        leaveTableBtn.textContent =
+          "LEAVE TABLE";
+      }
+
+
+      return;
+    }
+
+
+    /* ========================================================
+       SUCCESS
+       ======================================================== */
+
+    const amountReturned =
+      Number(
+        data.amountReturned || 0
+      );
+
+
+    walletBalance =
+      Number(
+        data.walletBalance ??
+        walletBalance ??
+        0
+      );
+
+
+    clearPendingLeave();
+
+    clearPokerSession();
+
+
+    /* --------------------------------------------------------
+       RESET YOUR OLD SEAT
+       -------------------------------------------------------- */
+
+    const oldSeat =
+      document.querySelector(
+        `.poker-seat[data-seat="${seatNumber}"]`
+      );
+
+
+    if (oldSeat) {
+
+      oldSeat.classList.remove(
+        "selected",
+        "occupied",
+        "my-seat"
+      );
+
+
+      const playerEl =
+        oldSeat.querySelector(
+          ".seat-player"
+        );
+
+
+      const stackEl =
+        oldSeat.querySelector(
+          ".seat-stack"
+        );
+
+
+      if (playerEl) {
+        playerEl.textContent =
+          "Open";
+      }
+
+
+      if (stackEl) {
+        stackEl.textContent =
+          "";
+      }
+    }
+
+
+    /* --------------------------------------------------------
+       RESET LOCAL UI
+       -------------------------------------------------------- */
+
+    selectedSeat = null;
+    selectedBuyin = null;
+
+
+    clearSeatHighlights();
+    clearBuyinHighlights();
+
+
+    setText(
+      walletBalanceEl,
+      money(walletBalance)
+    );
+
+
+    setText(
+      pokerStackEl,
+      "0"
+    );
+
+
+    setText(
+      pokerStatusEl,
+      "Not Seated"
+    );
+
+
+    setText(
+      selectedSeatText,
+      "None"
+    );
+
+
+    setText(
+      selectedBuyinText,
+      "None"
+    );
+
+
+    if (sitDownBtn) {
+      sitDownBtn.textContent =
+        "SIT DOWN";
+    }
+
+
+    if (leaveTableBtn) {
+      leaveTableBtn.disabled =
+        false;
+
+      leaveTableBtn.hidden =
+        true;
+
+      leaveTableBtn.textContent =
+        "LEAVE TABLE";
+    }
+
+
+    updateControls();
+
+
+    setMessage(
+      `${money(amountReturned)} chips returned to your wallet. New wallet balance: ${money(walletBalance)}.`,
+      "good"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Poker leave request failed:",
+      error
+    );
+
+
+    /*
+      Do NOT clear pending leave here.
+
+      The server may have completed the transaction before
+      the connection failed. Reusing the same key prevents
+      a duplicate payout.
+    */
+
+
+    if (leaveTableBtn) {
+      leaveTableBtn.disabled =
+        false;
+
+      leaveTableBtn.textContent =
+        "LEAVE TABLE";
+    }
+
+
+    setMessage(
+      error?.message ||
+      "Leave-table request failed.",
+      "bad"
+    );
+  }
 }
 
 
