@@ -477,45 +477,32 @@ async function handlePost(context) {
      rewrite when the engine is added.
      ============================================================ */
 
-  const currentHand =
-    await DB.prepare(`
-      SELECT
-        id,
-        hand_number,
-
-        dealer_seat,
-        small_blind_seat,
-        big_blind_seat,
-
-        status,
-        street_reached,
-
-        flop_dealt,
-
-        board_json,
-
-        pot_before_rake,
-        rake_amount,
-        pot_after_rake
-
-      FROM poker_hands
-
-      WHERE table_id = ?
-
-        AND status IN (
-          'active',
-          'settling'
-        )
-
-      ORDER BY
-        hand_number DESC
-
-      LIMIT 1
-    `)
-      .bind(
-        tableId
+const currentHand =
+  await DB.prepare(`
+    SELECT
+      id,
+      hand_number,
+      dealer_seat,
+      small_blind_seat,
+      big_blind_seat,
+      status,
+      street_reached,
+      flop_dealt,
+      board_json,
+      pot_before_rake,
+      rake_amount,
+      pot_after_rake
+    FROM poker_hands
+    WHERE table_id = ?
+      AND status IN (
+        'active',
+        'settling'
       )
-      .first();
+    ORDER BY hand_number DESC
+    LIMIT 1
+  `)
+    .bind(tableId)
+    .first();
 
 
   let hand =

@@ -61,6 +61,7 @@ let loadingTableState = false;
 
 let tableStateFailures = 0;
 let tableStateTimer = null;
+let tableStatePollingEnabled = false;
 
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
@@ -1151,13 +1152,12 @@ async function loadTableState() {
 
   if (
     response.status >= 500 &&
-    tableStateFailures >=
-      TABLE_STATE_MAX_FAILURES
+    tableStateFailures >= TABLE_STATE_MAX_FAILURES
   ) {
     stopTableStatePolling();
 
     setMessage(
-      "Live poker updates are temporarily unavailable. Refresh after the backend is corrected.",
+      "Live poker updates are temporarily unavailable.",
       "bad"
     );
 
@@ -1169,10 +1169,7 @@ async function loadTableState() {
 
     tableStateFailures = 0;
 
-
-    renderTableState(
-      data
-    );
+    renderTableState(data);
 
 
 } catch (error) {
@@ -1209,25 +1206,19 @@ async function loadTableState() {
 function scheduleTableStatePoll(
   delay = TABLE_STATE_POLL_MS
 ) {
-  if (
-    !tableStatePollingEnabled
-  ) {
+  if (!tableStatePollingEnabled) {
     return;
   }
 
   if (tableStateTimer) {
-    clearTimeout(
-      tableStateTimer
-    );
+    clearTimeout(tableStateTimer);
   }
 
   tableStateTimer =
     setTimeout(
       async () => {
 
-        if (
-          !tableStatePollingEnabled
-        ){
+        if (!tableStatePollingEnabled) {
           return;
         }
 
@@ -1238,9 +1229,7 @@ function scheduleTableStatePoll(
           await loadTableState();
         }
 
-        if (
-          tableStatePollingEnabled
-        ) {
+        if (tableStatePollingEnabled) {
           scheduleTableStatePoll(
             TABLE_STATE_POLL_MS
           );
@@ -1254,23 +1243,17 @@ function scheduleTableStatePoll(
 
 function startTableStatePolling() {
   tableStateFailures = 0;
-
-  tableStatePollingEnabled = 
-    true;
+  tableStatePollingEnabled = true;
 
   scheduleTableStatePoll();
 }
 
 
 function stopTableStatePolling() {
-  tableStatePollingEnabled =
-    false;
-    
-  if (tableStateTimer) {
-    clearTimeout(
-      tableStateTimer
-    );
+  tableStatePollingEnabled = false;
 
+  if (tableStateTimer) {
+    clearTimeout(tableStateTimer);
     tableStateTimer = null;
   }
 }
