@@ -698,10 +698,9 @@ function renderSavedSession() {
   LIVE TABLE STATE
   ============================================================= */
 
-  function resetLiveSeats() {
-    document.querySelectorAll(
-      ".poker-seat"
-    )
+function resetLiveSeats() {
+  document
+    .querySelectorAll(".poker-seat")
     .forEach((seat) => {
 
       seat.classList.remove(
@@ -709,21 +708,27 @@ function renderSavedSession() {
         "my-seat"
       );
 
-      const playerEl = seat.querySelector(
-        ".seat-player"
-      );
+      const playerEl =
+        seat.querySelector(
+          ".seat-player"
+        );
+
+      const stackEl =
+        seat.querySelector(
+          ".seat-stack"
+        );
 
       if (playerEl) {
-        playerEl.textContent = 
-        "Open";
+        playerEl.textContent =
+          "Open";
       }
-      
+
       if (stackEl) {
-        stackEl.textContent = 
-        "";
+        stackEl.textContent =
+          "";
       }
     });
-  }
+}
 
 /* ============================================================
    RENDER SERVER TABLE STATE
