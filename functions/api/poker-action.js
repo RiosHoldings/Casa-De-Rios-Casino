@@ -271,6 +271,577 @@ function runBoardToRiver(
   };
 }
 
+/* ============================================================
+   EXPIRED TURN PROCESSING
+
+   Timeout rule:
+   - Check if checking is legal.
+   - Otherwise fold.
+   ============================================================ */
+
+async function processExpiredTurn(
+  DB,
+  hand,
+  players
+) {
+  if (
+    !hand.action_deadline ||
+    hand.current_turn_seat === null ||
+    hand.current_turn_seat === undefined
+  ) {
+    return null;
+  }
+
+
+  const deadlineMs =
+    Date.parse(
+      hand.action_deadline
+    );
+
+
+  if (
+    !Number.isFinite(deadlineMs) ||
+    Date.now() < deadlineMs
+  ) {
+    return null;
+  }
+
+
+  const timedSeat =
+    Number(
+      hand.current_turn_seat
+    );
+
+
+  const timedPlayer =
+    players.find(
+      (player) =>
+        player.seatNumber ===
+        timedSeat
+    );
+
+
+  if (
+    !timedPlayer ||
+    timedPlayer.folded ||
+    timedPlayer.allIn
+  ) {
+    return null;
+  }
+
+
+  const currentBet =
+    Number(
+      hand.current_bet ||
+      0
+    );
+
+
+  const callRequired =
+    Math.max(
+      0,
+      currentBet -
+      timedPlayer.streetContributed
+    );
+
+
+  const timeoutAction =
+    callRequired === 0
+      ? "timeout_check"
+      : "timeout_fold";
+
+
+  /* ----------------------------------------------------------
+     COPY PLAYER STATE
+     ---------------------------------------------------------- */
+
+  const updatedPlayers =
+    players.map(
+      (player) => ({
+        ...player
+      })
+    );
+
+
+  const updatedTimedPlayer =
+    updatedPlayers.find(
+      (player) =>
+        player.seatNumber ===
+        timedSeat
+    );
+
+
+  updatedTimedPlayer.acted =
+    true;
+
+  updatedTimedPlayer.lastAction =
+    timeoutAction;
+
+
+  if (
+    timeoutAction ===
+    "timeout_fold"
+  ) {
+    updatedTimedPlayer.folded =
+      true;
+  }
+
+
+  /* ----------------------------------------------------------
+     HAND STATE
+     ---------------------------------------------------------- */
+
+  const remainingPlayers =
+    updatedPlayers.filter(
+      (player) =>
+        !player.folded
+    );
+
+
+  let nextTurnSeat = null;
+
+  let newStreet =
+    hand.street_reached;
+
+  let board =
+    parseArray(
+      hand.board_json
+    );
+
+  let deck =
+    parseArray(
+      hand.deck_json
+    );
+
+  let flopDealt =
+    Number(
+      hand.flop_dealt ||
+      0
+    );
+
+  let newCurrentBet =
+    currentBet;
+
+  let newMinRaise =
+    Number(
+      hand.min_raise ||
+      hand.big_blind ||
+      200
+    );
+
+  let newLastRaiser =
+    hand.last_raiser_seat;
+
+  let status =
+    "active";
+
+  let resetStreetPlayers =
+    false;
+
+
+  /* ----------------------------------------------------------
+     ONLY ONE PLAYER REMAINS
+     ---------------------------------------------------------- */
+
+  if (
+    remainingPlayers.length <= 1
+  ) {
+    status =
+      "settling";
+
+  } else {
+
+    const playersAbleToAct =
+      remainingPlayers.filter(
+        (player) =>
+          !player.allIn
+      );
+
+
+    const roundComplete =
+      playersAbleToAct.every(
+        (player) =>
+          player.acted &&
+          player.streetContributed ===
+            newCurrentBet
+      );
+
+
+    /* --------------------------------------------------------
+       ROUND COMPLETE
+       -------------------------------------------------------- */
+
+    if (roundComplete) {
+
+      if (
+        newStreet ===
+        "river"
+      ) {
+        status =
+          "settling";
+
+      } else if (
+        playersAbleToAct.length <=
+        1
+      ) {
+
+        /*
+          Nobody can make another betting decision.
+          Run the remaining board automatically.
+        */
+
+        const runout =
+          runBoardToRiver(
+            newStreet,
+            deck,
+            board
+          );
+
+
+        newStreet =
+          runout.street;
+
+        deck =
+          runout.deck;
+
+        board =
+          runout.board;
+
+        flopDealt =
+          runout.flopDealt;
+
+        status =
+          "settling";
+
+      } else {
+
+        /*
+          Advance one street.
+        */
+
+        const dealt =
+          dealNextStreet(
+            newStreet,
+            deck,
+            board
+          );
+
+
+        newStreet =
+          dealt.street;
+
+        deck =
+          dealt.deck;
+
+        board =
+          dealt.board;
+
+        flopDealt =
+          dealt.flopDealt;
+
+
+        newCurrentBet = 0;
+
+        newMinRaise =
+          Number(
+            hand.big_blind
+          );
+
+        newLastRaiser =
+          null;
+
+        resetStreetPlayers =
+          true;
+
+
+        /*
+          First post-flop action:
+          clockwise from dealer.
+        */
+
+        nextTurnSeat =
+          nextClockwise(
+            updatedPlayers,
+            Number(
+              hand.dealer_seat
+            ),
+            (player) =>
+              !player.folded &&
+              !player.allIn
+          );
+      }
+
+    } else {
+
+      /* ------------------------------------------------------
+         SAME STREET
+         ------------------------------------------------------ */
+
+      nextTurnSeat =
+        nextClockwise(
+          updatedPlayers,
+          timedSeat,
+          (player) =>
+            !player.folded &&
+            !player.allIn &&
+            (
+              !player.acted ||
+              player.streetContributed <
+                newCurrentBet
+            )
+        );
+    }
+  }
+
+
+  /* ----------------------------------------------------------
+     NEW DEADLINE
+     ---------------------------------------------------------- */
+
+  const actionDeadline =
+    status === "active" &&
+    nextTurnSeat !== null
+      ? deadlineFromNow(
+          hand.turn_seconds
+        )
+      : null;
+
+
+  /* ----------------------------------------------------------
+     ACTION SEQUENCE
+     ---------------------------------------------------------- */
+
+  const sequenceRow =
+    await DB.prepare(`
+      SELECT
+        COALESCE(
+          MAX(sequence_number),
+          0
+        ) AS max_sequence
+
+      FROM poker_actions
+
+      WHERE hand_id = ?
+    `)
+      .bind(hand.id)
+      .first();
+
+
+  const sequenceNumber =
+    Number(
+      sequenceRow?.max_sequence ||
+      0
+    ) + 1;
+
+
+  const statements = [];
+
+
+  /* ----------------------------------------------------------
+     AUDIT TIMEOUT
+     ---------------------------------------------------------- */
+
+  statements.push(
+    DB.prepare(`
+      INSERT INTO poker_actions (
+        hand_id,
+        session_id,
+        player_id,
+
+        sequence_number,
+        seat_number,
+
+        street,
+        action,
+
+        amount,
+        to_amount,
+
+        pot_after,
+        stack_after
+      )
+      VALUES (
+        ?, ?, ?,
+        ?, ?,
+        ?, ?,
+        ?, ?,
+        ?, ?
+      )
+    `)
+      .bind(
+        hand.id,
+
+        timedPlayer.sessionId,
+        timedPlayer.playerId,
+
+        sequenceNumber,
+        timedSeat,
+
+        hand.street_reached,
+        timeoutAction,
+
+        0,
+        timedPlayer.streetContributed,
+
+        Number(
+          hand.pot_before_rake ||
+          0
+        ),
+
+        timedPlayer.currentStack
+      )
+  );
+
+
+  /* ----------------------------------------------------------
+     UPDATE TIMED PLAYER
+     ---------------------------------------------------------- */
+
+  statements.push(
+    DB.prepare(`
+      UPDATE poker_hand_players
+
+      SET
+        folded =
+          CASE
+            WHEN ? = 1
+              THEN 1
+            ELSE folded
+          END,
+
+        acted_this_round = 1,
+        last_action = ?
+
+      WHERE hand_id = ?
+        AND player_id = ?
+    `)
+      .bind(
+        timeoutAction ===
+          "timeout_fold"
+          ? 1
+          : 0,
+
+        timeoutAction,
+
+        hand.id,
+        timedPlayer.playerId
+      )
+  );
+
+
+  /* ----------------------------------------------------------
+     RESET NEW STREET
+     ---------------------------------------------------------- */
+
+  if (
+    resetStreetPlayers
+  ) {
+    statements.push(
+      DB.prepare(`
+        UPDATE poker_hand_players
+
+        SET
+          street_contributed = 0,
+          acted_this_round = 0,
+          last_action = NULL
+
+        WHERE hand_id = ?
+      `)
+        .bind(
+          hand.id
+        )
+    );
+  }
+
+
+  /* ----------------------------------------------------------
+     UPDATE HAND
+     ---------------------------------------------------------- */
+
+  statements.push(
+    DB.prepare(`
+      UPDATE poker_hands
+
+      SET
+        status = ?,
+
+        street_reached = ?,
+        flop_dealt = ?,
+
+        board_json = ?,
+        deck_json = ?,
+
+        current_turn_seat = ?,
+        current_bet = ?,
+        min_raise = ?,
+        last_raiser_seat = ?,
+
+        action_deadline = ?
+
+      WHERE id = ?
+        AND status = 'active'
+        AND current_turn_seat = ?
+    `)
+      .bind(
+        status,
+
+        newStreet,
+        flopDealt,
+
+        JSON.stringify(
+          board
+        ),
+
+        JSON.stringify(
+          deck
+        ),
+
+        nextTurnSeat,
+
+        newCurrentBet,
+        newMinRaise,
+        newLastRaiser,
+
+        actionDeadline,
+
+        hand.id,
+        timedSeat
+      )
+  );
+
+
+  await DB.batch(
+    statements
+  );
+
+
+  return {
+    processed: true,
+
+    timedOutSeat:
+      timedSeat,
+
+    timeoutAction,
+
+    status,
+
+    street:
+      newStreet,
+
+    board,
+
+    currentTurnSeat:
+      nextTurnSeat,
+
+    currentBet:
+      newCurrentBet,
+
+    minRaise:
+      newMinRaise,
+
+    actionDeadline
+  };
+}
 
 /* ============================================================
    POST
@@ -449,6 +1020,7 @@ async function handlePost(context) {
         h.current_bet,
         h.min_raise,
         h.last_raiser_seat,
+        h.action_deadline,
 
         t.big_blind,
         t.turn_seconds
@@ -652,25 +1224,89 @@ async function handlePost(context) {
   }
 
 
-  if (
-    Number(
-      hand.current_turn_seat
-    ) !==
-    player.seatNumber
-  ) {
-    return json(
-      {
-        ok: false,
+/* ----------------------------------------------------------
+   RESOLVE EXPIRED TURN FIRST
+   ---------------------------------------------------------- */
 
-        error:
-          "It is not your turn.",
+const timeoutResult =
+  await processExpiredTurn(
+    DB,
+    hand,
+    players
+  );
+
+
+if (timeoutResult) {
+  return json(
+    {
+      ok: false,
+
+      timeoutProcessed:
+        true,
+
+      error:
+        timeoutResult.timeoutAction ===
+        "timeout_fold"
+          ? `Seat ${timeoutResult.timedOutSeat} timed out and folded. Retry your action.`
+          : `Seat ${timeoutResult.timedOutSeat} timed out and checked. Retry your action.`,
+
+      timedOutSeat:
+        timeoutResult.timedOutSeat,
+
+      timeoutAction:
+        timeoutResult.timeoutAction,
+
+      hand: {
+        status:
+          timeoutResult.status,
+
+        street:
+          timeoutResult.street,
+
+        board:
+          timeoutResult.board,
 
         currentTurnSeat:
-          hand.current_turn_seat
-      },
-      409
-    );
-  }
+          timeoutResult.currentTurnSeat,
+
+        currentBet:
+          timeoutResult.currentBet,
+
+        minRaise:
+          timeoutResult.minRaise,
+
+        actionDeadline:
+          timeoutResult.actionDeadline
+      }
+    },
+    409
+  );
+}
+
+
+/* ----------------------------------------------------------
+   NORMAL TURN CHECK
+   ---------------------------------------------------------- */
+
+if (
+  Number(
+    hand.current_turn_seat
+  ) !==
+  player.seatNumber
+) {
+  return json(
+    {
+      ok: false,
+
+      error:
+        "It is not your turn.",
+
+      currentTurnSeat:
+        hand.current_turn_seat
+    },
+    409
+  );
+}
 
 
   /* ----------------------------------------------------------
