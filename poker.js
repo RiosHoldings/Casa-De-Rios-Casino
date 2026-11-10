@@ -731,13 +731,453 @@ function resetLiveSeats() {
 }
 
 /* ============================================================
+   LIVE POKER HAND DISPLAY
+   ============================================================ */
+
+function renderHandState(data) {
+  const hud =
+    document.getElementById(
+      "pokerHandHud"
+    );
+
+  const hand =
+    data.hand || null;
+
+  /* Clear old seat decorations */
+
+  document
+    .querySelectorAll(".poker-seat")
+    .forEach((seat) => {
+      seat.classList.remove(
+        "current-turn",
+        "folded",
+        "all-in"
+      );
+
+      seat
+        .querySelectorAll(
+          ".poker-seat-marker, .poker-seat-status"
+        )
+        .forEach(
+          (el) => el.remove()
+        );
+    });
+
+
+  /* No active hand */
+
+  if (!hand) {
+    if (hud) {
+      hud.hidden = true;
+    }
+
+    return;
+  }
+
+
+  /* Show HUD */
+
+  if (hud) {
+    hud.hidden = false;
+  }
+
+
+  /* Basic hand info */
+
+  setText(
+    document.getElementById(
+      "pokerHandNumber"
+    ),
+    `#${hand.handNumber}`
+  );
+
+  setText(
+    document.getElementById(
+      "pokerStreet"
+    ),
+    String(
+      hand.street || "preflop"
+    ).toUpperCase()
+  );
+
+  setText(
+    document.getElementById(
+      "pokerPot"
+    ),
+    money(hand.pot || 0)
+  );
+
+  setText(
+    document.getElementById(
+      "pokerCurrentBet"
+    ),
+    money(
+      hand.currentBet || 0
+    )
+  );
+
+  setText(
+    document.getElementById(
+      "pokerMinRaise"
+    ),
+    money(
+      hand.minRaise || 0
+    )
+  );
+
+
+  /* ----------------------------------------
+     CARD RENDERER
+     ---------------------------------------- */
+
+  function renderCards(
+    elementId,
+    cards
+  ) {
+    const el =
+      document.getElementById(
+        elementId
+      );
+
+    if (!el) return;
+
+    const list =
+      Array.isArray(cards)
+        ? cards
+        : [];
+
+    const suitMap = {
+      S: "♠",
+      H: "♥",
+      D: "♦",
+      C: "♣"
+    };
+
+    el.innerHTML =
+      list.map((card) => {
+        const value =
+          String(card)
+            .trim()
+            .toUpperCase();
+
+        const suitCode =
+          value.slice(-1);
+
+        const rank =
+          value.slice(0, -1);
+
+        const suit =
+          suitMap[suitCode] ||
+          suitCode;
+
+        const red =
+          suitCode === "H" ||
+          suitCode === "D";
+
+        return `
+          <div
+            class="poker-card ${
+              red
+                ? "red"
+                : "black"
+            }"
+          >
+            <div class="poker-card-rank">
+              ${rank}
+            </div>
+
+            <div class="poker-card-suit">
+              ${suit}
+            </div>
+
+            <div class="poker-card-center">
+              ${suit}
+            </div>
+          </div>
+        `;
+      }).join("");
+  }
+
+
+  renderCards(
+    "pokerBoard",
+    hand.board || []
+  );
+
+  renderCards(
+    "pokerHoleCards",
+    data.yourCards || []
+  );
+
+
+  /* ----------------------------------------
+     POSITION MARKERS
+     ---------------------------------------- */
+
+  function marker(
+    seatNumber,
+    label,
+    className
+  ) {
+    const seat =
+      document.querySelector(
+        `.poker-seat[data-seat="${seatNumber}"]`
+      );
+
+    if (!seat) return;
+
+    const badge =
+      document.createElement(
+        "span"
+      );
+
+    badge.className =
+      `poker-seat-marker ${className}`;
+
+    badge.textContent =
+      label;
+
+    seat.appendChild(
+      badge
+    );
+  }
+
+
+  marker(
+    hand.dealerSeat,
+    "D",
+    "dealer"
+  );
+
+  marker(
+    hand.smallBlindSeat,
+    "SB",
+    "small-blind"
+  );
+
+  marker(
+    hand.bigBlindSeat,
+    "BB",
+    "big-blind"
+  );
+
+
+  /* ----------------------------------------
+     HAND PLAYER STATES
+     ---------------------------------------- */
+
+  const handPlayers =
+    data.handPlayers || [];
+
+  handPlayers.forEach(
+    (player) => {
+      const seat =
+        document.querySelector(
+          `.poker-seat[data-seat="${player.seatNumber}"]`
+        );
+
+      if (!seat) return;
+
+
+      if (player.folded) {
+        seat.classList.add(
+          "folded"
+        );
+      }
+
+
+      if (player.allIn) {
+        seat.classList.add(
+          "all-in"
+        );
+      }
+
+
+      let statusText = "";
+
+
+      if (player.folded) {
+        statusText =
+          "FOLDED";
+
+      } else if (player.allIn) {
+        statusText =
+          "ALL IN";
+
+      } else if (
+        player.lastAction ===
+        "post_small_blind"
+      ) {
+        statusText =
+          `SB ${money(
+            player.streetContributed
+          )}`;
+
+      } else if (
+        player.lastAction ===
+        "post_big_blind"
+      ) {
+        statusText =
+          `BB ${money(
+            player.streetContributed
+          )}`;
+
+      } else if (
+        player.lastAction
+      ) {
+        statusText =
+          String(
+            player.lastAction
+          )
+            .replaceAll(
+              "_",
+              " "
+            )
+            .toUpperCase();
+      }
+
+
+      if (statusText) {
+        const status =
+          document.createElement(
+            "div"
+          );
+
+        status.className =
+          "poker-seat-status";
+
+        status.textContent =
+          statusText;
+
+        seat.appendChild(
+          status
+        );
+      }
+    }
+  );
+
+
+  /* ----------------------------------------
+     CURRENT TURN
+     ---------------------------------------- */
+
+  const currentTurnSeat =
+    Number(
+      hand.currentTurnSeat
+    );
+
+  const currentSeat =
+    document.querySelector(
+      `.poker-seat[data-seat="${currentTurnSeat}"]`
+    );
+
+  if (currentSeat) {
+    currentSeat.classList.add(
+      "current-turn"
+    );
+  }
+
+
+  const yourSeat =
+    data.yourSession
+      ? Number(
+          data.yourSession
+            .seatNumber
+        )
+      : null;
+
+
+  const isYourTurn =
+    yourSeat !== null &&
+    yourSeat ===
+      currentTurnSeat;
+
+
+  const turnBox =
+    document.getElementById(
+      "pokerTurnBox"
+    );
+
+  if (turnBox) {
+    turnBox.classList.toggle(
+      "your-turn",
+      isYourTurn
+    );
+  }
+
+
+  const turnPlayer =
+    handPlayers.find(
+      (player) =>
+        Number(
+          player.seatNumber
+        ) ===
+        currentTurnSeat
+    );
+
+
+  setText(
+    document.getElementById(
+      "pokerTurnText"
+    ),
+
+    isYourTurn
+      ? "YOUR TURN"
+      : turnPlayer
+        ? `${turnPlayer.characterName}'s Turn`
+        : "Waiting..."
+  );
+
+
+  /* ----------------------------------------
+     TIMER
+     ---------------------------------------- */
+
+  const timer =
+    document.getElementById(
+      "pokerTurnTimer"
+    );
+
+  if (
+    timer &&
+    hand.actionDeadline
+  ) {
+    const deadline =
+      new Date(
+        hand.actionDeadline
+      ).getTime();
+
+    const serverTime =
+      data.serverTime
+        ? new Date(
+            data.serverTime
+          ).getTime()
+        : Date.now();
+
+    const seconds =
+      Math.max(
+        0,
+        Math.ceil(
+          (
+            deadline -
+            serverTime
+          ) / 1000
+        )
+      );
+
+    timer.textContent =
+      `${seconds} sec`;
+  }
+}
+
+/* ============================================================
    RENDER SERVER TABLE STATE
    ============================================================ */
 
    function renderTableState(data) {
     const hadLocalSession =
     Boolean(pokerSession)
-    
+
     const seats = 
       Array.isArray(data.seats)
         ? data.seats
@@ -1071,6 +1511,8 @@ seats.forEach(
 
 
   updateControls();
+
+  renderHandState(data);
 }
 
 
