@@ -493,3 +493,557 @@ body.debug .wheel-wrap {
   z-index: 20;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65));
 }
+
+/* ============================================================
+   LIVE POKER HAND HUD
+   ============================================================ */
+
+.poker-hand-hud {
+  width: min(94%, 760px);
+  margin: 18px auto;
+  padding: 16px;
+
+  border: 1px solid rgba(255, 217, 104, 0.45);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(29, 7, 42, 0.96),
+      rgba(4, 2, 7, 0.96)
+    );
+
+  box-shadow:
+    0 0 24px rgba(0, 0, 0, 0.75),
+    inset 0 0 24px rgba(122, 35, 174, 0.12);
+
+  color: #f8df9a;
+}
+
+
+.poker-hand-hud[hidden] {
+  display: none !important;
+}
+
+
+/* ============================================================
+   HAND HEADER
+   ============================================================ */
+
+.poker-hand-top {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+
+.poker-hand-stat {
+  padding: 10px 6px;
+
+  border:
+    1px solid
+    rgba(255, 217, 104, 0.25);
+
+  border-radius: 12px;
+
+  background:
+    rgba(0, 0, 0, 0.42);
+
+  text-align: center;
+}
+
+
+.poker-hand-stat span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #bca46d;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+}
+
+
+.poker-hand-stat strong {
+  color: #ffd968;
+
+  font-size: 17px;
+}
+
+
+/* ============================================================
+   BOARD
+   ============================================================ */
+
+.poker-board-wrap {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+
+.poker-board-label,
+.poker-hole-label {
+  margin-bottom: 8px;
+
+  color: #e9c15d;
+
+  font-size: 11px;
+  font-weight: 900;
+
+  letter-spacing: 0.16em;
+}
+
+
+.poker-board {
+  min-height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+}
+
+
+/* ============================================================
+   PLAYING CARDS
+   ============================================================ */
+
+.poker-card {
+  position: relative;
+
+  width: 50px;
+  height: 72px;
+
+  flex: 0 0 auto;
+
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #e8e8e8
+    );
+
+  border:
+    1px solid
+    rgba(0, 0, 0, 0.5);
+
+  box-shadow:
+    0 4px 10px
+    rgba(0, 0, 0, 0.55);
+
+  color: #111;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+}
+
+
+.poker-card.red {
+  color: #b71927;
+}
+
+
+.poker-card.black {
+  color: #111;
+}
+
+
+.poker-card-rank {
+  position: absolute;
+
+  top: 5px;
+  left: 6px;
+
+  font-size: 17px;
+  font-weight: 900;
+
+  line-height: 1;
+}
+
+
+.poker-card-suit {
+  position: absolute;
+
+  top: 21px;
+  left: 7px;
+
+  font-size: 15px;
+  line-height: 1;
+}
+
+
+.poker-card-center {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 27px;
+}
+
+
+.poker-card-back {
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 217, 104, 0.26),
+      transparent 45%
+    ),
+    repeating-linear-gradient(
+      45deg,
+      #40145b,
+      #40145b 5px,
+      #22082f 5px,
+      #22082f 10px
+    );
+
+  border:
+    2px solid
+    #d4a64a;
+}
+
+
+/* ============================================================
+   HOLE CARDS
+   ============================================================ */
+
+.poker-hole-wrap {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+
+.poker-hole-cards {
+  min-height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+}
+
+
+.poker-hole-cards .poker-card {
+  width: 58px;
+  height: 84px;
+}
+
+
+.poker-hole-cards
+.poker-card-rank {
+  font-size: 19px;
+}
+
+
+.poker-hole-cards
+.poker-card-center {
+  font-size: 32px;
+}
+
+
+/* ============================================================
+   CURRENT TURN
+   ============================================================ */
+
+.poker-turn-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin: 10px 0 14px;
+  padding: 12px 14px;
+
+  border:
+    1px solid
+    rgba(255, 217, 104, 0.3);
+
+  border-radius: 12px;
+
+  background:
+    rgba(0, 0, 0, 0.48);
+}
+
+
+.poker-turn-box strong {
+  color: #f8df9a;
+}
+
+
+.poker-turn-box span {
+  color: #ffd968;
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+
+.poker-turn-box.your-turn {
+  border-color:
+    rgba(255, 217, 104, 0.9);
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(122, 35, 174, 0.55),
+      rgba(0, 0, 0, 0.6)
+    );
+
+  box-shadow:
+    0 0 18px
+    rgba(255, 217, 104, 0.25);
+}
+
+
+.poker-turn-box.your-turn strong {
+  color: #ffd968;
+}
+
+
+/* ============================================================
+   BET INFO
+   ============================================================ */
+
+.poker-bet-info {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 8px;
+}
+
+
+.poker-bet-info > div {
+  padding: 10px;
+
+  border:
+    1px solid
+    rgba(255, 217, 104, 0.18);
+
+  border-radius: 10px;
+
+  background:
+    rgba(0, 0, 0, 0.32);
+
+  text-align: center;
+}
+
+
+.poker-bet-info span {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #a99567;
+
+  font-size: 10px;
+
+  letter-spacing: 0.1em;
+}
+
+
+.poker-bet-info strong {
+  color: #ffd968;
+
+  font-size: 16px;
+}
+
+
+/* ============================================================
+   SEAT HAND MARKERS
+   ============================================================ */
+
+.poker-seat {
+  position: relative;
+}
+
+
+.poker-seat-marker {
+  position: absolute;
+
+  top: -10px;
+  right: -10px;
+
+  min-width: 28px;
+  height: 28px;
+
+  padding: 0 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  border:
+    2px solid
+    #050208;
+
+  font-size: 10px;
+  font-weight: 900;
+
+  line-height: 1;
+
+  z-index: 10;
+
+  pointer-events: none;
+}
+
+
+.poker-seat-marker.dealer {
+  background: #f5f5f5;
+  color: #111;
+}
+
+
+.poker-seat-marker.small-blind {
+  background: #6f2e91;
+  color: #fff;
+}
+
+
+.poker-seat-marker.big-blind {
+  background: #d4a64a;
+  color: #140a00;
+}
+
+
+/* ============================================================
+   CURRENT PLAYER TURN
+   ============================================================ */
+
+.poker-seat.current-turn {
+  box-shadow:
+    0 0 0 3px
+      rgba(255, 217, 104, 0.95),
+    0 0 22px
+      rgba(255, 217, 104, 0.65);
+
+  animation:
+    pokerTurnPulse
+    1.15s ease-in-out
+    infinite alternate;
+}
+
+
+@keyframes pokerTurnPulse {
+  from {
+    filter:
+      brightness(1);
+  }
+
+  to {
+    filter:
+      brightness(1.18);
+  }
+}
+
+
+/* ============================================================
+   FOLDED / ALL-IN
+   ============================================================ */
+
+.poker-seat.folded {
+  opacity: 0.48;
+}
+
+
+.poker-seat.all-in {
+  border-color:
+    #ffd968 !important;
+
+  box-shadow:
+    0 0 18px
+    rgba(255, 217, 104, 0.45);
+}
+
+
+.poker-seat-status {
+  margin-top: 3px;
+
+  color: #e9c15d;
+
+  font-size: 9px;
+  font-weight: 900;
+
+  letter-spacing: 0.06em;
+
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (
+  max-width: 520px
+) {
+
+  .poker-hand-hud {
+    width: 96%;
+    padding: 12px;
+  }
+
+
+  .poker-card {
+    width: 42px;
+    height: 62px;
+  }
+
+
+  .poker-hole-cards
+  .poker-card {
+    width: 50px;
+    height: 72px;
+  }
+
+
+  .poker-card-rank {
+    font-size: 14px;
+  }
+
+
+  .poker-card-suit {
+    font-size: 12px;
+    top: 18px;
+  }
+
+
+  .poker-card-center {
+    font-size: 23px;
+  }
+
+
+  .poker-hole-cards
+  .poker-card-center {
+    font-size: 27px;
+  }
+
+
+  .poker-turn-box {
+    padding: 10px;
+  }
+
+
+  .poker-turn-box span {
+    font-size: 15px;
+  }
+}

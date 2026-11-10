@@ -735,6 +735,9 @@ function resetLiveSeats() {
    ============================================================ */
 
    function renderTableState(data) {
+    const hadLocalSession =
+    Boolean(pokerSession)
+    
     const seats = 
       Array.isArray(data.seats)
         ? data.seats

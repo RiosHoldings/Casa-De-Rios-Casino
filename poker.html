@@ -274,6 +274,113 @@
 
     </section>
 
+    <!-- =========================================================
+     LIVE POKER HAND
+     ========================================================= -->
+
+<section
+  id="pokerHandHud"
+  class="poker-hand-hud"
+  hidden
+>
+
+  <div class="poker-hand-top">
+
+    <div class="poker-hand-stat">
+      <span>HAND</span>
+      <strong id="pokerHandNumber">
+        --
+      </strong>
+    </div>
+
+    <div class="poker-hand-stat">
+      <span>STREET</span>
+      <strong id="pokerStreet">
+        --
+      </strong>
+    </div>
+
+    <div class="poker-hand-stat">
+      <span>POT</span>
+      <strong id="pokerPot">
+        0
+      </strong>
+    </div>
+
+  </div>
+
+
+  <!-- BOARD -->
+
+  <div class="poker-board-wrap">
+
+    <div class="poker-board-label">
+      BOARD
+    </div>
+
+    <div
+      id="pokerBoard"
+      class="poker-board"
+    ></div>
+
+  </div>
+
+
+  <!-- YOUR CARDS -->
+
+  <div class="poker-hole-wrap">
+
+    <div class="poker-hole-label">
+      YOUR HAND
+    </div>
+
+    <div
+      id="pokerHoleCards"
+      class="poker-hole-cards"
+    ></div>
+
+  </div>
+
+
+  <!-- CURRENT TURN -->
+
+  <div
+    id="pokerTurnBox"
+    class="poker-turn-box"
+  >
+
+    <strong id="pokerTurnText">
+      Waiting...
+    </strong>
+
+    <span id="pokerTurnTimer">
+      -- sec
+    </span>
+
+  </div>
+
+
+  <!-- BET INFO -->
+
+  <div class="poker-bet-info">
+
+    <div>
+      <span>Current Bet</span>
+      <strong id="pokerCurrentBet">
+        0
+      </strong>
+    </div>
+
+    <div>
+      <span>Minimum Raise</span>
+      <strong id="pokerMinRaise">
+        0
+      </strong>
+    </div>
+
+  </div>
+
+</section>
 
     <!-- ======================================================
          SEAT SELECTION
