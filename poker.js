@@ -735,6 +735,11 @@ function resetLiveSeats() {
    ============================================================ */
 
 function renderHandState(data) {
+  renderHandState(data);
+
+  const hadLocalSession =
+    Boolean(pokerSession);
+    
   const hud =
     document.getElementById(
       "pokerHandHud"
