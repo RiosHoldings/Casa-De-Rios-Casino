@@ -63,6 +63,9 @@ let tableStateFailures = 0;
 let tableStateTimer = null;
 let tableStatePollingEnabled = false;
 
+let submittingPokerAction = false;
+let latestPokerState = null;
+
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
 
@@ -94,6 +97,29 @@ const leaveTableBtn =
 const pokerMessage =
   document.getElementById("pokerMessage");
 
+const pokerActionPanel = 
+  document.getElementById("pokerActionPanel");
+
+const pokerFoldBtn = 
+  document.getElementById("pokerFoldBtn");
+
+const pokerCheckBtn =
+  document.getElementById("pokerCheckBtn");
+  
+const pokerCallBtn =
+  document.getElementById("pokerCallBtn");
+  
+const pokerRaiseBtn = 
+  document.getElementById("pokerRaiseBtn");
+
+const pokerAllInBtn =
+  document.getElementById("pokerAllInBtn");
+
+const pokerRaiseSlider =
+  document.getElementById("pokerRaiseSlider");
+
+const pokerRaiseAmount =
+  documemt.getElementById("pokerRaiseAmount");
 
 /* ============================================================
    HELPERS
@@ -731,11 +757,535 @@ function resetLiveSeats() {
 }
 
 /* ============================================================
+   POKER ACTION CONTROLS
+   ============================================================ */
+
+function getYourHandPlayer(data) {
+  if (
+    !data?.yourSession ||
+    !Array.isArray(
+      data.handPlayers
+    )
+  ) {
+    return null;
+  }
+
+  const yourSeat =
+    Number(
+      data.yourSession
+        .seatNumber
+    );
+
+  return (
+    data.handPlayers.find(
+      (player) =>
+        Number(
+          player.seatNumber
+        ) ===
+        yourSeat
+    ) || null
+  );
+}
+
+
+function syncRaiseAmountText() {
+  if (
+    !pokerRaiseSlider ||
+    !pokerRaiseAmount
+  ) {
+    return;
+  }
+
+  pokerRaiseAmount.textContent =
+    money(
+      pokerRaiseSlider.value
+    );
+}
+
+
+function hidePokerActions() {
+  if (pokerActionPanel) {
+    pokerActionPanel.hidden =
+      true;
+
+    pokerActionPanel
+      .classList
+      .remove(
+        "your-turn"
+      );
+  }
+}
+
+
+function renderPokerActionControls(
+  data
+) {
+  latestPokerState =
+    data;
+
+  const hand =
+    data?.hand;
+
+  const session =
+    data?.yourSession;
+
+  const yourPlayer =
+    getYourHandPlayer(
+      data
+    );
+
+
+  if (
+    !hand ||
+    !session ||
+    !yourPlayer ||
+    hand.status !== "active"
+  ) {
+    hidePokerActions();
+    return;
+  }
+
+
+  const yourSeat =
+    Number(
+      session.seatNumber
+    );
+
+  const currentTurnSeat =
+    Number(
+      hand.currentTurnSeat
+    );
+
+
+  const isYourTurn =
+    yourSeat ===
+      currentTurnSeat &&
+    !yourPlayer.folded &&
+    !yourPlayer.allIn;
+
+
+  if (!isYourTurn) {
+    hidePokerActions();
+    return;
+  }
+
+
+  if (pokerActionPanel) {
+    pokerActionPanel.hidden =
+      false;
+
+    pokerActionPanel
+      .classList
+      .add(
+        "your-turn"
+      );
+  }
+
+
+  const currentBet =
+    Number(
+      hand.currentBet ||
+      0
+    );
+
+  const minRaise =
+    Number(
+      hand.minRaise ||
+      data.table?.bigBlind ||
+      200
+    );
+
+  const streetContributed =
+    Number(
+      yourPlayer
+        .streetContributed ||
+      0
+    );
+
+  const stack =
+    Number(
+      yourPlayer.currentStack ||
+      0
+    );
+
+
+  const callRequired =
+    Math.max(
+      0,
+      currentBet -
+        streetContributed
+    );
+
+
+  /* ----------------------------------------------------------
+     FOLD
+     ---------------------------------------------------------- */
+
+  if (pokerFoldBtn) {
+    pokerFoldBtn.disabled =
+      submittingPokerAction;
+  }
+
+
+  /* ----------------------------------------------------------
+     CHECK
+     ---------------------------------------------------------- */
+
+  if (pokerCheckBtn) {
+    pokerCheckBtn.hidden =
+      callRequired !== 0;
+
+    pokerCheckBtn.disabled =
+      submittingPokerAction ||
+      callRequired !== 0;
+  }
+
+
+  /* ----------------------------------------------------------
+     CALL
+     ---------------------------------------------------------- */
+
+  if (pokerCallBtn) {
+    pokerCallBtn.hidden =
+      callRequired <= 0;
+
+    const actualCall =
+      Math.min(
+        callRequired,
+        stack
+      );
+
+    pokerCallBtn.textContent =
+      actualCall >= stack
+        ? `CALL ${money(actualCall)} — ALL IN`
+        : `CALL ${money(actualCall)}`;
+
+    pokerCallBtn.disabled =
+      submittingPokerAction ||
+      callRequired <= 0 ||
+      stack <= 0;
+  }
+
+
+  /* ----------------------------------------------------------
+     BET / RAISE SLIDER
+     ---------------------------------------------------------- */
+
+  const maximumTarget =
+    streetContributed +
+    stack;
+
+
+  let minimumTarget;
+
+  let raiseAction;
+
+
+  if (currentBet === 0) {
+    minimumTarget =
+      Number(
+        data.table?.bigBlind ||
+        200
+      );
+
+    raiseAction =
+      "bet";
+
+  } else {
+    minimumTarget =
+      currentBet +
+      minRaise;
+
+    raiseAction =
+      "raise";
+  }
+
+
+  if (pokerRaiseBtn) {
+    pokerRaiseBtn.dataset.action =
+      raiseAction;
+
+    pokerRaiseBtn.textContent =
+      raiseAction === "bet"
+        ? "BET"
+        : "RAISE";
+  }
+
+
+  const canBetOrRaise =
+    stack > 0 &&
+    maximumTarget >
+      currentBet &&
+    maximumTarget >=
+      minimumTarget;
+
+
+  if (pokerRaiseSlider) {
+    const sliderMin =
+      canBetOrRaise
+        ? minimumTarget
+        : maximumTarget;
+
+    pokerRaiseSlider.min =
+      String(
+        Math.max(
+          0,
+          sliderMin
+        )
+      );
+
+    pokerRaiseSlider.max =
+      String(
+        Math.max(
+          0,
+          maximumTarget
+        )
+      );
+
+    pokerRaiseSlider.step =
+      "100";
+
+
+    let currentSliderValue =
+      Number(
+        pokerRaiseSlider.value ||
+        sliderMin
+      );
+
+
+    if (
+      currentSliderValue <
+        sliderMin ||
+      currentSliderValue >
+        maximumTarget
+    ) {
+      currentSliderValue =
+        sliderMin;
+    }
+
+
+    pokerRaiseSlider.value =
+      String(
+        Math.max(
+          0,
+          currentSliderValue
+        )
+      );
+
+
+    pokerRaiseSlider.disabled =
+      submittingPokerAction ||
+      !canBetOrRaise;
+  }
+
+
+  if (pokerRaiseBtn) {
+    pokerRaiseBtn.disabled =
+      submittingPokerAction ||
+      !canBetOrRaise;
+  }
+
+
+  syncRaiseAmountText();
+
+
+  /* ----------------------------------------------------------
+     ALL IN
+     ---------------------------------------------------------- */
+
+  if (pokerAllInBtn) {
+    pokerAllInBtn.textContent =
+      stack > 0
+        ? `ALL IN ${money(stack)}`
+        : "ALL IN";
+
+    pokerAllInBtn.disabled =
+      submittingPokerAction ||
+      stack <= 0;
+  }
+}
+
+
+/* ============================================================
+   SEND POKER ACTION
+   ============================================================ */
+
+async function submitPokerAction(
+  action,
+  amount = null
+) {
+  if (
+    submittingPokerAction
+  ) {
+    return;
+  }
+
+
+  const state =
+    latestPokerState;
+
+
+  if (
+    !state?.hand?.id
+  ) {
+    setMessage(
+      "No active poker hand.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } =
+    getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    setMessage(
+      "Player login is missing.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  submittingPokerAction =
+    true;
+
+
+  renderPokerActionControls(
+    state
+  );
+
+
+  setMessage(
+    "Sending poker action...",
+    "warn"
+  );
+
+
+  try {
+    const payload = {
+      playerId,
+      playerSecret,
+
+      tableId:
+        TABLE_ID,
+
+      handId:
+        state.hand.id,
+
+      action
+    };
+
+
+    if (
+      amount !== null &&
+      amount !== undefined
+    ) {
+      payload.amount =
+        Number(amount);
+    }
+
+
+    const response =
+      await fetch(
+        "/api/poker-action",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              payload
+            )
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.ok) {
+      if (
+        data.timeoutProcessed
+      ) {
+        setMessage(
+          data.error ||
+            "Expired turn processed.",
+          "warn"
+        );
+
+      } else {
+        setMessage(
+          data.error ||
+            "Poker action denied.",
+          "bad"
+        );
+      }
+
+
+      await loadTableState();
+
+      return;
+    }
+
+
+    setMessage(
+      data.message ||
+        "Poker action accepted.",
+      "good"
+    );
+
+
+    await loadTableState();
+
+
+  } catch (error) {
+    console.error(
+      "Poker action failed:",
+      error
+    );
+
+    setMessage(
+      "Poker action request failed.",
+      "bad"
+    );
+
+  } finally {
+    submittingPokerAction =
+      false;
+
+    if (
+      latestPokerState
+    ) {
+      renderPokerActionControls(
+        latestPokerState
+      );
+    }
+  }
+}
+
+/* ============================================================
    LIVE POKER HAND DISPLAY
    ============================================================ */
 
 function renderHandState(data) {
   renderHandState(data);
+  renderPokerActionControls(data);
 
   const hadLocalSession =
     Boolean(pokerSession);
@@ -2480,6 +3030,79 @@ function bindBuyinEvents() {
 
     });
 }
+
+/* ============================================================
+   POKER ACTION EVENTS
+   ============================================================ */
+
+pokerRaiseSlider?.addEventListener(
+  "input",
+  syncRaiseAmountText
+);
+
+
+pokerFoldBtn?.addEventListener(
+  "click",
+  () => {
+    submitPokerAction(
+      "fold"
+    );
+  }
+);
+
+
+pokerCheckBtn?.addEventListener(
+  "click",
+  () => {
+    submitPokerAction(
+      "check"
+    );
+  }
+);
+
+
+pokerCallBtn?.addEventListener(
+  "click",
+  () => {
+    submitPokerAction(
+      "call"
+    );
+  }
+);
+
+
+pokerRaiseBtn?.addEventListener(
+  "click",
+  () => {
+    const action =
+      pokerRaiseBtn
+        .dataset
+        .action ||
+      "raise";
+
+    const amount =
+      Number(
+        pokerRaiseSlider
+          ?.value ||
+        0
+      );
+
+    submitPokerAction(
+      action,
+      amount
+    );
+  }
+);
+
+
+pokerAllInBtn?.addEventListener(
+  "click",
+  () => {
+    submitPokerAction(
+      "all_in"
+    );
+  }
+);
 
 
 /* ============================================================
