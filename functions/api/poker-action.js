@@ -13,101 +13,57 @@
    IMPORTANT:
    - All chip math is server-side.
    - "amount" for BET / RAISE means the TOTAL street amount.
-     Example:
-       current bet = 200
-       raise to 600
-       amount = 600
-   ============================================================ */
-
-
-/* ============================================================
-   RESPONSE
+   - Timeout rule: auto-check if legal, otherwise auto-fold.
    ============================================================ */
 
 function json(data, status = 200) {
-  return new Response(
-    JSON.stringify(data),
-    {
-      status,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-store"
-      }
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
     }
-  );
+  });
 }
-
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
 
 function parseArray(value) {
   if (!value) return [];
-
-  if (Array.isArray(value)) {
-    return value;
-  }
+  if (Array.isArray(value)) return value;
 
   try {
     const parsed = JSON.parse(value);
-
-    return Array.isArray(parsed)
-      ? parsed
-      : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
-
 function positiveInteger(value) {
   const number = Number(value);
 
-  if (
-    !Number.isInteger(number) ||
-    number <= 0
-  ) {
+  if (!Number.isInteger(number) || number <= 0) {
     return null;
   }
 
   return number;
 }
 
+function nextClockwise(players, fromSeat, predicate) {
+  const sorted = [...players].sort(
+    (a, b) => a.seatNumber - b.seatNumber
+  );
 
-function nextClockwise(
-  players,
-  fromSeat,
-  predicate
-) {
-  const sorted =
-    [...players].sort(
-      (a, b) =>
-        a.seatNumber -
-        b.seatNumber
-    );
-
-  if (!sorted.length) {
-    return null;
-  }
-
-  const after =
-    sorted.filter(
-      (player) =>
-        player.seatNumber >
-        fromSeat
-    );
-
-  const before =
-    sorted.filter(
-      (player) =>
-        player.seatNumber <=
-        fromSeat
-    );
+  if (!sorted.length) return null;
 
   const ordered = [
-    ...after,
-    ...before
+    ...sorted.filter(
+      (player) =>
+        player.seatNumber > fromSeat
+    ),
+    ...sorted.filter(
+      (player) =>
+        player.seatNumber <= fromSeat
+    )
   ];
 
   const found =
@@ -118,12 +74,11 @@ function nextClockwise(
     : null;
 }
 
-
 function deadlineFromNow(seconds) {
   return new Date(
     Date.now() +
-    Number(seconds || 30) *
-    1000
+      Number(seconds || 30) *
+      1000
   ).toISOString();
 }
 
@@ -144,9 +99,12 @@ function dealNextStreet(
     [...board];
 
 
-  if (currentStreet === "preflop") {
+  if (
+    currentStreet ===
+    "preflop"
+  ) {
     /*
-      Burn one.
+      Burn.
     */
 
     nextDeck.shift();
@@ -170,8 +128,19 @@ function dealNextStreet(
   }
 
 
-  if (currentStreet === "flop") {
+  if (
+    currentStreet ===
+    "flop"
+  ) {
+    /*
+      Burn.
+    */
+
     nextDeck.shift();
+
+    /*
+      Turn.
+    */
 
     nextBoard.push(
       nextDeck.shift()
@@ -186,8 +155,19 @@ function dealNextStreet(
   }
 
 
-  if (currentStreet === "turn") {
+  if (
+    currentStreet ===
+    "turn"
+  ) {
+    /*
+      Burn.
+    */
+
     nextDeck.shift();
+
+    /*
+      River.
+    */
 
     nextBoard.push(
       nextDeck.shift()
@@ -203,9 +183,15 @@ function dealNextStreet(
 
 
   return {
-    street: currentStreet,
-    deck: nextDeck,
-    board: nextBoard,
+    street:
+      currentStreet,
+
+    deck:
+      nextDeck,
+
+    board:
+      nextBoard,
+
     flopDealt:
       currentStreet ===
       "preflop"
@@ -265,18 +251,120 @@ function runBoardToRiver(
 
   return {
     street,
-    deck: remainingDeck,
-    board: finalBoard,
+    deck:
+      remainingDeck,
+    board:
+      finalBoard,
     flopDealt
   };
 }
+
+
+/* ============================================================
+   ACTION AUDIT
+
+   Sequence number is calculated inside the INSERT itself.
+
+   We also require the hand to still be on the expected seat.
+   This prevents an old/double request from being committed
+   after the turn has already moved.
+   ============================================================ */
+
+function actionAuditStatement(
+  DB,
+  {
+    handId,
+    tableId,
+    sessionId,
+    playerId,
+    seatNumber,
+    street,
+    action,
+    amount,
+    toAmount,
+    potAfter,
+    stackAfter,
+    expectedTurnSeat
+  }
+) {
+  return DB.prepare(`
+    INSERT INTO poker_actions (
+      hand_id,
+      session_id,
+      player_id,
+      sequence_number,
+      seat_number,
+      street,
+      action,
+      amount,
+      to_amount,
+      pot_after,
+      stack_after
+    )
+
+    SELECT
+      ?,
+      ?,
+      ?,
+
+      COALESCE(
+        (
+          SELECT
+            MAX(sequence_number)
+
+          FROM poker_actions
+
+          WHERE hand_id = ?
+        ),
+        0
+      ) + 1,
+
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?
+
+    WHERE EXISTS (
+      SELECT 1
+
+      FROM poker_hands
+
+      WHERE id = ?
+        AND table_id = ?
+        AND status = 'active'
+        AND current_turn_seat = ?
+    )
+  `).bind(
+    handId,
+    sessionId,
+    playerId,
+
+    handId,
+
+    seatNumber,
+    street,
+    action,
+    amount,
+    toAmount,
+    potAfter,
+    stackAfter,
+
+    handId,
+    tableId,
+    expectedTurnSeat
+  );
+}
+
 
 /* ============================================================
    EXPIRED TURN PROCESSING
 
    Timeout rule:
-   - Check if checking is legal.
-   - Otherwise fold.
+   - Auto-check if checking is legal.
+   - Otherwise auto-fold.
    ============================================================ */
 
 async function processExpiredTurn(
@@ -286,8 +374,10 @@ async function processExpiredTurn(
 ) {
   if (
     !hand.action_deadline ||
-    hand.current_turn_seat === null ||
-    hand.current_turn_seat === undefined
+    hand.current_turn_seat ===
+      null ||
+    hand.current_turn_seat ===
+      undefined
   ) {
     return null;
   }
@@ -300,8 +390,11 @@ async function processExpiredTurn(
 
 
   if (
-    !Number.isFinite(deadlineMs) ||
-    Date.now() < deadlineMs
+    !Number.isFinite(
+      deadlineMs
+    ) ||
+    Date.now() <
+      deadlineMs
   ) {
     return null;
   }
@@ -341,7 +434,8 @@ async function processExpiredTurn(
     Math.max(
       0,
       currentBet -
-      timedPlayer.streetContributed
+        timedPlayer
+          .streetContributed
     );
 
 
@@ -352,7 +446,7 @@ async function processExpiredTurn(
 
 
   /* ----------------------------------------------------------
-     COPY PLAYER STATE
+     COPY STATE
      ---------------------------------------------------------- */
 
   const updatedPlayers =
@@ -388,7 +482,7 @@ async function processExpiredTurn(
 
 
   /* ----------------------------------------------------------
-     HAND STATE
+     DETERMINE NEXT HAND STATE
      ---------------------------------------------------------- */
 
   const remainingPlayers =
@@ -398,7 +492,8 @@ async function processExpiredTurn(
     );
 
 
-  let nextTurnSeat = null;
+  let nextTurnSeat =
+    null;
 
   let newStreet =
     hand.street_reached;
@@ -440,11 +535,12 @@ async function processExpiredTurn(
 
 
   /* ----------------------------------------------------------
-     ONLY ONE PLAYER REMAINS
+     ONLY ONE PLAYER LEFT
      ---------------------------------------------------------- */
 
   if (
-    remainingPlayers.length <= 1
+    remainingPlayers.length <=
+    1
   ) {
     status =
       "settling";
@@ -462,7 +558,8 @@ async function processExpiredTurn(
       playersAbleToAct.every(
         (player) =>
           player.acted &&
-          player.streetContributed ===
+          player
+            .streetContributed ===
             newCurrentBet
       );
 
@@ -471,7 +568,13 @@ async function processExpiredTurn(
        ROUND COMPLETE
        -------------------------------------------------------- */
 
-    if (roundComplete) {
+    if (
+      roundComplete
+    ) {
+
+      /*
+        River complete.
+      */
 
       if (
         newStreet ===
@@ -480,16 +583,16 @@ async function processExpiredTurn(
         status =
           "settling";
 
+
+      /*
+        Nobody has another betting decision.
+        Run the rest of the board.
+      */
+
       } else if (
         playersAbleToAct.length <=
         1
       ) {
-
-        /*
-          Nobody can make another betting decision.
-          Run the remaining board automatically.
-        */
-
         const runout =
           runBoardToRiver(
             newStreet,
@@ -513,12 +616,12 @@ async function processExpiredTurn(
         status =
           "settling";
 
+
+      /*
+        Advance one street.
+      */
+
       } else {
-
-        /*
-          Advance one street.
-        */
-
         const dealt =
           dealNextStreet(
             newStreet,
@@ -540,7 +643,8 @@ async function processExpiredTurn(
           dealt.flopDealt;
 
 
-        newCurrentBet = 0;
+        newCurrentBet =
+          0;
 
         newMinRaise =
           Number(
@@ -555,38 +659,42 @@ async function processExpiredTurn(
 
 
         /*
-          First post-flop action:
+          Post-flop action begins
           clockwise from dealer.
         */
 
         nextTurnSeat =
           nextClockwise(
             updatedPlayers,
+
             Number(
               hand.dealer_seat
             ),
+
             (player) =>
               !player.folded &&
               !player.allIn
           );
       }
 
+
+    /* --------------------------------------------------------
+       SAME STREET
+       -------------------------------------------------------- */
+
     } else {
-
-      /* ------------------------------------------------------
-         SAME STREET
-         ------------------------------------------------------ */
-
       nextTurnSeat =
         nextClockwise(
           updatedPlayers,
           timedSeat,
+
           (player) =>
             !player.folded &&
             !player.allIn &&
             (
               !player.acted ||
-              player.streetContributed <
+              player
+                .streetContributed <
                 newCurrentBet
             )
         );
@@ -595,7 +703,7 @@ async function processExpiredTurn(
 
 
   /* ----------------------------------------------------------
-     NEW DEADLINE
+     NEW TURN DEADLINE
      ---------------------------------------------------------- */
 
   const actionDeadline =
@@ -608,94 +716,71 @@ async function processExpiredTurn(
 
 
   /* ----------------------------------------------------------
-     ACTION SEQUENCE
+     DATABASE BATCH
      ---------------------------------------------------------- */
 
-  const sequenceRow =
-    await DB.prepare(`
-      SELECT
-        COALESCE(
-          MAX(sequence_number),
-          0
-        ) AS max_sequence
-
-      FROM poker_actions
-
-      WHERE hand_id = ?
-    `)
-      .bind(hand.id)
-      .first();
+  const statements =
+    [];
 
 
-  const sequenceNumber =
-    Number(
-      sequenceRow?.max_sequence ||
-      0
-    ) + 1;
-
-
-  const statements = [];
-
-
-  /* ----------------------------------------------------------
-     AUDIT TIMEOUT
-     ---------------------------------------------------------- */
+  /*
+    Audit timeout action.
+  */
 
   statements.push(
-    DB.prepare(`
-      INSERT INTO poker_actions (
-        hand_id,
-        session_id,
-        player_id,
+    actionAuditStatement(
+      DB,
+      {
+        handId:
+          hand.id,
 
-        sequence_number,
-        seat_number,
+        tableId:
+          hand.table_id,
 
-        street,
-        action,
+        sessionId:
+          timedPlayer
+            .sessionId,
 
-        amount,
-        to_amount,
+        playerId:
+          timedPlayer
+            .playerId,
 
-        pot_after,
-        stack_after
-      )
-      VALUES (
-        ?, ?, ?,
-        ?, ?,
-        ?, ?,
-        ?, ?,
-        ?, ?
-      )
-    `)
-      .bind(
-        hand.id,
+        seatNumber:
+          timedSeat,
 
-        timedPlayer.sessionId,
-        timedPlayer.playerId,
+        street:
+          hand.street_reached,
 
-        sequenceNumber,
-        timedSeat,
+        action:
+          timeoutAction,
 
-        hand.street_reached,
-        timeoutAction,
+        amount:
+          0,
 
-        0,
-        timedPlayer.streetContributed,
+        toAmount:
+          timedPlayer
+            .streetContributed,
 
-        Number(
-          hand.pot_before_rake ||
-          0
-        ),
+        potAfter:
+          Number(
+            hand.pot_before_rake ||
+            0
+          ),
 
-        timedPlayer.currentStack
-      )
+        stackAfter:
+          timedPlayer
+            .currentStack,
+
+        expectedTurnSeat:
+          timedSeat
+      }
+    )
   );
 
 
-  /* ----------------------------------------------------------
-     UPDATE TIMED PLAYER
-     ---------------------------------------------------------- */
+  /*
+    Update timed-out player.
+  */
 
   statements.push(
     DB.prepare(`
@@ -710,10 +795,22 @@ async function processExpiredTurn(
           END,
 
         acted_this_round = 1,
+
         last_action = ?
 
       WHERE hand_id = ?
         AND player_id = ?
+
+        AND EXISTS (
+          SELECT 1
+
+          FROM poker_hands h
+
+          WHERE h.id = ?
+            AND h.table_id = ?
+            AND h.status = 'active'
+            AND h.current_turn_seat = ?
+        )
     `)
       .bind(
         timeoutAction ===
@@ -724,14 +821,19 @@ async function processExpiredTurn(
         timeoutAction,
 
         hand.id,
-        timedPlayer.playerId
+        timedPlayer.playerId,
+
+        hand.id,
+        hand.table_id,
+        timedSeat
       )
   );
 
 
-  /* ----------------------------------------------------------
-     RESET NEW STREET
-     ---------------------------------------------------------- */
+  /*
+    If we advanced a street,
+    reset street-specific state.
+  */
 
   if (
     resetStreetPlayers
@@ -746,17 +848,32 @@ async function processExpiredTurn(
           last_action = NULL
 
         WHERE hand_id = ?
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_hands h
+
+            WHERE h.id = ?
+              AND h.table_id = ?
+              AND h.status = 'active'
+              AND h.current_turn_seat = ?
+          )
       `)
         .bind(
-          hand.id
+          hand.id,
+
+          hand.id,
+          hand.table_id,
+          timedSeat
         )
     );
   }
 
 
-  /* ----------------------------------------------------------
-     UPDATE HAND
-     ---------------------------------------------------------- */
+  /*
+    Update hand itself.
+  */
 
   statements.push(
     DB.prepare(`
@@ -779,6 +896,7 @@ async function processExpiredTurn(
         action_deadline = ?
 
       WHERE id = ?
+        AND table_id = ?
         AND status = 'active'
         AND current_turn_seat = ?
     `)
@@ -805,18 +923,53 @@ async function processExpiredTurn(
         actionDeadline,
 
         hand.id,
+        hand.table_id,
         timedSeat
       )
   );
 
 
-  await DB.batch(
-    statements
-  );
+  /* ----------------------------------------------------------
+     COMMIT
+     ---------------------------------------------------------- */
+
+  const batchResults =
+    await DB.batch(
+      statements
+    );
+
+
+  /*
+    First statement is the action log.
+
+    If it inserted zero rows, another request
+    already moved the turn.
+  */
+
+  const auditChanges =
+    Number(
+      batchResults?.[0]
+        ?.meta?.changes ||
+      0
+    );
+
+
+  if (
+    auditChanges !== 1
+  ) {
+    return {
+      processed:
+        false,
+
+      race:
+        true
+    };
+  }
 
 
   return {
-    processed: true,
+    processed:
+      true,
 
     timedOutSeat:
       timedSeat,
@@ -843,13 +996,17 @@ async function processExpiredTurn(
   };
 }
 
+
 /* ============================================================
-   POST
+   MAIN ACTION HANDLER
    ============================================================ */
 
-async function handlePost(context) {
+async function handlePost(
+  context
+) {
   const DB =
     context.env.DB;
+
 
   if (!DB) {
     return json(
@@ -869,9 +1026,13 @@ async function handlePost(context) {
 
   let body;
 
+
   try {
     body =
-      await context.request.json();
+      await context
+        .request
+        .json();
+
   } catch {
     return json(
       {
@@ -886,13 +1047,17 @@ async function handlePost(context) {
 
   const playerId =
     String(
-      body.playerId || ""
+      body.playerId ||
+      ""
     ).trim();
+
 
   const playerSecret =
     String(
-      body.playerSecret || ""
+      body.playerSecret ||
+      ""
     ).trim();
+
 
   const tableId =
     String(
@@ -900,14 +1065,18 @@ async function handlePost(context) {
       "poker-room-1"
     ).trim();
 
+
   const handId =
     String(
-      body.handId || ""
+      body.handId ||
+      ""
     ).trim();
+
 
   const action =
     String(
-      body.action || ""
+      body.action ||
+      ""
     )
       .trim()
       .toLowerCase();
@@ -957,7 +1126,7 @@ async function handlePost(context) {
 
 
   /* ----------------------------------------------------------
-     AUTH
+     AUTHENTICATION
      ---------------------------------------------------------- */
 
   const account =
@@ -993,7 +1162,7 @@ async function handlePost(context) {
 
 
   /* ----------------------------------------------------------
-     HAND + TABLE
+     LOAD HAND / TABLE
      ---------------------------------------------------------- */
 
   const hand =
@@ -1020,6 +1189,7 @@ async function handlePost(context) {
         h.current_bet,
         h.min_raise,
         h.last_raiser_seat,
+
         h.action_deadline,
 
         t.big_blind,
@@ -1056,7 +1226,8 @@ async function handlePost(context) {
 
 
   if (
-    hand.status !== "active"
+    hand.status !==
+    "active"
   ) {
     return json(
       {
@@ -1092,7 +1263,9 @@ async function handlePost(context) {
         hp.last_action,
 
         s.current_stack,
-        s.status AS session_status
+
+        s.status
+          AS session_status
 
       FROM poker_hand_players hp
 
@@ -1105,17 +1278,17 @@ async function handlePost(context) {
       ORDER BY
         hp.seat_number ASC
     `)
-      .bind(handId)
+      .bind(
+        handId
+      )
       .all();
 
 
-  const rawPlayers =
-    playerResult.results ||
-    [];
-
-
   const players =
-    rawPlayers.map(
+    (
+      playerResult.results ||
+      []
+    ).map(
       (row) => ({
         sessionId:
           row.session_id,
@@ -1174,6 +1347,10 @@ async function handlePost(context) {
     );
 
 
+  /* ----------------------------------------------------------
+     CALLER
+     ---------------------------------------------------------- */
+
   const player =
     players.find(
       (item) =>
@@ -1224,89 +1401,115 @@ async function handlePost(context) {
   }
 
 
-/* ----------------------------------------------------------
-   RESOLVE EXPIRED TURN FIRST
-   ---------------------------------------------------------- */
+  /* ----------------------------------------------------------
+     PROCESS EXPIRED TURN FIRST
+     ---------------------------------------------------------- */
 
-const timeoutResult =
-  await processExpiredTurn(
-    DB,
-    hand,
-    players
-  );
+  const timeoutResult =
+    await processExpiredTurn(
+      DB,
+      hand,
+      players
+    );
 
 
-if (timeoutResult) {
-  return json(
-    {
-      ok: false,
+  if (
+    timeoutResult?.race
+  ) {
+    return json(
+      {
+        ok: false,
+        error:
+          "Poker turn changed. Refresh and retry."
+      },
+      409
+    );
+  }
 
-      timeoutProcessed:
-        true,
 
-      error:
-        timeoutResult.timeoutAction ===
-        "timeout_fold"
-          ? `Seat ${timeoutResult.timedOutSeat} timed out and folded. Retry your action.`
-          : `Seat ${timeoutResult.timedOutSeat} timed out and checked. Retry your action.`,
+  if (
+    timeoutResult?.processed
+  ) {
+    return json(
+      {
+        ok: false,
 
-      timedOutSeat:
-        timeoutResult.timedOutSeat,
+        timeoutProcessed:
+          true,
 
-      timeoutAction:
-        timeoutResult.timeoutAction,
+        error:
+          timeoutResult
+            .timeoutAction ===
+          "timeout_fold"
+            ? `Seat ${timeoutResult.timedOutSeat} timed out and folded. Retry your action.`
+            : `Seat ${timeoutResult.timedOutSeat} timed out and checked. Retry your action.`,
 
-      hand: {
-        status:
-          timeoutResult.status,
+        timedOutSeat:
+          timeoutResult
+            .timedOutSeat,
 
-        street:
-          timeoutResult.street,
+        timeoutAction:
+          timeoutResult
+            .timeoutAction,
 
-        board:
-          timeoutResult.board,
+        hand: {
+          status:
+            timeoutResult
+              .status,
+
+          street:
+            timeoutResult
+              .street,
+
+          board:
+            timeoutResult
+              .board,
+
+          currentTurnSeat:
+            timeoutResult
+              .currentTurnSeat,
+
+          currentBet:
+            timeoutResult
+              .currentBet,
+
+          minRaise:
+            timeoutResult
+              .minRaise,
+
+          actionDeadline:
+            timeoutResult
+              .actionDeadline
+        }
+      },
+      409
+    );
+  }
+
+
+  /* ----------------------------------------------------------
+     NORMAL TURN CHECK
+     ---------------------------------------------------------- */
+
+  if (
+    Number(
+      hand.current_turn_seat
+    ) !==
+    player.seatNumber
+  ) {
+    return json(
+      {
+        ok: false,
+
+        error:
+          "It is not your turn.",
 
         currentTurnSeat:
-          timeoutResult.currentTurnSeat,
-
-        currentBet:
-          timeoutResult.currentBet,
-
-        minRaise:
-          timeoutResult.minRaise,
-
-        actionDeadline:
-          timeoutResult.actionDeadline
-      }
-    },
-    409
-  );
-}
-
-
-/* ----------------------------------------------------------
-   NORMAL TURN CHECK
-   ---------------------------------------------------------- */
-
-if (
-  Number(
-    hand.current_turn_seat
-  ) !==
-  player.seatNumber
-) {
-  return json(
-    {
-      ok: false,
-
-      error:
-        "It is not your turn.",
-
-      currentTurnSeat:
-        hand.current_turn_seat
-    },
-    409
-  );
-}
+          hand.current_turn_seat
+      },
+      409
+    );
+  }
 
 
   /* ----------------------------------------------------------
@@ -1319,6 +1522,7 @@ if (
       0
     );
 
+
   const oldMinRaise =
     Number(
       hand.min_raise ||
@@ -1326,50 +1530,68 @@ if (
       200
     );
 
+
   const streetContribution =
     player.streetContributed;
 
+
   const stack =
     player.currentStack;
+
 
   const callRequired =
     Math.max(
       0,
       currentBet -
-      streetContribution
+        streetContribution
     );
 
 
-  let chipsAdded = 0;
+  let chipsAdded =
+    0;
+
 
   let newStreetContribution =
     streetContribution;
 
+
   let newStack =
     stack;
+
 
   let newCurrentBet =
     currentBet;
 
+
   let newMinRaise =
     oldMinRaise;
+
 
   let newLastRaiser =
     hand.last_raiser_seat;
 
-  let folded = false;
 
-  let allIn = false;
+  let folded =
+    false;
 
-  let fullRaise = false;
+
+  let allIn =
+    false;
+
+
+  let fullRaise =
+    false;
 
 
   /* ----------------------------------------------------------
      FOLD
      ---------------------------------------------------------- */
 
-  if (action === "fold") {
-    folded = true;
+  if (
+    action === "fold"
+  ) {
+    folded =
+      true;
   }
 
 
@@ -1377,11 +1599,16 @@ if (
      CHECK
      ---------------------------------------------------------- */
 
-  if (action === "check") {
-    if (callRequired !== 0) {
+  if (
+    action === "check"
+  ) {
+    if (
+      callRequired !== 0
+    ) {
       return json(
         {
           ok: false,
+
           error:
             `You must call ${callRequired} chips or fold.`
         },
@@ -1395,11 +1622,16 @@ if (
      CALL
      ---------------------------------------------------------- */
 
-  if (action === "call") {
-    if (callRequired <= 0) {
+  if (
+    action === "call"
+  ) {
+    if (
+      callRequired <= 0
+    ) {
       return json(
         {
           ok: false,
+
           error:
             "There is nothing to call. Check instead."
         },
@@ -1414,13 +1646,16 @@ if (
         stack
       );
 
+
     newStreetContribution =
       streetContribution +
       chipsAdded;
 
+
     newStack =
       stack -
       chipsAdded;
+
 
     allIn =
       newStack === 0;
@@ -1431,11 +1666,16 @@ if (
      BET
      ---------------------------------------------------------- */
 
-  if (action === "bet") {
-    if (currentBet !== 0) {
+  if (
+    action === "bet"
+  ) {
+    if (
+      currentBet !== 0
+    ) {
       return json(
         {
           ok: false,
+
           error:
             "You cannot bet into an existing bet. Raise instead."
         },
@@ -1474,6 +1714,7 @@ if (
       return json(
         {
           ok: false,
+
           error:
             "Bet exceeds your poker stack."
         },
@@ -1497,6 +1738,7 @@ if (
       return json(
         {
           ok: false,
+
           error:
             `Minimum bet is ${hand.big_blind}.`
         },
@@ -1509,15 +1751,19 @@ if (
       target -
       streetContribution;
 
+
     newStreetContribution =
       target;
+
 
     newStack =
       stack -
       chipsAdded;
 
+
     newCurrentBet =
       target;
+
 
     allIn =
       newStack === 0;
@@ -1529,7 +1775,8 @@ if (
         hand.big_blind
       )
     ) {
-      fullRaise = true;
+      fullRaise =
+        true;
 
       newMinRaise =
         target;
@@ -1544,13 +1791,40 @@ if (
      RAISE
      ---------------------------------------------------------- */
 
-  if (action === "raise") {
-    if (currentBet <= 0) {
+  if (
+    action === "raise"
+  ) {
+    if (
+      currentBet <= 0
+    ) {
       return json(
         {
           ok: false,
+
           error:
             "There is no bet to raise. Bet instead."
+        },
+        409
+      );
+    }
+
+
+    /*
+      If this player already acted and then only
+      faced a short all-in raise, betting has not
+      reopened for them.
+    */
+
+    if (
+      player.acted &&
+      callRequired > 0
+    ) {
+      return json(
+        {
+          ok: false,
+
+          error:
+            "Betting has not been reopened. You may call or fold."
         },
         409
       );
@@ -1567,6 +1841,7 @@ if (
       return json(
         {
           ok: false,
+
           error:
             "Enter a valid raise-to amount."
         },
@@ -1582,6 +1857,7 @@ if (
       return json(
         {
           ok: false,
+
           error:
             `Raise must be above ${currentBet}.`
         },
@@ -1602,6 +1878,7 @@ if (
       return json(
         {
           ok: false,
+
           error:
             "Raise exceeds your poker stack."
         },
@@ -1613,6 +1890,7 @@ if (
     const raiseSize =
       target -
       currentBet;
+
 
     const isAllIn =
       target ===
@@ -1643,25 +1921,34 @@ if (
       target -
       streetContribution;
 
+
     newStreetContribution =
       target;
+
 
     newStack =
       stack -
       chipsAdded;
 
+
     newCurrentBet =
       target;
+
 
     allIn =
       newStack === 0;
 
 
+    /*
+      Full legal raise.
+    */
+
     if (
       raiseSize >=
       oldMinRaise
     ) {
-      fullRaise = true;
+      fullRaise =
+        true;
 
       newMinRaise =
         raiseSize;
@@ -1676,13 +1963,50 @@ if (
      ALL IN
      ---------------------------------------------------------- */
 
-  if (action === "all_in") {
-    if (stack <= 0) {
+  if (
+    action === "all_in"
+  ) {
+    if (
+      stack <= 0
+    ) {
       return json(
         {
           ok: false,
+
           error:
             "You have no chips remaining."
+        },
+        409
+      );
+    }
+
+
+    const allInTarget =
+      streetContribution +
+      stack;
+
+
+    /*
+      If player already acted and betting was
+      not reopened by a full raise, they cannot
+      use ALL IN as an illegal re-raise.
+
+      They may still call all-in if their total
+      does not exceed currentBet.
+    */
+
+    if (
+      player.acted &&
+      callRequired > 0 &&
+      allInTarget >
+        currentBet
+    ) {
+      return json(
+        {
+          ok: false,
+
+          error:
+            "Betting has not been reopened. You may only call or fold."
         },
         409
       );
@@ -1692,13 +2016,17 @@ if (
     chipsAdded =
       stack;
 
+
     newStreetContribution =
-      streetContribution +
-      stack;
+      allInTarget;
 
-    newStack = 0;
 
-    allIn = true;
+    newStack =
+      0;
+
+
+    allIn =
+      true;
 
 
     if (
@@ -1718,7 +2046,8 @@ if (
         raiseSize >=
         oldMinRaise
       ) {
-        fullRaise = true;
+        fullRaise =
+          true;
 
         newMinRaise =
           raiseSize;
@@ -1731,7 +2060,7 @@ if (
 
 
   /* ----------------------------------------------------------
-     APPLY ACTION TO IN-MEMORY STATE
+     APPLY TO IN-MEMORY STATE
      ---------------------------------------------------------- */
 
   const updatedPlayers =
@@ -1753,33 +2082,39 @@ if (
   updatedPlayer.currentStack =
     newStack;
 
+
   updatedPlayer.streetContributed =
     newStreetContribution;
+
 
   updatedPlayer.totalContributed +=
     chipsAdded;
 
+
   updatedPlayer.folded =
     folded;
+
 
   updatedPlayer.allIn =
     allIn;
 
+
   updatedPlayer.acted =
     true;
+
 
   updatedPlayer.lastAction =
     action;
 
 
   /*
-    A FULL raise reopens action for everyone
+    Full raise reopens action for everyone
     else who can still act.
-
-    A short all-in raise does NOT reopen action.
   */
 
-  if (fullRaise) {
+  if (
+    fullRaise
+  ) {
     updatedPlayers.forEach(
       (item) => {
         if (
@@ -1806,13 +2141,14 @@ if (
       0
     );
 
+
   const newPot =
     oldPot +
     chipsAdded;
 
 
   /* ----------------------------------------------------------
-     DETERMINE HAND STATE
+     DETERMINE NEXT HAND STATE
      ---------------------------------------------------------- */
 
   const remainingPlayers =
@@ -1822,20 +2158,25 @@ if (
     );
 
 
-  let nextTurnSeat = null;
+  let nextTurnSeat =
+    null;
+
 
   let newStreet =
     hand.street_reached;
+
 
   let board =
     parseArray(
       hand.board_json
     );
 
+
   let deck =
     parseArray(
       hand.deck_json
     );
+
 
   let flopDealt =
     Number(
@@ -1843,14 +2184,18 @@ if (
       0
     );
 
+
   let status =
     "active";
+
 
   let roundAdvanced =
     false;
 
+
   let needsSettlement =
     false;
+
 
   let resetStreetPlayers =
     false;
@@ -1869,10 +2214,12 @@ if (
 
     needsSettlement =
       true;
+
+
   } else {
 
     /* --------------------------------------------------------
-       IS BETTING ROUND COMPLETE?
+       ROUND COMPLETE?
        -------------------------------------------------------- */
 
     const playersAbleToAct =
@@ -1886,19 +2233,23 @@ if (
       playersAbleToAct.every(
         (item) =>
           item.acted &&
-          item.streetContributed ===
+          item
+            .streetContributed ===
             newCurrentBet
       );
 
 
-    if (roundComplete) {
+    if (
+      roundComplete
+    ) {
 
       /* ------------------------------------------------------
          RIVER COMPLETE
          ------------------------------------------------------ */
 
       if (
-        newStreet === "river"
+        newStreet ===
+        "river"
       ) {
         status =
           "settling";
@@ -1906,17 +2257,15 @@ if (
         needsSettlement =
           true;
 
+
+      /* ------------------------------------------------------
+         EVERYBODY ALL-IN / NO MORE BETTING
+         ------------------------------------------------------ */
+
       } else if (
         playersAbleToAct.length <=
         1
       ) {
-
-        /* ----------------------------------------------------
-           EVERYBODY IS ALL-IN / NO MORE BETTING POSSIBLE
-
-           Automatically deal through river.
-           ---------------------------------------------------- */
-
         const runout =
           runBoardToRiver(
             newStreet,
@@ -1928,30 +2277,36 @@ if (
         newStreet =
           runout.street;
 
+
         deck =
           runout.deck;
+
 
         board =
           runout.board;
 
+
         flopDealt =
           runout.flopDealt;
+
 
         status =
           "settling";
 
+
         needsSettlement =
           true;
+
 
         roundAdvanced =
           true;
 
+
+      /* ------------------------------------------------------
+         ADVANCE ONE STREET
+         ------------------------------------------------------ */
+
       } else {
-
-        /* ----------------------------------------------------
-           ADVANCE ONE STREET
-           ---------------------------------------------------- */
-
         const dealt =
           dealNextStreet(
             newStreet,
@@ -1963,66 +2318,79 @@ if (
         newStreet =
           dealt.street;
 
+
         deck =
           dealt.deck;
+
 
         board =
           dealt.board;
 
+
         flopDealt =
           dealt.flopDealt;
 
-        newCurrentBet = 0;
+
+        newCurrentBet =
+          0;
+
 
         newMinRaise =
           Number(
             hand.big_blind
           );
 
+
         newLastRaiser =
           null;
 
+
         roundAdvanced =
           true;
+
 
         resetStreetPlayers =
           true;
 
 
         /*
-          First post-flop player:
-          first active player clockwise
-          left of dealer.
+          First post-flop actor:
+          clockwise from dealer.
         */
 
         nextTurnSeat =
           nextClockwise(
             updatedPlayers,
+
             Number(
               hand.dealer_seat
             ),
+
             (item) =>
               !item.folded &&
               !item.allIn
           );
       }
 
+
+    /* --------------------------------------------------------
+       SAME STREET
+       -------------------------------------------------------- */
+
     } else {
-
-      /* ------------------------------------------------------
-         SAME BETTING ROUND — NEXT PLAYER WHO OWES ACTION
-         ------------------------------------------------------ */
-
       nextTurnSeat =
         nextClockwise(
           updatedPlayers,
+
           player.seatNumber,
+
           (item) =>
             !item.folded &&
             !item.allIn &&
             (
               !item.acted ||
-              item.streetContributed <
+              item
+                .streetContributed <
                 newCurrentBet
             )
         );
@@ -2044,99 +2412,63 @@ if (
 
 
   /* ----------------------------------------------------------
-     ACTION SEQUENCE
-     ---------------------------------------------------------- */
-
-  const sequenceRow =
-    await DB.prepare(`
-      SELECT
-        COALESCE(
-          MAX(sequence_number),
-          0
-        ) AS max_sequence
-
-      FROM poker_actions
-
-      WHERE hand_id = ?
-    `)
-      .bind(handId)
-      .first();
-
-
-  const sequenceNumber =
-    Number(
-      sequenceRow?.max_sequence ||
-      0
-    ) + 1;
-
-
-  /* ----------------------------------------------------------
      DATABASE BATCH
      ---------------------------------------------------------- */
 
-  const statements = [];
+  const statements =
+    [];
 
 
   /*
-    Action audit first.
-
-    UNIQUE(hand_id, sequence_number)
-    gives us protection against duplicate
-    simultaneous action requests.
+    Audit action.
   */
 
   statements.push(
-    DB.prepare(`
-      INSERT INTO poker_actions (
-        hand_id,
-        session_id,
-        player_id,
-
-        sequence_number,
-        seat_number,
-
-        street,
-        action,
-
-        amount,
-        to_amount,
-
-        pot_after,
-        stack_after
-      )
-      VALUES (
-        ?, ?, ?,
-        ?, ?,
-        ?, ?,
-        ?, ?,
-        ?, ?
-      )
-    `)
-      .bind(
+    actionAuditStatement(
+      DB,
+      {
         handId,
-        player.sessionId,
+        tableId,
+
+        sessionId:
+          player.sessionId,
+
         playerId,
 
-        sequenceNumber,
-        player.seatNumber,
+        seatNumber:
+          player.seatNumber,
 
-        hand.street_reached,
+        street:
+          hand.street_reached,
+
         action,
 
-        chipsAdded,
-        newStreetContribution,
+        amount:
+          chipsAdded,
 
-        newPot,
-        newStack
-      )
+        toAmount:
+          newStreetContribution,
+
+        potAfter:
+          newPot,
+
+        stackAfter:
+          newStack,
+
+        expectedTurnSeat:
+          player.seatNumber
+      }
+    )
   );
 
 
-  /* ----------------------------------------------------------
-     FULL RAISE REOPENS OTHER PLAYERS
-     ---------------------------------------------------------- */
+  /*
+    Full raise reopens action.
+  */
 
-  if (fullRaise) {
+  if (
+    fullRaise
+  ) {
     statements.push(
       DB.prepare(`
         UPDATE poker_hand_players
@@ -2148,18 +2480,33 @@ if (
           AND player_id <> ?
           AND folded = 0
           AND all_in = 0
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_hands h
+
+            WHERE h.id = ?
+              AND h.table_id = ?
+              AND h.status = 'active'
+              AND h.current_turn_seat = ?
+          )
       `)
         .bind(
           handId,
-          playerId
+          playerId,
+
+          handId,
+          tableId,
+          player.seatNumber
         )
     );
   }
 
 
-  /* ----------------------------------------------------------
-     UPDATE ACTING PLAYER
-     ---------------------------------------------------------- */
+  /*
+    Update acting player.
+  */
 
   statements.push(
     DB.prepare(`
@@ -2174,17 +2521,32 @@ if (
         ending_stack = ?,
 
         folded = ?,
+
         all_in = ?,
 
         acted_this_round = 1,
+
         last_action = ?
 
       WHERE hand_id = ?
         AND player_id = ?
+
+        AND EXISTS (
+          SELECT 1
+
+          FROM poker_hands h
+
+          WHERE h.id = ?
+            AND h.table_id = ?
+            AND h.status = 'active'
+            AND h.current_turn_seat = ?
+        )
     `)
       .bind(
         chipsAdded,
+
         newStreetContribution,
+
         newStack,
 
         folded
@@ -2198,16 +2560,22 @@ if (
         action,
 
         handId,
-        playerId
+        playerId,
+
+        handId,
+        tableId,
+        player.seatNumber
       )
   );
 
 
-  /* ----------------------------------------------------------
-     UPDATE TABLE STACK
-     ---------------------------------------------------------- */
+  /*
+    Update session stack.
+  */
 
-  if (chipsAdded > 0) {
+  if (
+    chipsAdded > 0
+  ) {
     statements.push(
       DB.prepare(`
         UPDATE poker_sessions
@@ -2222,14 +2590,32 @@ if (
         WHERE id = ?
           AND player_id = ?
           AND current_stack >= ?
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_hands h
+
+            WHERE h.id = ?
+              AND h.table_id = ?
+              AND h.status = 'active'
+              AND h.current_turn_seat = ?
+          )
       `)
         .bind(
           chipsAdded,
+
           player.sessionId,
           playerId,
-          chipsAdded
+
+          chipsAdded,
+
+          handId,
+          tableId,
+          player.seatNumber
         )
     );
+
   } else {
     statements.push(
       DB.prepare(`
@@ -2241,18 +2627,34 @@ if (
 
         WHERE id = ?
           AND player_id = ?
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_hands h
+
+            WHERE h.id = ?
+              AND h.table_id = ?
+              AND h.status = 'active'
+              AND h.current_turn_seat = ?
+          )
       `)
         .bind(
           player.sessionId,
-          playerId
+          playerId,
+
+          handId,
+          tableId,
+          player.seatNumber
         )
     );
   }
 
 
-  /* ----------------------------------------------------------
-     NEW STREET RESET
-     ---------------------------------------------------------- */
+  /*
+    Reset street state if we just
+    advanced to a new street.
+  */
 
   if (
     resetStreetPlayers
@@ -2267,15 +2669,32 @@ if (
           last_action = NULL
 
         WHERE hand_id = ?
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_hands h
+
+            WHERE h.id = ?
+              AND h.table_id = ?
+              AND h.status = 'active'
+              AND h.current_turn_seat = ?
+          )
       `)
-        .bind(handId)
+        .bind(
+          handId,
+
+          handId,
+          tableId,
+          player.seatNumber
+        )
     );
   }
 
 
-  /* ----------------------------------------------------------
-     UPDATE HAND
-     ---------------------------------------------------------- */
+  /*
+    Update hand.
+  */
 
   statements.push(
     DB.prepare(`
@@ -2311,8 +2730,13 @@ if (
         newStreet,
         flopDealt,
 
-        JSON.stringify(board),
-        JSON.stringify(deck),
+        JSON.stringify(
+          board
+        ),
+
+        JSON.stringify(
+          deck
+        ),
 
         newPot,
         newPot,
@@ -2331,15 +2755,25 @@ if (
   );
 
 
+  /* ----------------------------------------------------------
+     COMMIT
+     ---------------------------------------------------------- */
+
+  let batchResults;
+
+
   try {
-    await DB.batch(
-      statements
-    );
+    batchResults =
+      await DB.batch(
+        statements
+      );
+
   } catch (error) {
     console.error(
       "Poker action batch failed:",
       error
     );
+
 
     return json(
       {
@@ -2354,6 +2788,37 @@ if (
             error ||
             ""
           )
+      },
+      409
+    );
+  }
+
+
+  /*
+    The first statement is always
+    our action audit INSERT.
+
+    If it inserted zero rows,
+    the turn already moved.
+  */
+
+  const auditChanges =
+    Number(
+      batchResults?.[0]
+        ?.meta?.changes ||
+      0
+    );
+
+
+  if (
+    auditChanges !== 1
+  ) {
+    return json(
+      {
+        ok: false,
+
+        error:
+          "Poker turn changed. Refresh and retry."
       },
       409
     );
@@ -2400,7 +2865,10 @@ if (
 
       message:
         `${action
-          .replaceAll("_", " ")
+          .replaceAll(
+            "_",
+            " "
+          )
           .toUpperCase()} accepted.`,
 
       action: {
@@ -2472,7 +2940,7 @@ if (
 
 
 /* ============================================================
-   EXPORTED HANDLER
+   CLOUDFLARE PAGES HANDLER
    ============================================================ */
 
 export async function onRequest(
@@ -2486,12 +2954,14 @@ export async function onRequest(
       return json(
         {
           ok: false,
+
           error:
             "Method not allowed."
         },
         405
       );
     }
+
 
     return await handlePost(
       context
@@ -2502,6 +2972,7 @@ export async function onRequest(
       "Poker action backend error:",
       error
     );
+
 
     return json(
       {
