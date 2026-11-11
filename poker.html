@@ -283,6 +283,90 @@
   class="poker-hand-hud"
   hidden
 >
+<!-- =========================================================
+     POKER ACTION CONTROLS
+     ========================================================= -->
+
+<section
+  id="pokerActionPanel"
+  class="poker-action-panel"
+  hidden
+>
+
+  <div class="poker-action-row">
+
+    <button
+      id="pokerFoldBtn"
+      class="poker-action-btn fold"
+      type="button"
+    >
+      FOLD
+    </button>
+
+    <button
+      id="pokerCheckBtn"
+      class="poker-action-btn check"
+      type="button"
+    >
+      CHECK
+    </button>
+
+    <button
+      id="pokerCallBtn"
+      class="poker-action-btn call"
+      type="button"
+    >
+      CALL
+    </button>
+
+  </div>
+
+
+  <div class="poker-raise-controls">
+
+    <div class="poker-raise-info">
+      <span>Raise To</span>
+
+      <strong id="pokerRaiseAmount">
+        400
+      </strong>
+    </div>
+
+
+    <input
+      id="pokerRaiseSlider"
+      class="poker-raise-slider"
+      type="range"
+      min="400"
+      max="10000"
+      step="100"
+      value="400"
+    >
+
+
+    <div class="poker-action-row">
+
+      <button
+        id="pokerRaiseBtn"
+        class="poker-action-btn raise"
+        type="button"
+      >
+        RAISE
+      </button>
+
+      <button
+        id="pokerAllInBtn"
+        class="poker-action-btn all-in"
+        type="button"
+      >
+        ALL IN
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
 
   <div class="poker-hand-top">
 
