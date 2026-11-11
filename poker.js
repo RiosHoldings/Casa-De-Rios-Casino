@@ -1738,13 +1738,28 @@ function renderHandState(data) {
    ============================================================ */
 
    function renderTableState(data) {
-    const hadLocalSession =
-    Boolean(pokerSession)
+    latestPokerState =
+      data;
 
-    const seats = 
-      Array.isArray(data.seats)
-        ? data.seats
-        : [];
+    renderHandState(
+      data
+    );
+
+    renderPokerActionControls(
+      data
+    );
+
+    const hadLocalSession =
+      Boolean(
+        pokerSession
+      );
+
+    const seats =
+    Array.isArray(
+      data.seats
+    )
+      ? data.seats
+      : [];
     
     const yourSession = 
       data.yourSession ||
@@ -2154,61 +2169,86 @@ async function loadTableState() {
     }
 
 
-   if (!data.ok) {
-  tableStateFailures++;
+    if (!data.ok) {
+      tableStateFailures++;
 
-  console.error(
-    "Poker table state:",
-    data.error,
-    data.debug || ""
-  );
+      console.error(
+        "Poker table state:",
+        data.error,
+        data.debug || ""
+      );
 
-  if (
-    response.status >= 500 &&
-    tableStateFailures >= TABLE_STATE_MAX_FAILURES
-  ) {
-    stopTableStatePolling();
+      if (
+        response.status >= 500 &&
+        tableStateFailures >=
+          TABLE_STATE_MAX_FAILURES
+      ) {
+        stopTableStatePolling();
 
-    setMessage(
-      "Live poker updates are temporarily unavailable.",
-      "bad"
-    );
+        setMessage(
+          "Live poker updates are temporarily unavailable.",
+          "bad"
+        );
 
-    return;
-  }
+        return;
+      }
 
-  return;
-}
+      return;
+    }
+
 
     tableStateFailures = 0;
 
-    renderTableState(data);
+
+    /* ========================================================
+       SAVE LATEST LIVE STATE
+       ======================================================== */
+
+    latestPokerState =
+      data;
 
 
-} catch (error) {
+    /* ========================================================
+       RENDER TABLE + ACTION CONTROLS
+       ======================================================== */
 
-  tableStateFailures++;
-
-  console.error(
-    "Poker table state failed:",
-    error
-  );
-
-  if (
-    tableStateFailures >=
-      TABLE_STATE_MAX_FAILURES
-  ) {
-    stopTableStatePolling();
-
-    setMessage(
-      "Live poker updates are temporarily unavailable.",
-      "bad"
+    renderTableState(
+      data
     );
-  }
 
-} finally {
-  loadingTableState = false;
-}
+    renderPokerActionControls(
+      data
+    );
+
+
+  } catch (error) {
+
+    tableStateFailures++;
+
+    console.error(
+      "Poker table state failed:",
+      error
+    );
+
+
+    if (
+      tableStateFailures >=
+        TABLE_STATE_MAX_FAILURES
+    ) {
+      stopTableStatePolling();
+
+      setMessage(
+        "Live poker updates are temporarily unavailable.",
+        "bad"
+      );
+    }
+
+
+  } finally {
+
+    loadingTableState =
+      false;
+  }
 }
 
 
