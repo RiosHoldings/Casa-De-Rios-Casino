@@ -118,8 +118,6 @@ const pokerAllInBtn =
 const pokerRaiseSlider =
   document.getElementById("pokerRaiseSlider");
 
-const pokerRaiseAmount =
-  documemt.getElementById("pokerRaiseAmount");
 
 /* ============================================================
    HELPERS
@@ -789,16 +787,26 @@ function getYourHandPlayer(data) {
 
 
 function syncRaiseAmountText() {
+  const slider =
+    document.getElementById(
+      "pokerRaiseSlider"
+    );
+
+  const amountText =
+    document.getElementById(
+      "pokerRaiseAmount"
+    );
+
   if (
-    !pokerRaiseSlider ||
-    !pokerRaiseAmount
+    !slider ||
+    !amountText
   ) {
     return;
   }
 
-  pokerRaiseAmount.textContent =
+  amountText.textContent =
     money(
-      pokerRaiseSlider.value
+      Number(slider.value || 0)
     );
 }
 
