@@ -1519,3 +1519,308 @@ body::before {
   }
 
 }
+
+/* ============================================================
+   POKER ACTION CONTROLS
+   ============================================================ */
+
+.poker-action-panel {
+  width: min(94vw, 620px);
+  margin: 14px auto 0;
+  padding: 14px;
+
+  border: 1px solid rgba(255, 215, 0, 0.45);
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(42, 8, 61, 0.94),
+      rgba(7, 2, 10, 0.96)
+    );
+
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.55),
+    inset 0 0 20px rgba(255, 215, 0, 0.035);
+}
+
+
+.poker-action-panel[hidden] {
+  display: none !important;
+}
+
+
+.poker-action-row {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+
+.poker-action-btn {
+  min-height: 48px;
+
+  padding: 10px 8px;
+
+  border: 1px solid
+    rgba(255, 215, 0, 0.55);
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #4a0f63,
+      #190620
+    );
+
+  color: #ffd968;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 14px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 5px 15px
+      rgba(0, 0, 0, 0.45);
+
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s ease;
+}
+
+
+.poker-action-btn:hover:not(:disabled) {
+  transform:
+    translateY(-1px);
+
+  box-shadow:
+    0 8px 20px
+      rgba(0, 0, 0, 0.58),
+    0 0 12px
+      rgba(255, 215, 0, 0.15);
+}
+
+
+.poker-action-btn:active:not(:disabled) {
+  transform:
+    translateY(1px);
+}
+
+
+.poker-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+
+/* FOLD */
+
+.poker-action-btn.fold {
+  border-color:
+    rgba(255, 90, 90, 0.6);
+
+  color:
+    #ff9a9a;
+
+  background:
+    linear-gradient(
+      180deg,
+      #551414,
+      #1d0606
+    );
+}
+
+
+/* CHECK */
+
+.poker-action-btn.check {
+  border-color:
+    rgba(255, 215, 0, 0.55);
+}
+
+
+/* CALL */
+
+.poker-action-btn.call {
+  border-color:
+    rgba(88, 196, 255, 0.65);
+
+  color:
+    #9bddff;
+
+  background:
+    linear-gradient(
+      180deg,
+      #14344d,
+      #07131d
+    );
+}
+
+
+/* RAISE */
+
+.poker-action-btn.raise {
+  border-color:
+    rgba(255, 215, 0, 0.75);
+
+  color:
+    #ffe48b;
+
+  background:
+    linear-gradient(
+      180deg,
+      #5b2d04,
+      #221002
+    );
+}
+
+
+/* ALL IN */
+
+.poker-action-btn.all-in {
+  border-color:
+    rgba(210, 115, 255, 0.75);
+
+  color:
+    #e4b4ff;
+
+  background:
+    linear-gradient(
+      180deg,
+      #4a145f,
+      #18051f
+    );
+}
+
+
+/* ============================================================
+   RAISE AREA
+   ============================================================ */
+
+.poker-raise-controls {
+  margin-top: 12px;
+  padding-top: 12px;
+
+  border-top:
+    1px solid
+      rgba(255, 215, 0, 0.22);
+}
+
+
+.poker-raise-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 8px;
+
+  color:
+    #f1d98a;
+
+  font-size: 13px;
+
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+
+.poker-raise-info strong {
+  color:
+    #ffd968;
+
+  font-size: 18px;
+}
+
+
+/* ============================================================
+   RANGE SLIDER
+   ============================================================ */
+
+.poker-raise-slider {
+  width: 100%;
+  height: 28px;
+
+  margin: 2px 0 10px;
+
+  background:
+    transparent;
+
+  cursor: pointer;
+
+  accent-color:
+    #d9ad38;
+}
+
+
+/* ============================================================
+   YOUR TURN GLOW
+   ============================================================ */
+
+.poker-action-panel.your-turn {
+  border-color:
+    rgba(255, 215, 0, 0.9);
+
+  box-shadow:
+    0 0 22px
+      rgba(255, 215, 0, 0.2),
+    0 12px 30px
+      rgba(0, 0, 0, 0.55);
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (
+  max-width: 520px
+) {
+
+  .poker-action-panel {
+    width: 96vw;
+
+    padding: 10px;
+
+    border-radius: 14px;
+  }
+
+
+  .poker-action-row {
+    gap: 7px;
+  }
+
+
+  .poker-action-btn {
+    min-height: 44px;
+
+    padding: 8px 4px;
+
+    font-size: 12px;
+
+    letter-spacing: 0.05em;
+  }
+
+
+  .poker-raise-info {
+    font-size: 11px;
+  }
+
+
+  .poker-raise-info strong {
+    font-size: 16px;
+  }
+}
