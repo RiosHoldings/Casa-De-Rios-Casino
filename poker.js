@@ -1292,7 +1292,6 @@ async function submitPokerAction(
    ============================================================ */
 
 function renderHandState(data) {
-  renderHandState(data);
   renderPokerActionControls(data);
 
   const hadLocalSession =
