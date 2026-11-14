@@ -917,9 +917,24 @@ function renderPokerActionControls(
       0
     );
 
+  const matchingSeat =
+    Array.isArray(data.seats)
+      ? data.seats.find(
+        (seat) =>
+          Number(seat.seatNumber) ===
+        yourSeat
+      )
+    : null;
+
   const stack =
     Number(
-      yourPlayer.currentStack ||
+      yourPlayer.currentStack ??
+      yourPlayer.current_stack ??
+      session.currentStack ??
+      session.current_stack ??
+      matchingSeat?.currentStack ??
+      matchingSeat?.current_stack ??
+      matchingSeat?.stack ??
       0
     );
 

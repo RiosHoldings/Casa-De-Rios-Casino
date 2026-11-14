@@ -1386,21 +1386,6 @@ async function handlePost(
   }
 
 
-  if (
-    player.folded ||
-    player.allIn
-  ) {
-    return json(
-      {
-        ok: false,
-        error:
-          "You cannot act in this hand."
-      },
-      409
-    );
-  }
-
-
   /* ----------------------------------------------------------
      PROCESS EXPIRED TURN FIRST
      ---------------------------------------------------------- */
@@ -1481,6 +1466,23 @@ async function handlePost(
             timeoutResult
               .actionDeadline
         }
+      },
+      409
+    );
+  }
+
+  /* A folded/all-in browser may process timeouts,
+     but cannot submit its own normal action. */
+
+      if (
+    player.folded ||
+    player.allIn
+  ) {
+    return json(
+      {
+        ok: false,
+        error:
+          "You cannot act in this hand."
       },
       409
     );
