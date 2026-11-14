@@ -66,6 +66,7 @@ let tableStatePollingEnabled = false;
 let submittingPokerAction = false;
 let latestPokerState = null;
 let processingPokerTimeout = false;
+let processingPokerSettlement = false;
 
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
@@ -2233,6 +2234,182 @@ async function processPokerTimeoutIfNeeded(data) {
 }
 
 /* ============================================================
+   AUTOMATIC HAND SETTLEMENT
+   ============================================================ */
+
+async function processPokerSettlementIfNeeded(data) {
+  if (
+    processingPokerSettlement ||
+    !data?.hand ||
+    data.hand.status !== "settling"
+  ) {
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } = getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    return;
+  }
+
+
+  processingPokerSettlement =
+    true;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-settle-hand",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID,
+
+              handId:
+                data.hand.id
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      result.ok
+    ) {
+
+      console.log(
+        "Poker hand settled:",
+        result
+      );
+
+
+      if (
+        result.alreadySettled
+      ) {
+        setMessage(
+          "Poker hand complete.",
+          "good"
+        );
+
+      } else {
+
+        const rake =
+          Number(
+            result.hand?.rake ||
+            0
+          );
+
+
+        setMessage(
+          rake > 0
+            ? `Hand complete. Casino rake: ${money(rake)}.`
+            : "Hand complete.",
+          "good"
+        );
+      }
+
+
+      /*
+        Reload quickly so stacks,
+        winner state, and hand status
+        update on the table.
+      */
+
+      setTimeout(
+        () => {
+          loadTableState();
+        },
+        150
+      );
+
+
+      return;
+    }
+
+
+    console.error(
+      "Poker settlement denied:",
+      result
+    );
+
+
+    /*
+      A duplicate settlement attempt can happen
+      when multiple players have the table open.
+
+      Just refresh state.
+    */
+
+    if (
+      response.status === 409
+    ) {
+      setTimeout(
+        () => {
+          loadTableState();
+        },
+        300
+      );
+
+      return;
+    }
+
+
+    setMessage(
+      result.error ||
+        "Poker settlement failed.",
+      "bad"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Automatic poker settlement failed:",
+      error
+    );
+
+
+    setMessage(
+      "Poker settlement request failed.",
+      "bad"
+    );
+
+
+  } finally {
+
+    processingPokerSettlement =
+      false;
+  }
+}
+
+/* ============================================================
    LOAD TABLE STATE
    ============================================================ */
 
@@ -2358,10 +2535,23 @@ async function loadTableState() {
       data
     );
 
+    /* =========================================================
+       SERVER AUTOMATION
+       ========================================================= */
+
+    if (
+      data.hand?.status ===
+      "settling"
+    ) {
+      processPokerSettlementIfNeeded(
+        data
+      );
+    } else {
+
     processPokerTimeoutIfNeeded(
       data
     );
-
+  }
 
   } catch (error) {
 
