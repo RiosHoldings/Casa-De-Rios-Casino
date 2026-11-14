@@ -65,6 +65,7 @@ let tableStatePollingEnabled = false;
 
 let submittingPokerAction = false;
 let latestPokerState = null;
+let processingPokerTimeout = false;
 
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
@@ -2092,6 +2093,144 @@ seats.forEach(
   renderHandState(data);
 }
 
+/* ============================================================
+   AUTOMATIC TURN TIMEOUT PROCESSING
+   ============================================================ */
+
+async function processPokerTimeoutIfNeeded(data) {
+  if (
+    processingPokerTimeout ||
+    !data?.hand ||
+    data.hand.status !== "active" ||
+    !data.hand.actionDeadline
+  ) {
+    return;
+  }
+
+
+  const deadline =
+    Date.parse(
+      data.hand.actionDeadline
+    );
+
+
+  const serverNow =
+    Date.parse(
+      data.serverTime ||
+      new Date().toISOString()
+    );
+
+
+  if (
+    !Number.isFinite(deadline) ||
+    !Number.isFinite(serverNow) ||
+    serverNow < deadline
+  ) {
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } = getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    return;
+  }
+
+
+  processingPokerTimeout =
+    true;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-action",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID,
+
+              handId:
+                data.hand.id,
+
+              /*
+                The requested action itself does not matter
+                when the deadline has expired.
+
+                poker-action.js processes the expired turn
+                BEFORE checking whose turn the caller owns.
+              */
+              action:
+                "check"
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      result.timeoutProcessed
+    ) {
+      console.log(
+        "Poker timeout processed:",
+        result.timeoutAction,
+        "Seat",
+        result.timedOutSeat
+      );
+
+      /*
+        Immediately reload instead of waiting
+        for the next 2-second poll.
+      */
+
+      setTimeout(
+        () => {
+          loadTableState();
+        },
+        150
+      );
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Automatic poker timeout failed:",
+      error
+    );
+
+
+  } finally {
+
+    processingPokerTimeout =
+      false;
+  }
+}
 
 /* ============================================================
    LOAD TABLE STATE
@@ -2216,6 +2355,10 @@ async function loadTableState() {
     );
 
     renderPokerActionControls(
+      data
+    );
+
+    processPokerTimeoutIfNeeded(
       data
     );
 
