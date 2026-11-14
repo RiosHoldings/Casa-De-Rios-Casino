@@ -2756,6 +2756,62 @@ function scheduleNextPokerHand(
 }
 
 /* ============================================================
+   ENSURE TABLE DOES NOT GET STUCK BETWEEN HANDS
+   ============================================================ */
+
+function ensureNextPokerHandScheduled(data) {
+  if (
+    data?.hand ||
+    startingNextPokerHand
+  ) {
+    return;
+  }
+
+
+  const seatedPlayers =
+    Number(
+      data?.seatedPlayers ||
+      0
+    );
+
+
+  if (
+    seatedPlayers < 2
+  ) {
+    return;
+  }
+
+
+  const delaySeconds =
+    Number(
+      data.table
+        ?.handDelaySeconds ||
+      7
+    );
+
+
+  /*
+    Use a stable key while the table
+    has no active hand.
+
+    scheduleNextPokerHand() already
+    prevents duplicate timers.
+  */
+
+  const idleKey =
+    `idle-${
+      data.table?.handCounter ??
+      "table"
+    }`;
+
+
+  scheduleNextPokerHand(
+    idleKey,
+    delaySeconds
+  );
+}
+
+/* ============================================================
    LOAD TABLE STATE
    ============================================================ */
 
@@ -2892,9 +2948,16 @@ async function loadTableState() {
       processPokerSettlementIfNeeded(
         data
       );
-    } else {
+    } else if (
+      data.hand?.status ===
+      "active"
+    ) {
 
     processPokerTimeoutIfNeeded(
+      data
+    );
+  } else {
+    ensureNextPokerHandScheduled(
       data
     );
   }
