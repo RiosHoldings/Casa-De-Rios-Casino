@@ -68,6 +68,11 @@ let latestPokerState = null;
 let processingPokerTimeout = false;
 let processingPokerSettlement = false;
 
+let startingNextPokerHand = false;
+let nextPokerHandTimer = null;
+let nextPokerHandForId = null;
+let lastSettledPokerResult = null;
+
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
 
@@ -2309,45 +2314,38 @@ async function processPokerSettlementIfNeeded(data) {
         result
       );
 
-
-      if (
-        result.alreadySettled
-      ) {
-        setMessage(
-          "Poker hand complete.",
-          "good"
-        );
-
-      } else {
-
-        const rake =
-          Number(
-            result.hand?.rake ||
-            0
-          );
-
-
-        setMessage(
-          rake > 0
-            ? `Hand complete. Casino rake: ${money(rake)}.`
-            : "Hand complete.",
-          "good"
-        );
-      }
-
-
-      /*
-        Reload quickly so stacks,
-        winner state, and hand status
-        update on the table.
-      */
-
-      setTimeout(
-        () => {
-          loadTableState();
-        },
-        150
+      showPokerHandResult(
+        result
       );
+
+    /* ------------------------------------------------------
+       SCHEDULE NEXT HAND
+       ------------------------------------------------------ */
+
+      const delaySeconds =
+        Number(
+          data.table
+            ?.handDelaySeconds ||
+            7
+        );
+
+      scheduleNextPokerHand(
+        result.hand?.id ||
+          data.hand.id,
+
+        delaySeconds
+      );
+
+      /* ------------------------------------------------
+         REFRESH PAID STACKS
+         ------------------------------------------------ */
+      
+         setTimeout(
+          () => {
+            loadTableState();
+          },
+          150
+         );
 
 
       return;
@@ -2407,6 +2405,339 @@ async function processPokerSettlementIfNeeded(data) {
     processingPokerSettlement =
       false;
   }
+}
+
+/* ============================================================
+   HAND RESULT + NEXT HAND
+   ============================================================ */
+
+function showPokerHandResult(result) {
+  const hand =
+    result?.hand;
+
+  if (!hand) {
+    return;
+  }
+
+
+  lastSettledPokerResult =
+    result;
+
+
+  const winners =
+    Array.isArray(
+      hand.winners
+    )
+      ? hand.winners
+      : [];
+
+
+  const paidWinners =
+    winners.filter(
+      (winner) =>
+        Number(
+          winner.payout || 0
+        ) > 0
+    );
+
+
+  let winnerText =
+    "Hand complete.";
+
+
+  if (
+    paidWinners.length
+  ) {
+    winnerText =
+      paidWinners
+        .map(
+          (winner) =>
+            `Seat ${winner.seatNumber} wins ${money(winner.payout)}`
+        )
+        .join(" • ");
+  }
+
+
+  const rake =
+    Number(
+      hand.rake || 0
+    );
+
+
+  const pot =
+    Number(
+      hand.potBeforeRake || 0
+    );
+
+
+  let message =
+    winnerText;
+
+
+  if (
+    pot > 0
+  ) {
+    message +=
+      ` • Pot ${money(pot)}`;
+  }
+
+
+  if (
+    rake > 0
+  ) {
+    message +=
+      ` • Rake ${money(rake)}`;
+  }
+
+
+  setMessage(
+    message,
+    "good"
+  );
+
+
+  /*
+    Reuse the turn display for the
+    seven-second result screen.
+  */
+
+  if (
+    pokerTurnText
+  ) {
+    pokerTurnText.textContent =
+      winnerText;
+  }
+
+
+  if (
+    pokerTurnBox
+  ) {
+    pokerTurnBox.hidden =
+      false;
+  }
+
+
+  hidePokerActions();
+}
+
+
+/* ============================================================
+   START NEXT HAND
+   ============================================================ */
+
+async function startNextPokerHand() {
+  if (
+    startingNextPokerHand
+  ) {
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } =
+    getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    return;
+  }
+
+
+  startingNextPokerHand =
+    true;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-start-hand",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID
+            })
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (
+      result.ok
+    ) {
+
+      console.log(
+        "Next poker hand started:",
+        result
+      );
+
+
+      setMessage(
+        result.hand?.handNumber
+          ? `Hand #${result.hand.handNumber} started.`
+          : "Next hand started.",
+        "good"
+      );
+
+
+      nextPokerHandForId =
+        null;
+
+
+      await loadTableState();
+
+      return;
+    }
+
+
+    /*
+      Another player's browser may have
+      already started the next hand.
+
+      A 409 here is therefore not
+      automatically an error.
+    */
+
+    if (
+      response.status === 409
+    ) {
+
+      console.log(
+        "Next poker hand start:",
+        result.error ||
+        "Another client may have started the hand."
+      );
+
+
+      nextPokerHandForId =
+        null;
+
+
+      await loadTableState();
+
+      return;
+    }
+
+
+    console.error(
+      "Could not start next poker hand:",
+      result
+    );
+
+
+    setMessage(
+      result.error ||
+        "Could not start the next poker hand.",
+      "bad"
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Next poker hand request failed:",
+      error
+    );
+
+
+    setMessage(
+      "Next poker hand request failed.",
+      "bad"
+    );
+
+
+  } finally {
+
+    startingNextPokerHand =
+      false;
+  }
+}
+
+
+/* ============================================================
+   SEVEN-SECOND RESULT DELAY
+   ============================================================ */
+
+function scheduleNextPokerHand(
+  settledHandId,
+  delaySeconds = 7
+) {
+  if (
+    !settledHandId
+  ) {
+    return;
+  }
+
+
+  /*
+    Don't schedule the same completed
+    hand more than once.
+  */
+
+  if (
+    nextPokerHandForId ===
+    settledHandId
+  ) {
+    return;
+  }
+
+
+  nextPokerHandForId =
+    settledHandId;
+
+
+  if (
+    nextPokerHandTimer
+  ) {
+    clearTimeout(
+      nextPokerHandTimer
+    );
+  }
+
+
+  const delayMs =
+    Math.max(
+      0,
+      Number(
+        delaySeconds || 7
+      ) * 1000
+    );
+
+
+  nextPokerHandTimer =
+    setTimeout(
+      () => {
+
+        nextPokerHandTimer =
+          null;
+
+        startNextPokerHand();
+
+      },
+      delayMs
+    );
 }
 
 /* ============================================================
