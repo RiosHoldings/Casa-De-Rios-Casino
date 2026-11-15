@@ -1664,14 +1664,122 @@ async function handlePost(
     );
 
 
-  /*
-    Rake is removed from pot layers
-    while sharing ONE total cap.
-  */
+/* ==========================================================
+   DISTRIBUTE RAKE ACROSS ALL POTS PROPORTIONALLY
 
-  let rakeRemaining =
-    collectedRake;
+   The hand still has ONE rake calculation and ONE rake cap.
 
+   This only determines how much of that rake belongs to
+   each main/side pot so one winner is not unfairly charged
+   the entire hand rake.
+   ========================================================== */
+
+const rakeByPot =
+  pots.map(
+    (pot) => {
+
+      if (
+        collectedRake <= 0 ||
+        grossPot <= 0
+      ) {
+        return {
+          rake: 0,
+          remainder: 0
+        };
+      }
+
+
+      const exactNumerator =
+        collectedRake *
+        pot.grossAmount;
+
+
+      const rake =
+        Math.floor(
+          exactNumerator /
+          grossPot
+        );
+
+
+      const remainder =
+        exactNumerator %
+        grossPot;
+
+
+      return {
+        rake,
+        remainder
+      };
+    }
+  );
+
+
+/*
+  Flooring can leave a few chips undistributed.
+
+  Give those chips to pots with the largest fractional
+  remainder so the final rake still equals collectedRake.
+*/
+
+let distributedRake =
+  rakeByPot.reduce(
+    (total, item) =>
+      total +
+      item.rake,
+
+    0
+  );
+
+
+let rakeLeft =
+  collectedRake -
+  distributedRake;
+
+
+const rakeRemainderOrder =
+  rakeByPot
+    .map(
+      (item, index) => ({
+        index,
+        remainder:
+          item.remainder
+      })
+    )
+    .sort(
+      (a, b) => {
+
+        if (
+          b.remainder !==
+          a.remainder
+        ) {
+          return (
+            b.remainder -
+            a.remainder
+          );
+        }
+
+        return (
+          a.index -
+          b.index
+        );
+      }
+    );
+
+
+for (
+  let i = 0;
+  i <
+    rakeRemainderOrder.length &&
+  rakeLeft > 0;
+  i++
+) {
+  rakeByPot[
+    rakeRemainderOrder[i]
+      .index
+  ].rake += 1;
+
+  rakeLeft--;
+}
 
   /* ----------------------------------------------------------
      PAYOUT MAPS
@@ -1703,9 +1811,10 @@ async function handlePost(
 
 
     const rakeFromThisPot =
-      Math.min(
-        rakeRemaining,
-        pot.grossAmount
+      Number(
+        rakeByPot[index]
+          ?.rake ||
+        0
       );
 
 
