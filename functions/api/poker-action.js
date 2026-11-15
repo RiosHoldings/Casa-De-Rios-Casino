@@ -1417,25 +1417,22 @@ async function handlePost(
   ) {
     return json(
       {
-        ok: false,
+        ok: true,
 
         timeoutProcessed:
           true,
-
-        error:
-          timeoutResult
-            .timeoutAction ===
+        
+        message:
+          timeoutResult.timeoutAction ===
           "timeout_fold"
             ? `Seat ${timeoutResult.timedOutSeat} timed out and folded. Retry your action.`
             : `Seat ${timeoutResult.timedOutSeat} timed out and checked. Retry your action.`,
 
         timedOutSeat:
-          timeoutResult
-            .timedOutSeat,
+          timeoutResult.timedOutSeat,
 
         timeoutAction:
-          timeoutResult
-            .timeoutAction,
+          timeoutResult.timeoutAction,
 
         hand: {
           status:
@@ -1467,7 +1464,7 @@ async function handlePost(
               .actionDeadline
         }
       },
-      409
+      200
     );
   }
 
