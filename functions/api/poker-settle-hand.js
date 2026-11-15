@@ -851,7 +851,7 @@ function buildPotLayers(
     );
 
 
-  const pots =
+  const rawPots =
     [];
 
 
@@ -947,7 +947,7 @@ function buildPotLayers(
     if (
       eligible.length > 0
     ) {
-      pots.push({
+      rawPots.push({
         grossAmount:
           layerAmount,
 
@@ -960,11 +960,59 @@ function buildPotLayers(
       level;
   }
 
+  /* ==========================================================
+     MERGE IDENTICAL ELIGIBITY LAYERS
 
-  return {
-    pots,
-    uncalledReturns
-  };
+     Examples:
+
+        Seat 3 folded after 100
+        Seat 5 contributed 200
+        Seat 6 contributed 200
+
+      Old result:
+        Main 300
+        Side 200
+
+      But Seats 5 and 6 are eligible for BOTH layers,
+      so there is no real side pot.
+
+      New result
+        Main 500
+      
+      A true all-in side pot still remains seperate because
+      the eligible player set changes between layers.
+    =========================================================== */
+
+  const pots =
+  [];
+
+  for (
+    const layer of
+    rawPots
+  ) {
+
+    const eligibleKey =
+      layer.eligible
+        .map(
+          (player) =>
+              player.playerId
+        )
+        .sort()
+        .join("|");
+  
+  const previousPot =
+  pots[
+    pots.length 
+  ]
+  }
+
+  if (
+    previousPot &&
+    previousPot.eligibleKey ===
+      eligibleKey
+  ) {}
+
+  
 }
 
 
