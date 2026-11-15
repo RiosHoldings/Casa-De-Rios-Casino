@@ -761,6 +761,90 @@ async function handlePost(context) {
     };
   }
 
+  /* ============================================================
+   LAST COMPLETED HAND
+   ============================================================ */
+
+const lastCompletedRow =
+  await DB.prepare(`
+    SELECT
+      id,
+      hand_number,
+
+      board_json,
+
+      pot_before_rake,
+      rake_amount,
+      pot_after_rake,
+
+      winner_summary_json,
+
+      ended_at
+
+    FROM poker_hands
+
+    WHERE table_id = ?
+      AND status = 'completed'
+
+    ORDER BY
+      ended_at DESC
+
+    LIMIT 1
+  `)
+    .bind(
+      tableId
+    )
+    .first();
+
+
+let lastCompletedHand =
+  null;
+
+
+if (
+  lastCompletedRow
+) {
+  lastCompletedHand = {
+    id:
+      lastCompletedRow.id,
+
+    handNumber:
+      Number(
+        lastCompletedRow.hand_number
+      ),
+
+    board:
+      parseArray(
+        lastCompletedRow.board_json
+      ),
+
+    potBeforeRake:
+      Number(
+        lastCompletedRow.pot_before_rake ||
+        0
+      ),
+
+    rake:
+      Number(
+        lastCompletedRow.rake_amount ||
+        0
+      ),
+
+    potAfterRake:
+      Number(
+        lastCompletedRow.pot_after_rake ||
+        0
+      ),
+
+    winners:
+      parseArray(
+        lastCompletedRow.winner_summary_json
+      ),
+
+    endedAt:
+      lastCompletedRow.ended_at
+  };
+}
 
   /* ----------------------------------------------------------
      RESPONSE
@@ -856,6 +940,8 @@ async function handlePost(context) {
       handPlayers,
 
       yourCards,
+
+      lastCompletedHand,
 
       serverTime:
         new Date()
