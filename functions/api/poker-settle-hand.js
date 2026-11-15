@@ -1002,17 +1002,50 @@ function buildPotLayers(
   
   const previousPot =
   pots[
-    pots.length 
-  ]
-  }
+    pots.length - 1
+  ];
 
   if (
     previousPot &&
     previousPot.eligibleKey ===
       eligibleKey
-  ) {}
+  ) {
+    previousPot.grossAmount ==
+      layer.grossAmount;
+  } else {
 
-  
+    pots.push({
+      grossAmount:
+        layer.grossAmount,
+
+
+      eligible:
+        layer.eligible,
+
+      eligibleKey
+    });
+  }
+}
+
+/*
+  Remove internal comparisom key before returning.
+*/
+
+const cleanedPots =
+  pots.map(
+    (pot) => ({
+      grossAmount:
+      pot.grossAmount,
+
+    eligible:
+      pot.eligible
+    })
+  );
+
+return {
+    pots,
+    uncalledReturns
+  };
 }
 
 
