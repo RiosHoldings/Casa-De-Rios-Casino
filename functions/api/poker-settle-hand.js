@@ -1823,10 +1823,6 @@ for (
       rakeFromThisPot;
 
 
-    rakeRemaining -=
-      rakeFromThisPot;
-
-
     const {
       winners,
       evaluations
