@@ -73,6 +73,8 @@ let nextPokerHandTimer = null;
 let nextPokerHandForId = null;
 let lastSettledPokerResult = null;
 
+let lastDisplayedCompleteHandId = null;
+
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
 
@@ -2333,6 +2335,10 @@ async function processPokerSettlementIfNeeded(data) {
         result
       );
 
+      lastDisplayedCompleteHandId =
+        result.hand?.id ||
+        data.hand.id;
+
     /* ------------------------------------------------------
        SCHEDULE NEXT HAND
        ------------------------------------------------------ */
@@ -2812,6 +2818,50 @@ function ensureNextPokerHandScheduled(data) {
 }
 
 /* ============================================================
+   SYNC COMPLETED HAND RESULT FROM TABLE STATE
+   ============================================================ */
+
+function syncCompletedPokerHandResult(data) {
+  const completed =
+    data?.lastCompletedHand;
+
+
+  if (!completed) {
+    return;
+  }
+
+
+  /*
+    Do not interrupt a new active hand
+    with the previous hand's result.
+  */
+
+  if (
+    data?.hand?.status ===
+    "active"
+  ) {
+    return;
+  }
+
+
+  if (
+    lastDisplayedCompletedHandId ===
+    completed.id
+  ) {
+    return;
+  }
+
+
+  lastDisplayedCompletedHandId =
+    completed.id;
+
+
+  showPokerHandResult({
+    hand: completed
+  });
+}
+
+/* ============================================================
    LOAD TABLE STATE
    ============================================================ */
 
@@ -2934,6 +2984,10 @@ async function loadTableState() {
     );
 
     renderPokerActionControls(
+      data
+    );
+
+    syncCompletedPokerHandResult(
       data
     );
 
