@@ -1983,3 +1983,165 @@ body::before {
     font-size: 10px;
   }
 }
+
+/* ============================================================
+   POKER REBUY PANEL
+   ============================================================ */
+
+.poker-rebuy-panel {
+  width: min(94vw, 620px);
+  margin: 10px auto 0;
+  padding: 14px;
+
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(30, 7, 40, 0.96),
+      rgba(8, 2, 12, 0.98)
+    );
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45);
+
+  text-align: center;
+}
+
+
+.poker-rebuy-panel[hidden] {
+  display: none !important;
+}
+
+
+.poker-rebuy-title {
+  color: #f6d66f;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 18px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+
+  text-shadow:
+    0 0 8px rgba(255, 215, 0, 0.18);
+}
+
+
+.poker-rebuy-subtitle {
+  margin-top: 4px;
+
+  color: rgba(255, 255, 255, 0.72);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+
+.poker-rebuy-options {
+  margin-top: 12px;
+
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+
+.poker-rebuy-btn {
+  min-height: 44px;
+
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #451057,
+      #19051f
+    );
+
+  color: #f8dc7b;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  letter-spacing: 0.04em;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+
+.poker-rebuy-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 16px rgba(255, 215, 0, 0.12);
+}
+
+
+.poker-rebuy-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+.poker-rebuy-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+
+.poker-rebuy-status {
+  margin-top: 10px;
+
+  color: #d6c7db;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 520px) {
+
+  .poker-rebuy-panel {
+    width: 96vw;
+    padding: 12px;
+  }
+
+
+  .poker-rebuy-title {
+    font-size: 16px;
+  }
+
+
+  .poker-rebuy-btn {
+    min-height: 42px;
+    font-size: 12px;
+  }
+}

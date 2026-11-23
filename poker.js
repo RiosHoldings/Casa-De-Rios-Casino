@@ -77,6 +77,8 @@ let lastDisplayedCompletedHandId = null;
 
 let submittingPokerSessionAction = false;
 
+let submittingPokerRebuy = false;
+
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
 
@@ -3228,6 +3230,374 @@ async function submitPokerSessionAction(
 }
 
 /* ============================================================
+   POKER REBUY PANEL
+   ============================================================ */
+
+function renderPokerRebuyPanel(data) {
+  const panel =
+    document.getElementById(
+      "pokerRebuyPanel"
+    );
+
+  const statusEl =
+    document.getElementById(
+      "pokerRebuyStatus"
+    );
+
+  if (!panel) return;
+
+
+  const session =
+    data?.yourSession ||
+    null;
+
+
+  if (!session) {
+    panel.hidden = true;
+    return;
+  }
+
+
+  const yourSeat =
+    Number(
+      session.seatNumber ??
+      session.seat_number ??
+      0
+    );
+
+
+  const matchingSeat =
+    Array.isArray(data?.seats)
+      ? data.seats.find(
+          (seat) =>
+            Number(
+              seat.seatNumber ??
+              seat.seat_number
+            ) === yourSeat
+        )
+      : null;
+
+
+  const stack =
+    Number(
+      session.currentStack ??
+      session.current_stack ??
+      matchingSeat?.currentStack ??
+      matchingSeat?.current_stack ??
+      matchingSeat?.stack ??
+      0
+    );
+
+
+  /*
+    Only show rebuy when the player's
+    poker stack is actually zero.
+  */
+
+  if (stack > 0) {
+    panel.hidden = true;
+    return;
+  }
+
+
+  const hand =
+    data?.hand ||
+    null;
+
+
+  const handPlayers =
+    Array.isArray(
+      data?.handPlayers
+    )
+      ? data.handPlayers
+      : [];
+
+
+  const stillInUnfinishedHand =
+    Boolean(
+      hand &&
+      (
+        hand.status === "active" ||
+        hand.status === "settling"
+      ) &&
+      handPlayers.some(
+        (player) =>
+          Number(
+            player.seatNumber ??
+            player.seat_number
+          ) === yourSeat
+      )
+    );
+
+
+  /*
+    If the player busted during the current hand,
+    wait until settlement finishes before offering rebuy.
+  */
+
+  if (stillInUnfinishedHand) {
+    panel.hidden = true;
+    return;
+  }
+
+
+  panel.hidden = false;
+
+
+  const buttons =
+    panel.querySelectorAll(
+      ".poker-rebuy-btn"
+    );
+
+
+  buttons.forEach(
+    (button) => {
+      const amount =
+        Number(
+          button.dataset.rebuy ||
+          0
+        );
+
+      button.disabled =
+        submittingPokerRebuy ||
+        (
+          walletBalance !== null &&
+          Number(walletBalance) < amount
+        );
+    }
+  );
+
+
+  if (statusEl) {
+    statusEl.textContent =
+      submittingPokerRebuy
+        ? "Processing rebuy..."
+        : "Your seat is being held.";
+  }
+
+
+  /*
+    A busted player should not have normal
+    betting controls visible.
+  */
+
+  hidePokerActions();
+}
+
+/* ============================================================
+   SUBMIT POKER REBUY
+   ============================================================ */
+
+async function submitPokerRebuy(
+  buyIn
+) {
+  if (submittingPokerRebuy) {
+    return;
+  }
+
+
+  buyIn =
+    Number(
+      buyIn || 0
+    );
+
+
+  if (
+    !APPROVED_BUYINS.includes(
+      buyIn
+    )
+  ) {
+    setMessage(
+      "Invalid poker rebuy amount.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } =
+    getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    setMessage(
+      "Player login is missing.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  const session =
+    latestPokerState?.yourSession;
+
+
+  const sessionId =
+    session?.id ||
+    pokerSession?.id;
+
+
+  if (!sessionId) {
+    setMessage(
+      "Poker session could not be found.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  const idempotencyKey =
+    "poker-rebuy-" +
+    (
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now()
+    );
+
+
+  submittingPokerRebuy =
+    true;
+
+
+  if (latestPokerState) {
+    renderPokerRebuyPanel(
+      latestPokerState
+    );
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-rebuy",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID,
+
+              sessionId,
+
+              buyIn,
+
+              idempotencyKey
+            })
+        }
+      );
+
+
+    const raw =
+      await response.text();
+
+
+    let result;
+
+
+    try {
+
+      result =
+        raw
+          ? JSON.parse(raw)
+          : {
+              ok: false,
+              error:
+                `Poker rebuy returned HTTP ${response.status}.`
+            };
+
+    } catch {
+
+      result = {
+        ok: false,
+        error:
+          `Poker rebuy returned invalid JSON (${response.status}).`
+      };
+    }
+
+
+    if (!result.ok) {
+      setMessage(
+        result.error ||
+          "Poker rebuy failed.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    walletBalance =
+      Number(
+        result.walletBalance ??
+        walletBalance ??
+        0
+      );
+
+
+    setMessage(
+      result.message ||
+        `Rebuy complete — ${money(
+          buyIn
+        )} chips.`,
+      "good"
+    );
+
+
+    await loadTableState();
+
+
+  } catch (error) {
+
+    console.error(
+      "Poker rebuy failed:",
+      error
+    );
+
+
+    setMessage(
+      "Poker rebuy request failed.",
+      "bad"
+    );
+
+
+  } finally {
+
+    submittingPokerRebuy =
+      false;
+
+
+    if (latestPokerState) {
+      renderPokerRebuyPanel(
+        latestPokerState
+      );
+    }
+  }
+}
+
+/* ============================================================
    LOAD TABLE STATE
    ============================================================ */
 
@@ -3354,6 +3724,10 @@ async function loadTableState() {
     );
 
     renderPokerSessionControls(
+      data
+    );
+
+    renderPokerRebuyPanel(
       data
     );
 
@@ -4364,6 +4738,25 @@ document.addEventListener(
           );
         }
       );
+
+    document
+  .querySelectorAll(
+    ".poker-rebuy-btn"
+  )
+  .forEach(
+    (button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          submitPokerRebuy(
+            Number(
+              button.dataset.rebuy
+            )
+          );
+        }
+      );
+    }
+  );  
 
 
     /* ----------------------------------------
