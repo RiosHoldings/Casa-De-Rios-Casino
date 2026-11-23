@@ -73,7 +73,7 @@ let nextPokerHandTimer = null;
 let nextPokerHandForId = null;
 let lastSettledPokerResult = null;
 
-let lastDisplayedCompleteHandId = null;
+let lastDisplayedCompletedHandId = null;
 
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
