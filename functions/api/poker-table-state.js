@@ -295,7 +295,74 @@ async function handlePost(context) {
         Number(row.amount)
     );
 
+/* ============================================================
+   SESSION HEARTBEAT / DISCONNECT GRACE
+   ============================================================ */
 
+/*
+  1. The player making this request is online.
+
+     If they were previously marked disconnected,
+     restore them to seated.
+*/
+
+await DB.prepare(`
+  UPDATE poker_sessions
+
+  SET
+    status =
+      CASE
+        WHEN status = 'disconnected'
+          THEN 'seated'
+        ELSE status
+      END,
+
+    last_seen_at =
+      CURRENT_TIMESTAMP
+
+  WHERE table_id = ?
+    AND player_id = ?
+    AND status IN (
+      'seated',
+      'disconnected'
+    )
+`)
+  .bind(
+    tableId,
+    playerId
+  )
+  .run();
+
+
+/*
+  2. Any OTHER seated player who has not
+     checked in for 60 seconds becomes disconnected.
+
+     Their seat and chips stay reserved.
+*/
+
+await DB.prepare(`
+  UPDATE poker_sessions
+
+  SET
+    status = 'disconnected'
+
+  WHERE table_id = ?
+    AND player_id <> ?
+    AND status = 'seated'
+
+    AND datetime(last_seen_at) <=
+        datetime(
+          'now',
+          '-60 seconds'
+        )
+`)
+  .bind(
+    tableId,
+    playerId
+  )
+  .run();
+  
   /* ----------------------------------------------------------
      LIVE SEATS
      ---------------------------------------------------------- */
