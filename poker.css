@@ -1824,3 +1824,162 @@ body::before {
     font-size: 16px;
   }
 }
+
+/* ============================================================
+   POKER SESSION CONTROLS
+   ============================================================ */
+
+.poker-session-controls {
+  width: min(94vw, 620px);
+  margin: 10px auto 0;
+  padding: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(22, 6, 30, 0.92),
+      rgba(6, 2, 9, 0.96)
+    );
+
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.42);
+}
+
+
+.poker-session-controls[hidden] {
+  display: none !important;
+}
+
+
+.poker-session-btn {
+  min-height: 42px;
+  padding: 9px 16px;
+
+  border: 1px solid rgba(255, 215, 0, 0.55);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #401051,
+      #17051d
+    );
+
+  color: #f6d66f;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 12px;
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+
+.poker-session-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 14px rgba(255, 215, 0, 0.12);
+}
+
+
+.poker-session-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+
+.poker-session-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+
+/* RETURN BUTTON */
+
+#pokerReturnBtn {
+  border-color: rgba(90, 220, 150, 0.65);
+
+  color: #a7f3c7;
+
+  background:
+    linear-gradient(
+      180deg,
+      #12452b,
+      #071b11
+    );
+}
+
+
+/* SIT-OUT STATUS */
+
+.poker-sitout-status {
+  padding: 8px 12px;
+
+  border: 1px solid rgba(255, 190, 70, 0.45);
+  border-radius: 9px;
+
+  background:
+    rgba(70, 35, 5, 0.45);
+
+  color: #ffd886;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+
+.poker-sitout-status[hidden] {
+  display: none !important;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 520px) {
+
+  .poker-session-controls {
+    width: 96vw;
+
+    padding: 8px;
+    gap: 7px;
+  }
+
+
+  .poker-session-btn {
+    min-height: 40px;
+
+    padding: 8px 12px;
+
+    font-size: 11px;
+  }
+
+
+  .poker-sitout-status {
+    font-size: 10px;
+  }
+}

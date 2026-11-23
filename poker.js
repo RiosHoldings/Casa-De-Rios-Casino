@@ -75,6 +75,8 @@ let lastSettledPokerResult = null;
 
 let lastDisplayedCompletedHandId = null;
 
+let submittingPokerSessionAction = false;
+
 const TABLE_STATE_POLL_MS = 2000;
 const TABLE_STATE_MAX_FAILURES = 3;
 
@@ -2888,6 +2890,344 @@ function syncCompletedPokerHandResult(data) {
 }
 
 /* ============================================================
+   POKER SESSION CONTROLS
+   ============================================================ */
+
+function renderPokerSessionControls(data) {
+  const controls =
+    document.getElementById(
+      "pokerSessionControls"
+    );
+
+  const sitOutBtn =
+    document.getElementById(
+      "pokerSitOutBtn"
+    );
+
+  const returnBtn =
+    document.getElementById(
+      "pokerReturnBtn"
+    );
+
+  const statusEl =
+    document.getElementById(
+      "pokerSitOutStatus"
+    );
+
+
+  if (
+    !controls ||
+    !sitOutBtn ||
+    !returnBtn ||
+    !statusEl
+  ) {
+    return;
+  }
+
+
+  const session =
+    data?.yourSession ||
+    null;
+
+
+  if (!session) {
+    controls.hidden =
+      true;
+
+    return;
+  }
+
+
+  controls.hidden =
+    false;
+
+
+  const status =
+    String(
+      session.status ||
+      ""
+    ).toLowerCase();
+
+
+  /* ----------------------------------------------------------
+     SITTING OUT
+     ---------------------------------------------------------- */
+
+  if (
+    status ===
+    "sitting_out"
+  ) {
+    sitOutBtn.hidden =
+      true;
+
+    returnBtn.hidden =
+      false;
+
+    returnBtn.disabled =
+      submittingPokerSessionAction;
+
+
+    statusEl.hidden =
+      false;
+
+    statusEl.textContent =
+      "Sitting Out";
+
+
+    /*
+      A sitting-out player should never
+      have action controls showing.
+    */
+
+    hidePokerActions();
+
+    return;
+  }
+
+
+  /* ----------------------------------------------------------
+     SEATED
+     ---------------------------------------------------------- */
+
+  sitOutBtn.hidden =
+    false;
+
+  returnBtn.hidden =
+    true;
+
+  statusEl.hidden =
+    true;
+
+
+  const hand =
+    data?.hand;
+
+
+  const handPlayers =
+    Array.isArray(
+      data?.handPlayers
+    )
+      ? data.handPlayers
+      : [];
+
+
+  const yourSeat =
+    Number(
+      session.seatNumber
+    );
+
+
+  const participatingInHand =
+    Boolean(
+      hand &&
+      (
+        hand.status ===
+          "active" ||
+        hand.status ===
+          "settling"
+      ) &&
+      handPlayers.some(
+        (player) =>
+          Number(
+            player.seatNumber
+          ) ===
+          yourSeat
+      )
+    );
+
+
+  /*
+    You cannot sit out halfway through
+    a hand you are currently playing.
+  */
+
+  sitOutBtn.disabled =
+    submittingPokerSessionAction ||
+    participatingInHand;
+
+
+  if (
+    participatingInHand
+  ) {
+    sitOutBtn.title =
+      "Finish the current hand before sitting out.";
+
+  } else {
+    sitOutBtn.title =
+      "";
+  }
+}
+
+
+/* ============================================================
+   SEND SIT OUT / RETURN REQUEST
+   ============================================================ */
+
+async function submitPokerSessionAction(
+  action
+) {
+  if (
+    submittingPokerSessionAction
+  ) {
+    return;
+  }
+
+
+  const {
+    playerId,
+    playerSecret
+  } =
+    getPlayerCredentials();
+
+
+  if (
+    !playerId ||
+    !playerSecret
+  ) {
+    setMessage(
+      "Player login is missing.",
+      "bad"
+    );
+
+    return;
+  }
+
+
+  submittingPokerSessionAction =
+    true;
+
+
+  if (
+    latestPokerState
+  ) {
+    renderPokerSessionControls(
+      latestPokerState
+    );
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/poker-sit-out",
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          cache:
+            "no-store",
+
+          body:
+            JSON.stringify({
+              playerId,
+              playerSecret,
+
+              tableId:
+                TABLE_ID,
+
+              action
+            })
+        }
+      );
+
+
+    const rawResponse =
+      await response.text();
+
+
+    let result;
+
+
+    try {
+
+      result =
+        rawResponse
+          ? JSON.parse(
+              rawResponse
+            )
+          : {
+              ok: false,
+
+              error:
+                `Poker session endpoint returned HTTP ${response.status}.`
+            };
+
+    } catch {
+
+      result = {
+        ok: false,
+
+        error:
+          `Poker session endpoint returned invalid JSON (${response.status}).`
+      };
+    }
+
+
+    if (
+      !result.ok
+    ) {
+      setMessage(
+        result.error ||
+          "Poker session action failed.",
+        "bad"
+      );
+
+      return;
+    }
+
+
+    setMessage(
+      result.message ||
+        (
+          action ===
+          "sit_out"
+            ? "You are now sitting out."
+            : "You have returned to the table."
+        ),
+      "good"
+    );
+
+
+    await loadTableState();
+
+
+  } catch (error) {
+
+    console.error(
+      "Poker session action failed:",
+      error
+    );
+
+
+    setMessage(
+      "Poker session request failed.",
+      "bad"
+    );
+
+
+  } finally {
+
+    submittingPokerSessionAction =
+      false;
+
+
+    if (
+      latestPokerState
+    ) {
+      renderPokerSessionControls(
+        latestPokerState
+      );
+    }
+  }
+}
+
+/* ============================================================
    LOAD TABLE STATE
    ============================================================ */
 
@@ -3010,6 +3350,10 @@ async function loadTableState() {
     );
 
     renderPokerActionControls(
+      data
+    );
+
+    renderPokerSessionControls(
       data
     );
 
@@ -3994,6 +4338,32 @@ document.addEventListener(
       "click",
       leaveTable
     );
+
+    document
+      .getElementById(
+        "pokerSitOutBtn"
+      )
+      ?.addEventListener(
+        "click",
+      () => {
+        submitPokerSessionAction(
+          "sit_out"
+        );    
+      }
+    );
+
+    document
+      .getElementById(
+        "pokerReturnBtn"
+      )
+      ?.addEventListener(
+        "click",
+        () => {
+          submitPokerSessionAction(
+            "return"
+          );
+        }
+      );
 
 
     /* ----------------------------------------
