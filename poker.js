@@ -2774,15 +2774,49 @@ function ensureNextPokerHandScheduled(data) {
   }
 
 
-  const seatedPlayers =
-    Number(
-      data?.seatedPlayers ||
-      0
+  const seats =
+    Array.isArray(data?.seats)
+      ? data.seats
+      : [];
+
+
+  const activePlayers =
+    seats.filter(
+      (seat) => {
+
+        const status =
+          String(
+            seat.status ||
+            seat.sessionStatus ||
+            ""
+          ).toLowerCase();
+
+
+        const stack =
+          Number(
+            seat.currentStack ??
+            seat.current_stack ??
+            seat.stack ??
+            0
+          );
+
+
+        return (
+          status === "seated" &&
+          stack > 0
+        );
+      }
     );
 
 
+  /*
+    Do not attempt to start a hand
+    unless at least two connected,
+    seated players have chips.
+  */
+
   if (
-    seatedPlayers < 2
+    activePlayers.length < 2
   ) {
     return;
   }
@@ -2795,14 +2829,6 @@ function ensureNextPokerHandScheduled(data) {
       7
     );
 
-
-  /*
-    Use a stable key while the table
-    has no active hand.
-
-    scheduleNextPokerHand() already
-    prevents duplicate timers.
-  */
 
   const idleKey =
     `idle-${
