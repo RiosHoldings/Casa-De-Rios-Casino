@@ -79,6 +79,511 @@ function parseJsonArray(value) {
   }
 }
 
+/* ============================================================
+   AUTO-REMOVE EXPIRED SIT-OUT PLAYERS
+   ============================================================ */
+
+async function autoRemoveExpiredSitouts(
+  DB,
+  tableId
+) {
+  const expiredResult =
+    await DB.prepare(`
+      SELECT
+        s.id,
+        s.player_id,
+        s.current_stack
+
+      FROM poker_sessions s
+
+      JOIN poker_tables t
+        ON t.id =
+           s.table_id
+
+      WHERE s.table_id = ?
+        AND s.status =
+            'sitting_out'
+
+        AND s.sit_out_at
+            IS NOT NULL
+
+        AND datetime(
+              s.sit_out_at,
+              '+' ||
+              COALESCE(
+                t.sitout_limit_seconds,
+                600
+              ) ||
+              ' seconds'
+            )
+            <= datetime('now')
+
+        AND NOT EXISTS (
+          SELECT 1
+
+          FROM poker_hand_players hp
+
+          JOIN poker_hands h
+            ON h.id =
+               hp.hand_id
+
+          WHERE hp.session_id =
+                s.id
+
+            AND h.status IN (
+              'active',
+              'settling'
+            )
+        )
+    `)
+      .bind(
+        tableId
+      )
+      .all();
+
+
+  const expiredSessions =
+    expiredResult.results ||
+    [];
+
+
+  for (
+    const session of
+    expiredSessions
+  ) {
+    const sessionId =
+      session.id;
+
+    const playerId =
+      session.player_id;
+
+    const stack =
+      Number(
+        session.current_stack ||
+        0
+      );
+
+
+    /* --------------------------------------------------------
+       ZERO STACK
+
+       Nothing to return to wallet.
+       Just release the seat.
+       -------------------------------------------------------- */
+
+    if (
+      stack <= 0
+    ) {
+      await DB.prepare(`
+        UPDATE poker_sessions
+
+        SET
+          ending_stack =
+            current_stack,
+
+          current_stack =
+            0,
+
+          status =
+            'left',
+
+          left_at =
+            CURRENT_TIMESTAMP,
+
+          sit_out_at =
+            NULL
+
+        WHERE id = ?
+          AND table_id = ?
+          AND status =
+              'sitting_out'
+      `)
+        .bind(
+          sessionId,
+          tableId
+        )
+        .run();
+
+
+      continue;
+    }
+
+
+    /* --------------------------------------------------------
+       ALREADY CASHED OUT?
+
+       Protect against duplicate auto-removal.
+       -------------------------------------------------------- */
+
+    const existingTransfer =
+      await DB.prepare(`
+        SELECT
+          id
+
+        FROM poker_transfers
+
+        WHERE session_id = ?
+          AND direction =
+              'table_to_wallet'
+
+        LIMIT 1
+      `)
+        .bind(
+          sessionId
+        )
+        .first();
+
+
+    if (
+      existingTransfer
+    ) {
+      /*
+        The money was already returned.
+
+        Clean up the session if it somehow
+        remained sitting_out.
+      */
+
+      await DB.prepare(`
+        UPDATE poker_sessions
+
+        SET
+          ending_stack =
+            current_stack,
+
+          current_stack =
+            0,
+
+          status =
+            'left',
+
+          left_at =
+            COALESCE(
+              left_at,
+              CURRENT_TIMESTAMP
+            ),
+
+          sit_out_at =
+            NULL
+
+        WHERE id = ?
+          AND table_id = ?
+          AND status =
+              'sitting_out'
+      `)
+        .bind(
+          sessionId,
+          tableId
+        )
+        .run();
+
+
+      continue;
+    }
+
+
+    /* --------------------------------------------------------
+       IDS
+       -------------------------------------------------------- */
+
+    const transferId =
+      `PKT-${crypto.randomUUID()}`;
+
+    const idempotencyKey =
+      `poker-auto-remove-${sessionId}`;
+
+
+    /* --------------------------------------------------------
+       TRANSFER AUDIT
+
+       This INSERT only succeeds if the player
+       is STILL eligible for auto-removal.
+       -------------------------------------------------------- */
+
+    const insertTransfer =
+      DB.prepare(`
+        INSERT OR IGNORE
+        INTO poker_transfers (
+          id,
+
+          table_id,
+          session_id,
+          player_id,
+
+          direction,
+          reason,
+
+          amount,
+
+          wallet_balance_before,
+          wallet_balance_after,
+
+          table_stack_before,
+          table_stack_after,
+
+          idempotency_key,
+
+          created_at
+        )
+
+        SELECT
+          ?,
+
+          s.table_id,
+          s.id,
+          s.player_id,
+
+          'table_to_wallet',
+          'auto_remove',
+
+          s.current_stack,
+
+          w.chips,
+          w.chips +
+            s.current_stack,
+
+          s.current_stack,
+          0,
+
+          ?,
+
+          CURRENT_TIMESTAMP
+
+        FROM poker_sessions s
+
+        JOIN poker_tables t
+          ON t.id =
+             s.table_id
+
+        JOIN wallets w
+          ON w.player_id =
+             s.player_id
+
+        WHERE s.id = ?
+          AND s.table_id = ?
+
+          AND s.status =
+              'sitting_out'
+
+          AND s.current_stack > 0
+
+          AND s.sit_out_at
+              IS NOT NULL
+
+          AND datetime(
+                s.sit_out_at,
+                '+' ||
+                COALESCE(
+                  t.sitout_limit_seconds,
+                  600
+                ) ||
+                ' seconds'
+              )
+              <= datetime('now')
+
+          AND NOT EXISTS (
+            SELECT 1
+
+            FROM poker_hand_players hp
+
+            JOIN poker_hands h
+              ON h.id =
+                 hp.hand_id
+
+            WHERE hp.session_id =
+                  s.id
+
+              AND h.status IN (
+                'active',
+                'settling'
+              )
+          )
+
+          AND NOT EXISTS (
+            SELECT 1
+
+            FROM poker_transfers pt
+
+            WHERE pt.session_id =
+                  s.id
+
+              AND pt.direction =
+                  'table_to_wallet'
+          )
+      `)
+        .bind(
+          transferId,
+          idempotencyKey,
+
+          sessionId,
+          tableId
+        );
+
+
+    /* --------------------------------------------------------
+       RETURN CHIPS TO WALLET
+
+       Amount comes from the transfer row itself,
+       not from browser/client data.
+       -------------------------------------------------------- */
+
+    const creditWallet =
+      DB.prepare(`
+        UPDATE wallets
+
+        SET
+          chips =
+            chips +
+            COALESCE(
+              (
+                SELECT amount
+
+                FROM poker_transfers
+
+                WHERE id = ?
+              ),
+              0
+            ),
+
+          updated_at =
+            CURRENT_TIMESTAMP
+
+        WHERE player_id = ?
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_transfers
+
+            WHERE id = ?
+          )
+      `)
+        .bind(
+          transferId,
+          playerId,
+          transferId
+        );
+
+
+    /* --------------------------------------------------------
+       MAIN CASINO LEDGER
+       -------------------------------------------------------- */
+
+    const ledger =
+      DB.prepare(`
+        INSERT INTO transactions (
+          player_id,
+
+          type,
+          game,
+
+          amount,
+          balance_after,
+
+          note,
+
+          created_at
+        )
+
+        SELECT
+          pt.player_id,
+
+          'poker_table_cashout',
+          'poker',
+
+          pt.amount,
+
+          w.chips,
+
+          'Poker auto-remove after sit-out limit',
+
+          CURRENT_TIMESTAMP
+
+        FROM poker_transfers pt
+
+        JOIN wallets w
+          ON w.player_id =
+             pt.player_id
+
+        WHERE pt.id = ?
+      `)
+        .bind(
+          transferId
+        );
+
+
+    /* --------------------------------------------------------
+       RELEASE SEAT
+       -------------------------------------------------------- */
+
+    const closeSession =
+      DB.prepare(`
+        UPDATE poker_sessions
+
+        SET
+          ending_stack =
+            current_stack,
+
+          current_stack =
+            0,
+
+          status =
+            'left',
+
+          left_at =
+            CURRENT_TIMESTAMP,
+
+          sit_out_at =
+            NULL
+
+        WHERE id = ?
+          AND table_id = ?
+          AND player_id = ?
+
+          AND status =
+              'sitting_out'
+
+          AND EXISTS (
+            SELECT 1
+
+            FROM poker_transfers
+
+            WHERE id = ?
+          )
+      `)
+        .bind(
+          sessionId,
+          tableId,
+          playerId,
+          transferId
+        );
+
+
+    /* --------------------------------------------------------
+       COMMIT AS ONE D1 BATCH
+       -------------------------------------------------------- */
+
+    try {
+
+      await DB.batch([
+        insertTransfer,
+        creditWallet,
+        ledger,
+        closeSession
+      ]);
+
+
+    } catch (error) {
+
+      console.error(
+        "Poker sit-out auto-remove failed:",
+        sessionId,
+        error
+      );
+    }
+  }
+}
+
 
 /* ============================================================
    POST
@@ -362,6 +867,11 @@ await DB.prepare(`
     playerId
   )
   .run();
+
+  await autoRemoveExpiredSitouts(
+    DB,
+    tableId
+  );
   
   /* ----------------------------------------------------------
      LIVE SEATS
