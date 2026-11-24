@@ -1010,7 +1010,7 @@ function buildPotLayers(
     previousPot.eligibleKey ===
       eligibleKey
   ) {
-    previousPot.grossAmount ==
+    previousPot.grossAmount +=
       layer.grossAmount;
   } else {
 
